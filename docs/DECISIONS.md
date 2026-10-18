@@ -125,3 +125,112 @@ All three exist on Hugging Face as of 2026-10-18 (they downloaded).
   carry the product their question is about, so there is no "stackoverflow" product (it is `source`).
 - **Qdrant client timeout 60 s** (default 5 s): the first calls after Docker starts took 2-6 s each.
 - **Tests use Qdrant's in-memory mode**, so `pytest` does not need Docker.
+
+## Test question set (stage 15, step 1)
+
+- **Chose:** 40 questions in `eval/questions.jsonl` (10 exact error messages, 10 symptoms, 8 versions, 6 across
+  products, 6 the docs cannot answer), all `verified=false` until you review them. Split: 30 `tune`,
+  10 `holdout` (touch the holdout only for the final run).
+- **Grounded in the corpus, not memory:** every answerable question cites the page, the section and a
+  verbatim `evidence` quote; `tests/test_eval_questions.py` checks each quote exists in `chunks.jsonl`. Each
+  unanswerable question lists `absent_terms` that the test proves occur nowhere in the corpus (e.g. PgBouncer,
+  Terraform). First draft idea "logical replication" was dropped as unanswerable because the corpus covers it.
+- **Labels are pages, not chunks:** `relevant` is a list of groups; any one page in a group satisfies it
+  (alternates), and cross-product questions have 2 groups (one per product) that must both be found.
+  Chunk ids change whenever chunking is retuned; page paths do not. *Considered:* chunk-level labels (precise
+  but break on every re-chunk).
+- **Holdout picked by hand before any retrieval ran**, 10 questions spread over all 5 types and 4 products
+  (err-02/06/10, sym-04/09, ver-03/05, x-03, none-01/06). *Considered:* random split (could leave a type out).
+- **Tickets as sources:** 10 questions have a Stack Overflow page among their answer pages (the stand-in "tickets"); the
+  rest cite docs pages. Docs versions are whatever was downloaded (Kafka 4.3, Kubernetes v1.36-dev,
+  PostgreSQL current = 18), so version questions are "as of this corpus".
+- **Not measured yet:** no metric exists until the eval script is written (step 2, after "verified").
+
+## Eval script and baseline (stage 15, step 2)
+
+- **Chose:** `python -m eval.run` scores `src.search.search()` as it is today (dense only, no product or access
+  filter) on the tuning split, top 10. Writes `eval/results/baseline_dense_tune.{json,md}`; the README table is
+  copied from the `.md`. The holdout runs only with `--final`, and the script refuses unverified questions.
+- **Metrics:** Recall@5, Recall@10, MRR. Recall = share of required page groups found (cross-product questions
+  have 2); MRR = 1/rank of the first correct chunk. Ranks are over chunks, not de-duplicated pages, because that is
+  what the later context builder will receive. *Considered:* de-duplicating pages first (hides crowding by one page).
+- **Unanswerable questions are skipped for retrieval metrics** (no correct page). Their score will be "did it
+  refuse", which needs stages 13-14.
+- **Questions marked `verified=true`** after your explicit "verified all"; the project rule says to ask first.
+- **Baseline reading:** n=26, Recall@5 = Recall@10 everywhere, so improvements must be judged on MRR and the
+  cross-product row. Do not tune on `holdout`.
+
+## Search improvements (stages 3, 9, 10, 11), one change at a time
+
+Method: after each change, `python -m eval.run` on the tuning split (26 answerable questions), then
+`python -m eval.compare` against the previous step. Keep a change only if it helps. Holdout untouched.
+Full table: README Results. Per-question lists: `eval/results/compare_*.md`.
+
+- **1. Heading-aware chunks: NOT kept (`chunking.strategy: fixed`).** *What:* split at markdown headings, pack
+  sections up to 500 tokens, merge sections under 100 tokens into a neighbour, never cut a code block or table (an
+  oversized table repeats its header), repeat the section heading when a section continues in a new chunk.
+  *Result:* Recall@5 0.904 -> 0.808, Recall@10 0.904 -> 0.865, MRR 0.763 -> 0.753; 5 questions helped, 8 hurt.
+  *Why it did not help:* 3816 chunks instead of 2602, so several small chunks of one page crowd the top 10, and the
+  exact-error question err-09 lost its chunk. It did help version questions (MRR +0.232). *Considered:* tuning
+  `min_tokens` (not tried: tuning on 26 questions is mostly noise). The code stays behind the config flag, tested.
+  I re-scored it on top of hybrid and rerank before dropping it for good (README re-test rows): still no clear win.
+  *Process note:* I kept a copy of the heading index as Qdrant collection `support_docs_headings` (vectors copied, no
+  re-embedding) so this re-test needed no second 12-minute indexing run. After switching back, the fixed index
+  reproduced the original baseline exactly (identical JSON summary).
+- **2. BM25 + RRF: kept (`retrieval.mode: hybrid`).** *What:* `rank-bm25` (BM25Okapi) over title + text of every chunk,
+  built in memory from Qdrant's payloads (so it can never disagree with the index); tokens = lowercase `\w+`. Dense
+  top 20 + BM25 top 20 merged with Reciprocal Rank Fusion, `rrf_k = 60`.
+  *Result:* MRR 0.763 -> 0.825, Recall@10 unchanged (0.904), Recall@5 0.904 -> 0.865 (one version question moved from
+  rank 5 to 6); 7 helped, 4 hurt. *By type:* no gain on error_message (0.905 before and after, so the "BM25 wins on
+  exact error messages" idea is **not supported** here: dense already found them), gains on symptom (+0.077) and
+  cross_product (+0.160); the helped questions have distinctive literal words. Cost: negligible once the index is warm (median search 125 ms vs 124 ms for dense in the eval).
+  *Considered:* weighted score fusion (needs tuning of weights, RRF has none); Qdrant sparse vectors (more moving
+  parts). *Bug found while measuring:* `search()` made a new Qdrant client per call, which made the BM25 cache miss and
+  rebuilt the index every search (1.1 s). Fixed with one cached client per process (now 125 ms).
+- **3. Cross-encoder rerank: NOT enabled by default.** *What:* `cross-encoder/ms-marco-MiniLM-L-6-v2` (CPU) re-scores
+  the top 30 merged candidates, the best 5 go to the answer step (`k_rerank_in: 30`, `k_context: 5`). The eval asks for
+  10 so it stays comparable with the earlier rows. *Result vs hybrid:* MRR 0.825 -> 0.822, Recall@5 0.865 -> 0.904 (one
+  question), Recall@10 unchanged; 7 helped, 5 hurt; median search 125 ms -> 3197 ms. That is no measurable gain for
+  about 3 s of latency, so by the keep-only-if-it-helps rule it is off. *This is a close call and yours to flip:* set
+  `retrieval.mode: rerank`. Two reasons to revisit: answer quality (not measured yet, retrieval metrics are page-level)
+  and stage 14, where a calibrated relevance score is the natural signal for "refuse if unsure" (RRF scores are not
+  calibrated). *Considered:* a smaller `k_rerank_in` (less latency, untested).
+- **4. Access level enforced in the Qdrant query: kept (a requirement, not a quality tweak).** *What:* roles in
+  `config.yaml` (`viewer` = public, `member` = public + internal, `admin` = all); `search(role=...)` builds a
+  `access_level IN (...)` filter that is part of the Qdrant query, and the BM25 side filters before ranking, so hidden
+  chunks never reach RRF or the reranker. Default role is `viewer` (least privilege); an unknown role raises an error
+  instead of falling back to "everything"; a chunk with no `access_level` is never returned. The eval defaults to
+  `--role admin` so rows stay comparable. *Cost, measured:* Recall@10 0.904 (admin) -> 0.846 (member) -> 0.692
+  (viewer). All 6 tuning questions a viewer loses have only internal/restricted answer pages, i.e. a viewer correctly
+  gets nothing relevant (the answer step must say so). *Tests:* a viewer gets only public chunks even when the question is
+  the exact text of a restricted chunk, in all three modes; the filter sits in the Qdrant call (k = 3 returns 3 public
+  chunks, which a filter applied after the search could not); and the real index is checked for all 40 questions as
+  viewer and member (restricted never reaches member). *Considered:* filtering after retrieval (leaks into scores,
+  returns fewer than k, one bug away from a leak); a separate collection per level.
+  *Limit:* roles are simulated and nothing authenticates the caller yet (stage 7, login).
+
+## Access model: public / member (per-product licenses) / admin
+
+*Supersedes the `viewer` / `member` / `admin` role names in change 4 above; the filter-inside-the-query design stays.*
+Your requirement: the app will later run inside organizations, whose product data is the company's own apps; public =
+outside users, admin = super user who grants licenses, members = users licensed per product.
+
+- **Chose:** three roles. `public` (not logged in): public chunks of all products. `member`: public chunks of all products
+  + internal and restricted chunks of licensed products only. `admin`: everything, and the only role that may add
+  users and grant/revoke licenses. Your answers to my two questions: an unlicensed product still shows its **public**-level
+  docs to a member (like an outside user), and **restricted** is readable by licensed members too (not admin-only).
+  Consequence: for a member, internal and restricted behave the same; the difference only matters to public users.
+- **One rule, two forms** (`src/access.py`): `Principal.qdrant_filter()` goes inside the Qdrant query,
+  `Principal.allows()` filters BM25 candidates before ranking. A test checks they select the same chunks for every role and
+  license combination, so they cannot drift apart. Missing/unknown `access_level` or `product` is denied, even for admin.
+- **Licenses in SQLite** (stdlib, one file `data/access.db`, tables users / licenses / audit). *Considered:* a YAML file
+  (no audit, hand-edited), Qdrant payloads (mixes who-can-see with what-is-indexed). Every grant/revoke is logged with the
+  actor. A member cannot self-grant; the first admin is created by `bootstrap_admin` from a setup script, never via a request.
+  Revoking takes effect on the next search (nothing is cached per user).
+- **Fail closed:** unknown role/product raises; unknown or missing user is `public`; the public role cannot carry licenses.
+- **Measured (hybrid, tune split):** admin = member licensed for all 4 = Recall@10 0.904; member with github only 0.712;
+  public 0.692. Row labels are in README Results 4a-4d. The earlier `viewer`/`member`(public+internal) result files
+  `step4_hybrid_*` are kept but no longer used.
+- **Not built:** login (stage 7; will supply the `user_id`), HTTP endpoints for the admin dashboard (UI comes later),
+  rate limits, license expiry/seats. In a real deployment the access level of a chunk should come from the source
+  system's own metadata; the path rules are a stand-in.

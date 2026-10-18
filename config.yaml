@@ -27,19 +27,30 @@ qdrant:
   url: http://localhost:6333
   collection: support_docs
 
-chunking:        # simple fixed-size version; bge-small reads at most 512 tokens
+chunking:        # bge-small reads at most 512 tokens
+  strategy: fixed      # fixed | headings; headings did not help on its own (docs/DECISIONS.md)
   size_tokens: 500
-  overlap_tokens: 50
+  overlap_tokens: 50   # used by fixed, and for oversized plain-text blocks
+  min_tokens: 100      # headings: a chunk smaller than this absorbs the next section
 
 ingest:
   min_chars: 300   # pages shorter than this after cleaning (index/stub pages) are skipped
 
 retrieval:       # placeholder
+  mode: hybrid     # dense | hybrid (+ BM25, RRF) | rerank (+ cross-encoder); hybrid kept, rerank off (docs/DECISIONS.md)
   k_dense: 20
   k_bm25: 20
   rrf_k: 60
-  k_rerank_in: 20
-  k_context: 5
+  k_rerank_in: 30  # candidates sent to the cross-encoder
+  k_context: 5     # chunks kept after reranking
+
+# SIMULATED access: the docs are public, so levels are assigned by configs/access_rules.yaml. Roles and the
+# license rule are in src/access.py: public = base_levels for every product; member = base_levels for every product
+# plus licensed_levels for the products they hold a license for; admin = admin_levels.
+access:
+  base_levels: [public]
+  licensed_levels: [internal, restricted]
+  admin_levels: [public, internal, restricted]
 
 thresholds:      # placeholder
   min_rerank_score: 0.0
@@ -50,3 +61,4 @@ paths:
   processed: data/processed
   eval_dir: eval
   eval_results: eval/results
+  access_db: data/access.db   # users, roles, product licenses, audit log (SQLite)

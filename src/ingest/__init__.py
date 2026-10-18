@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from .chunk import chunk_text, load_tokenizer
+from .chunk import chunk_markdown, chunk_text, load_tokenizer
 from .clean import MASK_TYPES, clean_pages
 from .metadata import add_metadata, load_access_rules
 from .parse import parse_all
@@ -36,10 +36,15 @@ def run():
     rules = load_access_rules()
     tok = load_tokenizer(cfg["models"]["embedding"])
     size, overlap = cfg["chunking"]["size_tokens"], cfg["chunking"]["overlap_tokens"]
+    strategy = cfg["chunking"].get("strategy", "fixed")
+    if strategy == "headings":
+        split = lambda text: chunk_markdown(text, tok, size, cfg["chunking"]["min_tokens"])  # noqa: E731
+    else:
+        split = lambda text: chunk_text(text, tok, size, overlap)  # noqa: E731
     chunks = []
     for p in pages:
         meta = add_metadata(p, rules)
-        for i, c in enumerate(chunk_text(p["text"], tok, size, overlap)):
+        for i, c in enumerate(split(p["text"])):
             chunks.append({"chunk_id": f"{p['source_path']}#{i}", "chunk_index": i, **meta, **c, "text": c["text"]})
     stats["chunks"] = len(chunks)
     stats["chunks_by_source"] = {s: sum(c["source"] == s for c in chunks) for s in parsed}
@@ -47,7 +52,7 @@ def run():
     stats["chunks_by_doc_type"] = {}
     for c in chunks:
         stats["chunks_by_doc_type"][c["doc_type"]] = stats["chunks_by_doc_type"].get(c["doc_type"], 0) + 1
-    stats["chunk_settings"] = {"size_tokens": size, "overlap_tokens": overlap}
+    stats["chunk_settings"] = {"strategy": strategy, "size_tokens": size, "overlap_tokens": overlap}
 
     with open(out_dir / "pages.jsonl", "w", encoding="utf8") as f:
         for p in pages:

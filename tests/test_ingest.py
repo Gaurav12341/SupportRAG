@@ -114,3 +114,70 @@ def test_access_levels_and_doc_types():
     assert doc_type({**page("kubernetes", "kubernetes/tasks/debug/debug-application/debug-pods.md"), "native_type": "task"}) == "troubleshooting"
     assert doc_type(page("github", "stackoverflow/1", source="stackoverflow")) == "qa"
     assert doc_type({**page("kubernetes", "kubernetes/concepts/x.md"), "native_type": "concept"}) == "concept"
+
+
+# ---------- heading-aware chunking ----------
+from src.ingest.chunk import chunk_markdown, split_blocks  # noqa: E402
+
+DOC = """# Title
+
+Intro words here.
+
+## Install
+
+Run this:
+
+```bash
+kubectl get pods
+
+kubectl describe pod x
+```
+
+## Flags
+
+| flag | meaning |
+|------|---------|
+| -a | all |
+
+| -b | none |
+
+## Last
+
+Done.
+"""
+
+
+def test_blocks_keep_code_and_table_whole():
+    kinds = [k for k, _ in split_blocks(DOC)]
+    assert kinds.count("code") == 1
+    code = next(b for k, b in split_blocks(DOC) if k == "code")
+    assert "kubectl get pods\n\nkubectl describe pod x" in code  # blank line inside fence kept
+    table = next(b for k, b in split_blocks(DOC) if k == "table")
+    assert table.count("\n") == 2  # header, separator, one row
+
+
+def test_chunks_split_at_headings_and_keep_blocks_intact():
+    tok = load_tokenizer("BAAI/bge-small-en-v1.5")
+    chunks = chunk_markdown(DOC, tok, size=30, min_tokens=1)
+    texts = [c["text"] for c in chunks]
+    assert any(t.startswith("## Install") for t in texts) and any(t.startswith("## Last") for t in texts)
+    for t in texts:
+        assert t.count("```") % 2 == 0  # no chunk cuts a code block in half
+    assert any("kubectl get pods\n\nkubectl describe pod x" in t for t in texts)
+
+
+def test_tiny_sections_merge_and_oversized_code_splits_with_fence():
+    tok = load_tokenizer("BAAI/bge-small-en-v1.5")
+    assert len(chunk_markdown(DOC, tok, size=500, min_tokens=100)) == 1  # all small -> one chunk
+    big = "## Big\n\n```\n" + "\n".join(f"line {i} of a long listing" for i in range(80)) + "\n```\n"
+    chunks = chunk_markdown(big, tok, size=100, min_tokens=1)
+    assert len(chunks) > 1 and all(c["text"].count("```") % 2 == 0 for c in chunks)
+    assert all(c["text"].startswith("## Big") for c in chunks)
+    assert all(c["n_tokens"] <= 100 for c in chunks)
+
+
+def test_oversized_table_repeats_header():
+    tok = load_tokenizer("BAAI/bge-small-en-v1.5")
+    tbl = "## T\n\n| a | b |\n|---|---|\n" + "\n".join(f"| row{i} | value number {i} |" for i in range(60)) + "\n"
+    chunks = chunk_markdown(tbl, tok, size=80, min_tokens=1)
+    assert len(chunks) > 1 and all("| a | b |" in c["text"] for c in chunks)

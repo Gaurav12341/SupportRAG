@@ -31,17 +31,22 @@ ONLINE (every question)
 | 0 | Download | `scripts/download_docs.py` | `configs/sources.yaml` | `data/raw/` | built |
 | 1 | Parse | `src/ingest/parse.py` | `data/raw/` | pages (markdown text) | built |
 | 2 | Clean, dedupe, mask | `src/ingest/clean.py` | pages | clean pages, mask counts | built |
-| 3 | Chunk | `src/ingest/chunk.py` | clean pages | ~500-token chunks | built |
+| 3 | Chunk | `src/ingest/chunk.py` | clean pages | ~500-token chunks (`fixed` windows, default; `headings` option, off) | built |
 | 4 | Metadata + access level | `src/ingest/metadata.py`, `configs/access_rules.yaml` | chunks | `data/processed/chunks.jsonl`, `pages.jsonl`, `ingest_report.json` | built |
 | 5 | Embed | `src/embed.py` | chunk text | 384-dim normalized vectors (CPU) | built |
 | 6 | Store in Qdrant | `src/index/`, `src/store.py` | `chunks.jsonl` | collection `support_docs` (vector + payload, model name in collection metadata) | built |
 | 8 | Embed the question | `src/embed.py` | question | vector (with bge query prefix) | built |
-| 9 | Retrieve (dense only so far) | `src/search.py` | question, k, optional product | top-k chunks with score | basic version built; BM25 and access filter not yet |
-| 7, 10-16 | rest of the pipeline | – | – | – | not built yet |
+| 7 (access part) | Who is the caller | `src/access.py` (`AccessStore`, `Principal`) | user id | public / member + licenses / admin; licenses in `data/access.db`; login itself not built | roles and licenses built, login not built |
+| 9 | Retrieve: dense + BM25, access filter | `src/search.py` | question, k, optional product, principal | dense top 20 (Qdrant, access rule inside the query: public chunks, plus non-public chunks of licensed products) and BM25 top 20 (filtered before ranking) | built |
+| 10 | Merge (RRF) | `src/search.py` | the two ranked lists | one list, score = sum of 1/(60+rank) | built; on by default (`retrieval.mode: hybrid`) |
+| 11 | Rerank | `src/search.py` | top 30 merged chunks | best 5 by cross-encoder score | built; off by default (no measured gain, +3 s), `retrieval.mode: rerank` |
+| 15 | Evaluate (retrieval) | `eval/run.py`, `eval/compare.py`, `eval/table.py`, `eval/questions.jsonl` | questions + `search()` (`--mode`, `--role`, `--collection`) | Recall@5/10, MRR overall and per type in `eval/results/*.json,.md` | built for retrieval; answer metrics not built |
+| 7 (rest), 12-14, 16 | rest of the pipeline | – | – | – | not built yet |
 
 Run stages 0-4: `python -m scripts.download_docs` then `python -m src.ingest` (entry: `src/ingest/__init__.py`).
 Run stages 5-6: `docker compose up -d` then `python -m src.index` (safe to repeat; `--recreate` after a model change, `--prune` to drop stale points).
-Try search: `python -m src.search "pod stuck in CrashLoopBackOff" --product kubernetes -k 5`.
+Try search: `python -m src.search "pod stuck in CrashLoopBackOff" --product kubernetes --role member --licenses kubernetes --mode hybrid -k 5`.
+Compare two eval runs: `python -m eval.compare <before> <after>`; rebuild the README table: `python -m eval.table`.
 
 ## Shared pieces
 
