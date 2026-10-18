@@ -1,0 +1,38 @@
+[project]
+name = "supportrag"
+version = "0.1.0"
+description = "Support and troubleshooting assistant that answers with cited docs, or says it doesn't know."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "openai",
+    "python-dotenv",
+    "pyyaml",
+    "qdrant-client",
+    "torch",
+    "sentence-transformers",
+    "rank-bm25",
+    "fastapi",
+    "uvicorn",
+    "gradio",
+    "beautifulsoup4>=4.15.0",
+]
+
+[dependency-groups]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.uv]
+package = false
+
+# torch from pytorch.org's CPU index: faster than PyPI here, and CPU-only is all we need.
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true

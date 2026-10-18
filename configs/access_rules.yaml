@@ -1,0 +1,18 @@
+# SIMULATED access levels. The public docs have no real access control; these rules
+# pretend some pages are internal or restricted so we can test the access filter (stage 9).
+# First matching rule wins. `product` is optional; `path` is a regex tested against
+# the page's source_path (lowercased). Pages matching nothing get `default`.
+
+default: public
+
+rules:
+  # restricted: security, authentication and secrets pages
+  - {level: restricted, path: "concepts/security|/secret|tasks/administer-cluster/securing"}
+  - {level: restricted, product: github,   path: "secure-your-work|reference/security|secrets"}
+  - {level: restricted, product: kafka,    path: "/security/"}
+  - {level: restricted, product: postgres, path: "client-authentication|auth-|gssapi|sspi|ssl|encryption"}
+  # internal: operating the platform itself (admin / ops / infra)
+  - {level: internal, product: kubernetes, path: "tasks/debug/debug-cluster|monitoring|logging|scheduling-eviction"}
+  - {level: internal, product: github,     path: "manage-runners|administer|monitor-workflows"}
+  - {level: internal, product: kafka,      path: "/operations/|/kafka-connect/|/implementation/"}
+  - {level: internal, product: postgres,   path: "runtime-config|backup|high-availability|maintenance|monitoring|wal|diskusage"}

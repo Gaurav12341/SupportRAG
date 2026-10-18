@@ -1,0 +1,70 @@
+# Which pages to ingest. Each rule takes up to `max` pages (sorted by path) from a
+# prefix, in the order listed, so troubleshooting content comes first.
+# Pages shorter than ingest.min_chars after cleaning are dropped (not counted in the quota).
+
+kubernetes:
+  version: "v1.36-dev (kubernetes/website main)" 
+  root: data/raw/k8s_repo/content/en/docs
+  license: CC BY 4.0
+  rules:
+    - {prefix: tasks/debug,                        max: 30}
+    - {prefix: concepts/workloads/pods,            max: 12}
+    - {prefix: concepts/services-networking,       max: 14}
+    - {prefix: concepts/storage,                   max: 10}
+    - {prefix: concepts/configuration,             max: 8}
+    - {prefix: concepts/security,                  max: 10}
+    - {prefix: concepts/scheduling-eviction,       max: 8}
+    - {prefix: tasks/configure-pod-container,      max: 10}
+    - {prefix: tasks/administer-cluster,           max: 12}
+
+github:
+  version: "github.com (docs main branch)"
+  root: data/raw/gh_repo/content/actions
+  license: CC BY 4.0
+  rules:
+    - {prefix: how-tos/troubleshoot-workflows,     max: 20}
+    - {prefix: how-tos/monitor-workflows,          max: 10}
+    - {prefix: how-tos/secure-your-work,           max: 20}
+    - {prefix: reference/security,                 max: 10}
+    - {prefix: concepts,                           max: 14}
+    - {prefix: reference/workflows-and-actions,    max: 10}
+    - {prefix: how-tos/write-workflows,            max: 13}
+    - {prefix: how-tos/manage-workflow-runs,       max: 9}
+    - {prefix: how-tos/manage-runners,             max: 12}
+    - {prefix: how-tos/deploy,                     max: 6}
+    - {prefix: reference/runners,                  max: 3}
+    - {prefix: reference/limits.md,                max: 1}
+
+kafka:
+  version: "4.3"
+  root: data/raw/kafka_repo/content/en/43
+  license: Apache License 2.0
+  rules:
+    - {prefix: operations,                         max: 20}
+    - {prefix: security,                           max: 8}
+    - {prefix: configuration,                      max: 12}
+    - {prefix: getting-started,                    max: 8}
+    - {prefix: kafka-connect,                      max: 8}
+    - {prefix: design,                             max: 4}
+    - {prefix: apis,                               max: 1}
+    - {prefix: implementation,                     max: 10}
+    - {prefix: streams,                            max: 28}
+
+postgres:
+  version: "18"
+  root: data/raw/postgres
+  license: PostgreSQL License
+  # chapters to fetch (page + its sub-sections), in priority order, with a page quota each
+  chapters:
+    - {page: client-authentication.html,  max: 12}
+    - {page: runtime-config.html,         max: 14}
+    - {page: maintenance.html,    max: 10}
+    - {page: mvcc.html,                   max: 8}
+    - {page: performance-tips.html,       max: 8}
+    - {page: monitoring.html,             max: 10}
+    - {page: backup.html,                 max: 8}
+    - {page: high-availability.html,      max: 8}
+    - {page: wal.html,                    max: 7}
+    - {page: errcodes-appendix.html,      max: 1}
+    - {page: indexes.html,                max: 10}
+    - {page: diskusage.html,              max: 2}

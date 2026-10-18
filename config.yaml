@@ -1,0 +1,52 @@
+# All tunable settings live here. Values marked "placeholder" are starting
+# points, not tuned results.
+
+llm:
+  # Default: LM Studio local server (OpenAI-compatible).
+  local:
+    base_url: http://localhost:1234/v1
+    model: qwen2.5-3b-instruct
+    timeout_s: 60
+  # Failsafe: used only if local is unreachable, times out or returns unusable output.
+  # Key comes from GROQ_API_KEY in .env, never from this file.
+  groq:
+    base_url: https://api.groq.com/openai/v1
+    model: openai/gpt-oss-120b
+    timeout_s: 30
+  temperature: 0.1
+  max_tokens: 700
+  fallback_log: logs/fallbacks.log
+
+models:          # all run on CPU so the GPU is left to the LLM (see docs/DECISIONS.md)
+  embedding: BAAI/bge-small-en-v1.5
+  reranker: cross-encoder/ms-marco-MiniLM-L-6-v2
+  nli: cross-encoder/nli-deberta-v3-small
+  device: cpu
+
+qdrant:
+  url: http://localhost:6333
+  collection: support_docs
+
+chunking:        # simple fixed-size version; bge-small reads at most 512 tokens
+  size_tokens: 500
+  overlap_tokens: 50
+
+ingest:
+  min_chars: 300   # pages shorter than this after cleaning (index/stub pages) are skipped
+
+retrieval:       # placeholder
+  k_dense: 20
+  k_bm25: 20
+  rrf_k: 60
+  k_rerank_in: 20
+  k_context: 5
+
+thresholds:      # placeholder
+  min_rerank_score: 0.0
+  min_nli_entailment: 0.5
+
+paths:
+  raw_docs: data/raw
+  processed: data/processed
+  eval_dir: eval
+  eval_results: eval/results
