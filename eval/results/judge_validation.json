@@ -1,0 +1,391 @@
+{
+  "n": 30,
+  "agree_correct_vs_not": 29,
+  "agree_four_way": 27,
+  "confusion (my label -> judge)": {
+    "incorrect -> incorrect": 8,
+    "correct -> correct": 16,
+    "partially_correct -> incorrect": 2,
+    "partially_correct -> partially_correct": 3,
+    "correct -> incorrect": 1
+  },
+  "judge_model": "qwen/qwen3.8-27b",
+  "prompt_version": "v2",
+  "tokens": {
+    "groq/qwen/qwen3.8-27b": {
+      "calls": 30,
+      "cached_calls": 30,
+      "prompt_tokens": 18171,
+      "completion_tokens": 3161,
+      "total_tokens": 21332,
+      "fresh_total_tokens": 0
+    }
+  },
+  "disagreements": [
+    {
+      "id": "err-21",
+      "which": "draft",
+      "label": "correct",
+      "judge": "incorrect",
+      "note": "Re-adds the origin with a token and checks out and pulls master: matches the key features.",
+      "judge_reason": "The answer uses a hardcoded branch name 'master' instead of the dynamic `${GITHUB_REF:11}` required to ensure the correct branch is checked out and pulled, which is the essential fix for the ENOREMOTEBRANCH error.",
+      "missing": [
+        "Re-checkout and pull the branch in the workflow with `git checkout \"${GITHUB_REF:11}\" && git pull` so lerna finds the branch"
+      ],
+      "wrong": []
+    }
+  ],
+  "rows": [
+    {
+      "id": "ver-14",
+      "which": "shown",
+      "label": "incorrect",
+      "judge": "incorrect",
+      "note": "Describes disabling Leader Migration after the upgrade, never says to set --enable-leader-migration to enable it.",
+      "judge_reason": "The answer describes how to disable Leader Migration rather than how to enable it, failing to state the essential key point.",
+      "missing": [
+        "Set --enable-leader-migration on kube-controller-manager or cloud-controller-manager"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "err-22",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Names LogAndSkip and UsePartitionTime extractors (the essential alternatives); leading with Wallclock is a documented option.",
+      "judge_reason": "The answer states the essential key point by suggesting the correct alternative extractors (LogAndSkipOnInvalidTimestamp or UsePartitionTimeOnInvalidTimestamp) in step 2, although it incorrectly prioritizes WallclockTimestampExtractor which does not solve the negative timestamp issue.",
+      "missing": [
+        "Use another timestamp extractor, at least one of: LogAndSkipOnInvalidTimestamp (logs a warning and drops the record so Streams can make progress) or UsePartitionTimeOnInvalidTimestamp (uses the previous valid timestamp of the same partition as an estimate, and throws if none exists)"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "err-01",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Backup, trust line, restart, psql, ALTER USER, restore: all steps of the accepted answer.",
+      "judge_reason": "The answer correctly outlines the steps to edit pg_hba.conf for trust authentication, restart the server, reset the password, and restore the original configuration, matching all essential and optional key points.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "sym-12",
+      "which": "shown",
+      "label": "partially_correct",
+      "judge": "incorrect",
+      "note": "A restart does re-read pg_hba.conf, but the answer misses the reload methods (pg_ctl reload, pg_reload_conf, kill -HUP). Valid but heavier.",
+      "judge_reason": "The answer incorrectly states that a full restart is required, whereas the documentation specifies that a reload signal (SIGHUP) is sufficient to apply changes to pg_hba.conf.",
+      "missing": [
+        "pg_hba.conf is read at start-up and on SIGHUP: signal the postmaster to re-read it, at least one of `pg_ctl reload`, the SQL function pg_reload_conf(), or `kill -HUP`"
+      ],
+      "wrong": [
+        "Ensure that you have restarted your PostgreSQL server after making changes to the `pg_hba.conf` file."
+      ]
+    },
+    {
+      "id": "ver-01",
+      "which": "draft",
+      "label": "incorrect",
+      "judge": "incorrect",
+      "note": "Never lists the supported Java versions (17/21/25); recommends 25 as LTS and then drifts into KRaft upgrade text.",
+      "judge_reason": "The answer fails to state the specific Java versions (17, 21, 25) that are fully supported for the broker, instead providing irrelevant information about KRaft mode and upgrade paths.",
+      "missing": [
+        "Java 17, Java 21 and Java 25 are fully supported"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "x-09",
+      "which": "shown",
+      "label": "partially_correct",
+      "judge": "partially_correct",
+      "note": "Kubernetes half only (add nodes / terminate pods); nothing about the ARC job waiting and the 24-hour unassign.",
+      "judge_reason": "The answer addresses the Kubernetes scheduling issue but completely omits the essential information about what happens to the GitHub Actions jobs (the 24-hour unassignment policy) and the specific check for CPU requests vs node capacity.",
+      "missing": [
+        "ARC: the controller creates the runner pods (retrying up to 5 times if a pod's status is failed) and the job waits for a runner; after 24 hours the GitHub Actions service unassigns the job if no runner accepts it",
+        "check that the pod's CPU request is not larger than the nodes' capacity (compare with kubectl describe nodes)"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "ver-15",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "States there is no support for compacted topics.",
+      "judge_reason": "The answer correctly states that tiered storage is not supported for compacted topics, matching the essential key point.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "err-20",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "INTERVAL fix with the full corrected query.",
+      "judge_reason": "The answer correctly identifies the need to use the INTERVAL type and provides the exact syntax for subtracting one day and filtering for the last 130 days as required by the key points.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "sym-17",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Cause (changelog restore before processing), num.standby.replicas and warmup replicas since 2.6 are all stated.",
+      "judge_reason": "The answer correctly identifies that state restoration (replaying changelogs) causes the delay and recommends using standby replicas (num.standby.replicas) and warmup replicas (since 2.6) to reduce or eliminate the pause.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "ver-12",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Contains the sentence that the inter-broker listener may not be updated dynamically in 1.1.x; the surrounding steps are from the same doc section.",
+      "judge_reason": "The answer correctly states that the inter-broker listener cannot be updated dynamically in Kafka 1.1.x, matching the essential key point, and contains no wrong or dangerous claims.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "sym-15",
+      "which": "draft",
+      "label": "incorrect",
+      "judge": "incorrect",
+      "note": "Never mentions checkpoints (checkpoint_timeout, max_wal_size); proposes unrelated flush and OS settings.",
+      "judge_reason": "The answer fails to identify checkpoints as the cause of the write bursts and does not mention the essential settings checkpoint_timeout or max_wal_size.",
+      "missing": [
+        "Checkpoints must flush all dirty data pages to disk, which can cause significant I/O load; the checkpointer starts one every checkpoint_timeout seconds or when max_wal_size is about to be exceeded (defaults 5 minutes and 1 GB)",
+        "Set checkpoint_timeout and max_wal_size high enough that checkpoints do not happen too often; checkpoint_warning can be set as a sanity check"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "sym-03",
+      "which": "draft",
+      "label": "incorrect",
+      "judge": "incorrect",
+      "note": "Does not mention ANALYZE or statistics; talks about COPY, wal_level and indexes.",
+      "judge_reason": "The answer fails to identify the missing or obsolete planner statistics and the need to run ANALYZE, which is the primary cause of slow queries after a bulk load.",
+      "missing": [
+        "After a bulk load the planner statistics are missing or obsolete; run ANALYZE (or VACUUM ANALYZE) on the table"
+      ],
+      "wrong": [
+        "Verify if disabling WAL archiving and streaming replication might help by setting wal_level to 'minimal', archive_mode to 'off', and max_wal_senders to zero."
+      ]
+    },
+    {
+      "id": "err-11",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Create the Ingress in the service's namespace, or ExternalName: the accepted answer.",
+      "judge_reason": "The answer correctly identifies that the Ingress must be in the same namespace as the Service or use an ExternalName service, covering the essential key point.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "ver-07",
+      "which": "draft",
+      "label": "incorrect",
+      "judge": "incorrect",
+      "note": "Says yes, the opposite of the docs (0.x clients are not compatible with 4.0).",
+      "judge_reason": "The answer incorrectly claims compatibility, contradicting the documentation that pre-0.10.x protocols are removed in Kafka 4.0.",
+      "missing": [
+        "No: Kafka 0.x clients (also 1.x and 2.0) are not compatible with Kafka 4.0, because pre-0.10.x protocols are fully removed in Kafka 4.0 (KIP-896)"
+      ],
+      "wrong": [
+        "Yes, according to the compatibility policy stated in S1, new clients can talk to old servers and vice versa."
+      ]
+    },
+    {
+      "id": "x-05",
+      "which": "shown",
+      "label": "incorrect",
+      "judge": "incorrect",
+      "note": "Talks about an emptyDir sizeLimit; no ephemeral-storage limits and nothing on Kafka retention.",
+      "judge_reason": "The answer fails to address the core issue of local disk eviction by suggesting a memory-backed emptyDir limit, which does not bound local disk usage, and omits the required Kafka retention settings.",
+      "missing": [
+        "Kubernetes: limit the Pod's local disk use with ephemeral-storage limits in the Pod spec",
+        "Kafka: bound how much data a topic stores with the topic settings retention.bytes (size) and retention.ms (time)"
+      ],
+      "wrong": [
+        "Set a size limit for your memory-backed `emptyDir` volume to prevent it from consuming up to the pod's memory limit."
+      ]
+    },
+    {
+      "id": "err-03",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Dummy repeatable read transaction plus max_standby_*_delay: satisfies the at-least-one-of point.",
+      "judge_reason": "The answer provides two of the three valid solutions (repeatable read transaction and max_standby_streaming_delay) but omits the primary recommended solution (hot_standby_feedback) and incorrectly suggests max_standby_archive_delay which is not the standard parameter for streaming replication conflicts.",
+      "missing": [
+        "set hot_standby_feedback on the standby"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "x-01",
+      "which": "draft",
+      "label": "partially_correct",
+      "judge": "partially_correct",
+      "note": "PVC for the data directory is right; WAL archiving settings are right but there is no base backup, which PITR needs.",
+      "judge_reason": "The answer fails to mention the requirement for a file-system-level base backup, which is essential for point-in-time recovery, and does not explicitly state that the PersistentVolume's lifecycle is independent of the Pod.",
+      "missing": [
+        "Kubernetes: keep the data directory on a PersistentVolume claimed through a PersistentVolumeClaim, whose lifecycle is independent of any individual Pod, so data survives pod restarts",
+        "PostgreSQL: combine a file-system-level base backup with continuously archived WAL files; this supports point-in-time recovery to any time since the base backup"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "sym-05",
+      "which": "draft",
+      "label": "partially_correct",
+      "judge": "incorrect",
+      "note": "Borderline: gives the webhook checks and remedies but never states the cause (finalizer blocked by an admission webhook).",
+      "judge_reason": "The answer provides troubleshooting steps but fails to state the essential explanation of why the pod is stuck (finalizer + webhook preventing removal).",
+      "missing": [
+        "Terminating means a deletion was issued but the control plane cannot delete the Pod object; typically the Pod has a finalizer and an admission webhook prevents the finalizer from being removed"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "err-21",
+      "which": "draft",
+      "label": "correct",
+      "judge": "incorrect",
+      "note": "Re-adds the origin with a token and checks out and pulls master: matches the key features.",
+      "judge_reason": "The answer uses a hardcoded branch name 'master' instead of the dynamic `${GITHUB_REF:11}` required to ensure the correct branch is checked out and pulled, which is the essential fix for the ENOREMOTEBRANCH error.",
+      "missing": [
+        "Re-checkout and pull the branch in the workflow with `git checkout \"${GITHUB_REF:11}\" && git pull` so lerna finds the branch"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "ver-06",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "States the deprecation and planned removal, the main fact; does not repeat that the hash is insecure.",
+      "judge_reason": "The answer correctly states that MD5 is deprecated and will be removed, satisfying the essential key point, but it does not mention using SCRAM as the recommended alternative.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "ver-08",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Deprecated since v1.28.",
+      "judge_reason": "The answer correctly identifies Kubernetes v1.28 as the version where the in-tree Ceph RBD provisioner was deprecated, matching the key point and documentation.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "x-06",
+      "which": "draft",
+      "label": "incorrect",
+      "judge": "incorrect",
+      "note": "Suggests TokenRequest API tokens; nothing on GitHub OIDC (id-token: write) or on the cluster accepting OIDC.",
+      "judge_reason": "The answer incorrectly suggests using Kubernetes TokenRequest API tokens for GitHub Actions authentication, whereas the correct method is using GitHub's OpenID Connect (OIDC) to issue short-lived JWTs that the Kubernetes cluster accepts via external authentication.",
+      "missing": [
+        "GitHub: yes, use OpenID Connect; give the job the id-token: write permission so the workflow can request a short-lived OIDC token (JWT) from GitHub's OIDC provider instead of storing long-lived credentials as secrets",
+        "Kubernetes: the cluster must be set up to accept an external authentication source such as OIDC, which is recommended over client certificates and service account tokens for users reaching the API"
+      ],
+      "wrong": [
+        "Use TokenRequest API tokens for service authentication, which can be configured to have a short lifespan to reduce the impact of compromised tokens.",
+        "Configure your GitHub Actions workflow to use these short-lived TokenRequest API tokens for authenticating to the Kubernetes cluster."
+      ]
+    },
+    {
+      "id": "sym-13",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Explains the excluded range and quotes the index predicate.",
+      "judge_reason": "The answer correctly identifies that the IP address is excluded from the partial index, satisfying the essential point, but it does not mention the optional point about predetermined values.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "err-13",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Item 3 states the fix (disable 'Use gRPC FUSE for file sharing'); items 1-2 are harmless extra checks.",
+      "judge_reason": "The answer correctly identifies disabling the gRPC FUSE feature as a fix but misses the alternative solution of updating to Docker Desktop 3.0.1 and fails to explicitly link the issue to the specific Docker Desktop 3.0.0 version mentioned in the key points.",
+      "missing": [
+        "The problem comes from Docker Desktop 3.0.0 for Mac",
+        "Update to Docker Desktop 3.0.1 where it is resolved"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "x-10",
+      "which": "draft",
+      "label": "partially_correct",
+      "judge": "partially_correct",
+      "note": "PGPASSWORD is right (one of the documented choices); the Kubernetes half (Secret as env var or file) is missing.",
+      "judge_reason": "The answer provides a valid PostgreSQL method (PGPASSWORD) but completely omits the essential Kubernetes requirement to use a Secret to securely supply the password to the container.",
+      "missing": [
+        "Kubernetes: store the password in a Secret and expose it to the container as an environment variable (secretKeyRef) or as a mounted file, instead of putting it in the image"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "err-14",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Extra slash before _authToken.",
+      "judge_reason": "The answer correctly identifies the missing slash in the .npmrc authentication line as the cause of the 401 error, matching the essential key point.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "ver-09",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Stable since v1.22.",
+      "judge_reason": "The answer correctly states that the feature is stable since Kubernetes v1.22, satisfying the essential key point.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "ver-16",
+      "which": "draft",
+      "label": "incorrect",
+      "judge": "incorrect",
+      "note": "Gives a commit SHA, not the version v1.0.2 that the question asks for.",
+      "judge_reason": "The answer provides a specific commit hash instead of the required version tag v1.0.2, failing to state the essential key point.",
+      "missing": [
+        "The example uses OctopusDeploy/login at v1.0.2"
+      ],
+      "wrong": []
+    },
+    {
+      "id": "ver-02",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "Deprecated in 4.3, removed in 5.0.",
+      "judge_reason": "The answer correctly states that kafka-streams-scala is deprecated as of Kafka 4.3 and will be removed in Kafka 5.0, matching both essential key points.",
+      "missing": [],
+      "wrong": []
+    },
+    {
+      "id": "sym-01",
+      "which": "draft",
+      "label": "correct",
+      "judge": "correct",
+      "note": "All three comparisons (primary load, network/standby load, replay vs flush) are stated correctly.",
+      "judge_reason": "The answer correctly identifies the specific LSN comparisons required to distinguish between primary load, network delay, and standby replay bottlenecks, matching all essential and optional key points.",
+      "missing": [],
+      "wrong": []
+    }
+  ]
+}

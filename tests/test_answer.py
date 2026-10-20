@@ -1,5 +1,5 @@
 """Stages 12-14: context building, reply parsing, verifier decisions, output safety. No LLM, Qdrant or NLI model:
-the NLI scorer is replaced by a fake."""
+the NLI scorer and the claim-check LLM are replaced by fakes."""
 import json
 
 import pytest
@@ -11,6 +11,7 @@ from src.llm import load_config
 from src.safety import dangerous_warnings, find_sensitive
 
 CFG = load_config()
+NLI = {**CFG, "verify": {**CFG["verify"], "method": "nli"}}  # the local scorer (the fallback); the default method is the LLM claim check
 REFUSE = CFG["answer"]["refuse_text"]
 
 PAGE = """# Title
@@ -103,24 +104,59 @@ ITEMS = [{"label": "S1", "chunk_id": "a#0", "chunk_ids": ["a#0", "a#1"], "text":
           "url": "u", "access_level": "public", "product": "postgres"}]
 
 
-def reply(*steps):
-    return json.dumps({"steps": [{"step": t, "sources": s} for t, s in steps]})
+def reply(*steps, kind="fix", coverage="full", missing="", summary="Do these."):
+    return json.dumps({"kind": kind, "coverage": coverage, "missing": missing, "summary": summary,
+                       "points": [{"text": t, "sources": s} for t, s in steps]})
 
 
 def test_parse_reply_resolves_labels_and_flags_unknown_ids():
-    steps = A.parse_reply(reply(("do a", ["S1"]), ("do b", ["S9", "x#3"]), ("do c", ["[a#1]"])), ITEMS)
+    steps = A.parse_reply(reply(("do a", ["S1"]), ("do b", ["S9", "x#3"]), ("do c", ["[a#1]"])), ITEMS).steps
     assert steps[0].cited == ["a#0"] and steps[0].bad_cites == []
     assert steps[1].cited == [] and steps[1].bad_cites == ["S9", "x#3"]
     assert steps[2].cited == ["a#1"]
 
 
-@pytest.mark.parametrize("text", ["not json", '{"nope": 1}', '{"steps": "x"}', '{"steps": [{"step": 1}]}'])
+@pytest.mark.parametrize("text", [
+    "not json", '{"nope": 1}', '{"steps": []}',  # the old format is not accepted any more
+    reply(("a", ["S1"]), kind="advice"), reply(("a", ["S1"]), coverage="most"),
+    json.dumps({"kind": "fix", "coverage": "full", "missing": "", "summary": "s", "points": [{"text": 1, "sources": []}]})])
 def test_parse_reply_rejects_bad_json(text):
     assert A.parse_reply(text, ITEMS) is None
 
 
-def test_empty_step_list_is_a_valid_refusal():
-    assert A.parse_reply('{"steps": []}', ITEMS) == []
+def test_reply_fields_are_parsed_and_not_found_is_a_refusal():
+    d = A.parse_reply(reply(("do a", ["S1"]), kind="explanation", coverage="partial", missing="the cause", summary=" Because. "), ITEMS)
+    assert (d.kind, d.coverage, d.missing, d.summary) == ("explanation", "partial", "the cause", "Because.")
+    nf = A.parse_reply(reply(kind="not_found", coverage="none", summary=""), ITEMS)
+    assert nf.kind == "not_found" and nf.steps == []
+
+
+class FakeChat:
+    def __init__(self, text, provider="groq"):
+        self.text, self.provider, self.kw = text, provider, None
+
+    def chat(self, messages, **kw):
+        self.kw = kw
+        return self.text, self.provider
+
+
+def test_generate_uses_the_configured_writer_and_marks_refusals():
+    llm = FakeChat(reply(("do a", ["S1"])))
+    draft, refused, provider = A.generate("q?", ITEMS, CFG, llm)
+    assert (len(draft.steps), refused, provider) == (1, False, "groq")
+    assert llm.kw["prefer"] == CFG["answer"]["llm"] == "groq" and llm.kw["reasoning_effort"] == CFG["answer"]["reasoning_effort"]
+    assert llm.kw["response_format"]["json_schema"] is A.SCHEMA and llm.kw["validate"]("{}") is False
+    assert A.generate("q?", ITEMS, CFG, FakeChat(reply(kind="not_found", coverage="none")))[1] is True
+    assert A.generate("q?", ITEMS, CFG, FakeChat(reply(kind="fix")))[1] is True  # no points = no answer
+    A.generate("q?", ITEMS, CFG, llm, cache="answer", salt="r2", stop_on_quota=True)
+    assert (llm.kw["cache"], llm.kw["salt"], llm.kw["stop_on_quota"]) == ("answer", "r2", True)
+
+
+def test_context_size_follows_the_answer_llm():
+    groq, local = A.answer_cfg(CFG), A.answer_cfg({**CFG, "answer": {**CFG["answer"], "llm": "local"}})
+    assert groq["retrieval"]["k_context"] == CFG["answer"]["context"]["groq"]["k_context"] > local["retrieval"]["k_context"] == 5
+    assert local["context"]["max_context_chars"] == 8000 and groq["context"]["max_section_chars"] == 2000
+    assert CFG["retrieval"]["k_context"] == 5  # the original is not changed
 
 
 def test_prompt_marks_retrieved_text_as_data_and_cannot_be_closed_early():
@@ -138,8 +174,8 @@ def fake_nli(monkeypatch):
     monkeypatch.setattr(A, "step_support", lambda step, items, cfg: 0.9 if any(step in it["text"] for it in items) else 0.1)
 
 
-def run(steps, verify=True, principal=None, items=ITEMS, refused=False):
-    return A.finalize("q", items, steps, refused, "local", principal or Principal.admin(), CFG, verify)
+def run(steps, verify=True, principal=None, items=ITEMS, refused=False, summary="", kind="fix", cfg=NLI, llm=None, **kw):
+    return A.finalize("q", items, A.Draft(kind, "full", "", summary, steps), refused, "local", principal or Principal.admin(), cfg, verify, llm, **kw)
 
 
 def S(text, cited=("a#0",), bad=()):
@@ -200,6 +236,28 @@ def test_warning_is_attached_to_the_step(fake_nli):
     assert ans.steps[0].warnings and "WARNING" in ans.render()
 
 
+def test_summary_is_shown_with_its_points_and_dropped_with_them(fake_nli):
+    ans = run([S("alpha"), S("invented")], summary="Because of alpha.", kind="explanation")
+    assert not ans.refused and ans.summary == "Because of alpha." and ans.kind == "explanation"
+    assert ans.render().startswith("Because of alpha.\n1. alpha")
+    refused = run([S("invented")], summary="Because of alpha.")
+    assert refused.refused and refused.summary == "" and "Because" not in refused.render()
+
+
+def test_secret_or_danger_in_the_summary_is_caught(fake_nli):
+    token = "ghp_" + "a1B2c3D4" * 4
+    ans = run([S("alpha")], summary=f"Use {token}", verify=False)
+    assert ans.refused and ans.blocked
+    ans = run([S("alpha")], summary="Run kubectl delete pod web-1 first.", verify=False)
+    assert ans.summary_warnings and "WARNING" in ans.render()
+
+
+def test_coverage_and_missing_travel_with_the_answer(fake_nli):
+    d = A.Draft("fix", "partial", "the second product", "s", [S("alpha")])
+    ans = A.finalize("q", ITEMS, d, False, "groq", Principal.admin(), NLI, True)
+    assert (ans.coverage, ans.missing, ans.kind) == ("partial", "the second product", "fix")
+
+
 def test_find_sensitive_clean_text():
     assert find_sensitive("Restart the server with `systemctl restart postgresql`.") == {}
     assert find_sensitive("mail me at jane.doe@gmail.com") == {"EMAIL": 1}
@@ -230,3 +288,88 @@ def test_copied_step_is_supported_even_if_nli_says_no(monkeypatch):
     assert not ans.refused and ans.steps[0].copied == 1.0
     ans = run([S("beta beta beta")], items=[{**ITEMS[0], "text": "alpha alpha alpha"}])
     assert ans.refused
+
+
+# ---------- LLM claim check (fake LLM) ----------
+
+class FakeChecker:
+    """Stands in for LLMClient.chat_full: answers with a fixed claim-check JSON, or raises."""
+    def __init__(self, statuses, answers="yes", summary="supported", error=None):
+        self.statuses, self.answers, self.summary, self.error, self.calls = statuses, answers, summary, error, []
+
+    def chat_full(self, messages, validate=None, **kw):
+        self.calls.append((messages, kw))
+        if self.error:
+            raise self.error
+        text = json.dumps({"answers_the_question": self.answers, "summary": self.summary,
+                           "points": [{"n": i, "status": st, "why": "" if st == "supported" else "not in the text"}
+                                      for i, st in enumerate(self.statuses, 1)]})
+        assert validate(text)
+        return type("R", (), {"text": text})()
+
+
+def check(steps, statuses, answers="yes", summary="Because.", summary_status="supported", **kw):
+    return run(steps, summary=summary, cfg=CFG, llm=FakeChecker(statuses, answers, summary_status), **kw)
+
+
+def test_claim_check_drops_unsupported_keeps_partial():
+    ans = check([S("alpha"), S("made up"), S("alpha plus extra")], ["supported", "unsupported", "partially_supported"])
+    assert not ans.refused and [s.text for s in ans.steps] == ["alpha", "alpha plus extra"] and ans.verified_by == "llm"
+    assert [s.claim for s in ans.checked] == ["supported", "unsupported", "partially_supported"]
+    assert ans.checked[1].claim_why == "not in the text" and not ans.partial
+
+
+def test_claim_check_refuses_when_nothing_is_supported_or_it_does_not_answer():
+    assert check([S("x"), S("y")], ["unsupported", "unsupported"]).refused
+    no = check([S("alpha")], ["supported"], answers="no")
+    assert no.refused and no.reason == REFUSE and no.summary == "" and no.checked  # kept for the eval's failure breakdown
+
+
+def test_claim_check_partly_adds_a_note_and_unsupported_summary_is_dropped():
+    ans = check([S("alpha")], ["supported"], answers="partly", summary_status="unsupported")
+    assert not ans.refused and ans.summary == "" and ans.partial == CFG["verify"]["partial_note"]
+    assert CFG["verify"]["partial_note"] in ans.render()
+
+
+def test_claim_check_sends_only_cited_excerpts_and_one_call():
+    other = {**ITEMS[0], "label": "S2", "chunk_id": "b#0", "chunk_ids": ["b#0"], "text": "never cited"}
+    llm = FakeChecker(["supported"])
+    run([S("alpha")], items=ITEMS + [other], cfg=CFG, llm=llm)
+    (messages, kw), = llm.calls
+    assert "alpha" in messages[1]["content"] and "never cited" not in messages[1]["content"]
+    assert kw["model"] == CFG["verify"]["llm"]["model"] and kw["fallback"] is False and kw["temperature"] == 0 and kw["cache"] == "verify"
+
+
+def test_claim_check_never_asks_about_a_point_without_a_valid_citation():
+    llm = FakeChecker([])
+    ans = run([S("alpha", cited=(), bad=("S9",))], cfg=CFG, llm=llm)
+    assert ans.refused and llm.calls == [] and ans.checked[0].claim == "unsupported"
+    llm = FakeChecker(["supported"])
+    ans = run([S("alpha"), S("alpha", cited=(), bad=("S9",))], cfg=CFG, llm=llm)  # only the first is sent
+    assert [s.text for s in ans.steps] == ["alpha"] and len(llm.calls) == 1
+
+
+def test_claim_check_failure_falls_back_to_nli_and_is_recorded(monkeypatch):
+    monkeypatch.setattr(A, "step_support", lambda step, items, cfg: 0.9 if any(step in it["text"] for it in items) else 0.1)
+    ans = run([S("alpha"), S("invented")], cfg=CFG, llm=FakeChecker([], error=RuntimeError("groq down")))
+    assert ans.verified_by == "nli" and [s.text for s in ans.steps] == ["alpha"]
+    from src.llm import QuotaExhausted
+    ans = run([S("alpha")], cfg=CFG, llm=FakeChecker([], error=QuotaExhausted("day")))
+    assert ans.verified_by == "nli"
+    with pytest.raises(QuotaExhausted):  # an eval must stop, not silently switch verifier
+        run([S("alpha")], cfg=CFG, llm=FakeChecker([], error=QuotaExhausted("day")), stop_on_quota=True)
+
+
+def test_claim_check_off_means_no_call_and_unsafe_text_is_still_blocked():
+    llm = FakeChecker(["supported"])
+    assert not run([S("alpha")], verify=False, cfg=CFG, llm=llm).refused and llm.calls == []
+    token = "ghp_" + "a1B2c3D4" * 4
+    ans = check([S("alpha")], ["supported"], summary=f"Use {token}")
+    assert ans.refused and ans.blocked
+
+
+@pytest.mark.parametrize("text", ["not json", "{}", json.dumps({"answers_the_question": "maybe", "summary": "supported", "points": []}),
+                                  json.dumps({"answers_the_question": "yes", "summary": "supported", "points": [{"n": 2, "status": "supported", "why": ""}]})])
+def test_parse_claims_rejects_bad_json(text):
+    from src.verify import parse_claims
+    assert parse_claims(text, 1) is None

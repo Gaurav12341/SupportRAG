@@ -108,6 +108,9 @@ def main():
     ap.add_argument("--role", default="admin", choices=["public", "member", "admin"],
                     help="default admin: all levels, so numbers stay comparable with the first baseline")
     ap.add_argument("--licenses", default="", help="members only: comma-separated products, e.g. github,kafka")
+    ap.add_argument("--k-context", type=int, default=None, help="chunks kept for the answer context (default: retrieval.k_context)")
+    ap.add_argument("--max-context-chars", type=int, default=None, help="context budget in characters (default: context.max_context_chars)")
+    ap.add_argument("--max-section-chars", type=int, default=None, help="longest parent section used (default: context.max_section_chars)")
     ap.add_argument("--plan", default="none", help="query plan parts to use: none, or a comma list of rewrite,route,hyde (src/query.py)")
     ap.add_argument("--plan-llm", default=None, choices=["local", "groq"], help="which LLM writes the plan (default: query.llm)")
     a = ap.parse_args()
@@ -123,6 +126,10 @@ def main():
         cfg["models"]["embedding"] = a.embedding
     if a.embedding_device:
         cfg["models"]["embedding_device"] = a.embedding_device
+    for flag, section, key in ((a.k_context, "retrieval", "k_context"), (a.max_context_chars, "context", "max_context_chars"),
+                               (a.max_section_chars, "context", "max_section_chars")):
+        if flag:
+            cfg[section][key] = flag
     who = Principal(a.role, frozenset(x for x in a.licenses.split(",") if x))
     who_label = a.role + (f"[{a.licenses}]" if a.licenses else "")
     chunking = a.chunking or cfg["chunking"]["strategy"]
@@ -147,9 +154,9 @@ def main():
             plan = understand(q["question"], cfg, prefer=a.plan_llm)
             plans.append((q, plan))
             t0 = time.perf_counter()  # search time only; plan time is reported separately
-            hits = search_plan(q["question"], plan, k=max(KS), principal=who, mode=mode, cfg=cfg, use=use)
+            hits = search_plan(q["question"], plan, k=max(max(KS), cfg["retrieval"]["k_context"]), principal=who, mode=mode, cfg=cfg, use=use)
         else:
-            hits = search(q["question"], k=max(KS), principal=who, mode=mode, cfg=cfg)
+            hits = search(q["question"], k=max(max(KS), cfg["retrieval"]["k_context"]), principal=who, mode=mode, cfg=cfg)
         ms.append((time.perf_counter() - t0) * 1000)
         pages = [page_of(h) for h in hits]
         ctx = build_context(hits[:cfg["retrieval"]["k_context"]], who, cfg)
@@ -173,7 +180,7 @@ def main():
                       "route_wrong_product": round(sum(bool(g - t) for t, g in truth) / len(truth), 3),
                       "median_plan_s": sorted(p.seconds for _, p in plans)[len(plans) // 2]}
     result = {**plan_stats, "split": split, "mode": mode, "role": who_label, "chunking": chunking, "collection": cfg["qdrant"]["collection"],
-              "embedding": cfg["models"]["embedding"], "k_used": max(KS), "median_search_ms": round(median_ms),
+              "embedding": cfg["models"]["embedding"], "k_used": max(KS), "k_context": cfg["retrieval"]["k_context"], "max_context_chars": cfg["context"]["max_context_chars"], "max_section_chars": cfg["context"]["max_section_chars"], "median_search_ms": round(median_ms),
               "avg_chunk_chars": round(sum(chars) / len(chars)) if chars else 0,
               "chunks_in_collection": _count(cfg), "skipped_unanswerable": skipped, "summary": summary, "per_question": rows}
     (out / f"{stem}.json").write_text(json.dumps(result, indent=2, ensure_ascii=False), encoding="utf8")

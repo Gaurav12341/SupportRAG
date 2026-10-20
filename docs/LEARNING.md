@@ -103,25 +103,25 @@ For each stage built: 1. What is it? 2. How does it work here? 3. Why do we need
 
 1. **What:** choose which text the model gets to read: the best chunks, grown to the section they sit in, without repeats.
 2. **Here:** `src/context.py` takes the top 5 hybrid hits, finds each chunk's section in the page (heading to next heading), merges overlapping sections, keeps the strongest first and stops at about 8000 characters. Labels S1, S2... are attached.
-3. **Why:** a 500-token window often cuts a procedure in half; a whole section keeps the steps together. Repeats waste the small context of a 3B model.
+3. **Why:** a 500-token window often cuts a procedure in half; a whole section keeps the steps together. Repeats waste the small context of a 3B model. A bigger writer can read more, so its profile takes 10 chunks / 12,000 characters with sections capped at 2,000 (measured: evidence in context 0.716 -> 0.810); more distinct places beat longer sections.
 4. **Measure:** unit tests for section finding, merging, the size cap and the access drop. Answer quality is measured end to end (see Stage 14).
 5. **Wrong:** a section can be huge or a page can have no headings, so the section gets cut or falls back to the chunk; too much context also confuses a small model. Fix: the size caps in `config.yaml`.
 
 ## Stage 13: Generate the answer
 
-1. **What:** the LLM writes numbered steps, and each step names the excerpt it came from.
-2. **Here:** `src/answer.py` sends the excerpts (wrapped as data) and the question to the local Qwen2.5-3B; the reply must match a JSON schema `{steps: [{step, sources}]}`. Unusable output goes to Groq and is logged.
+1. **What:** the LLM writes a short cited answer: a summary and points, each point naming the excerpt it came from.
+2. **Here:** `src/answer.py` sends the excerpts (wrapped as data) and the question to the writer, Groq `gpt-oss-120b` (local Qwen2.5-3B is the failsafe, every fallback logged); the reply must match a JSON schema `{kind, coverage, missing, summary, points: [{text, sources}]}`. `kind` is fix / explanation / fact / not_found, so a version question gets one fact and a why-question gets a cause, instead of everything being forced into steps. `coverage` and `missing` say what the excerpts lack (for the retry loop later).
 3. **Why:** citations let a person check each step; the schema forces the model to give them (free text skipped them too often).
-4. **Measure:** how many steps have a valid citation, how many are supported (Stage 14), and how often Groq was needed (0 of 30 questions in the last run).
+4. **Measure:** end-to-end accuracy (Stage 15, answers) and, per answer, tokens: about 3.5k on the 120b bucket. The 3B writer got 42.5% of the dev questions right as a draft, the 120b writer 82.5% (same questions, same judge).
 5. **Wrong:** a small model still invents generic advice, may cite the wrong excerpt, or obey text inside an excerpt. Fix: the verifier, the "excerpts are data" rule, and neutralising `</doc` in excerpts.
 
 ## Stage 14: Verify and output safety
 
-1. **What:** after the model answers, check the answer before the user sees it: are the citations real, does the cited text back each step, is anything secret or dangerous in it.
-2. **Here:** `src/verify.py` checks every cited id is in the context, then an NLI model scores "cited text entails step" (best of ~1200-character windows), or the step counts as supported if it is mostly copied from the cited text (NLI misses word-for-word code and list items); unsupported steps are dropped, and too few left means "No documented fix found." `src/safety.py` withholds answers with secrets/personal data, adds WARNING lines to `kubectl delete`, `DROP TABLE` and Kafka topic deletes, and drops citations to chunks the caller may not read.
-3. **Why:** a support answer that sounds right but is invented is worse than "not found"; a dangerous command pasted without a warning can do real harm; and a citation must never point to a document the user cannot open.
-4. **Measure:** `python -m eval.answer`: unsupported steps, refusals of the unanswerable questions, and answerable questions wrongly refused, with the verifier off and on (README, Answer quality).
-5. **Wrong:** NLI is weak on instructions and the threshold is a trade-off (too high refuses real answers, too low lets invented steps through); the "unsupported" metric uses the same model that filters. Fix: tune the threshold on the tuning split only, add the independent command-word check, and label a sample of steps by hand later.
+1. **What:** after the model answers, check the answer before the user sees it: are the citations real, does the cited text back each point, does the answer address the question, is anything secret or dangerous in it.
+2. **Here:** `src/answer.py` first checks every cited id is in the context and readable by the caller. Then **one** small-LLM call (`src/verify.py` `claim_check`, Groq `gpt-oss-20b`, temperature 0, cached) gets the question, the answer and only the cited excerpts and marks the summary and each point supported / partially_supported / unsupported, plus whether the answer answers the question (yes / partly / no). Unsupported points are dropped; no point left or "no" means "No documented fix found."; "partly" is shown with a note. If the LLM is down, the old NLI scorer (cited text entails the point, or it is mostly copied) checks that answer instead and the fallback is logged. `src/safety.py` withholds answers with secrets/personal data, adds WARNING lines to `kubectl delete`, `DROP TABLE` and Kafka topic deletes.
+3. **Why:** a support answer that sounds right but is invented is worse than "not found"; a dangerous command pasted without a warning can do real harm; and a citation must never point to a document the user cannot open. The NLI model could not be the judge of a strong writer: it scores commands, code and list items near 0 even when copied from the docs, and it saw each step without the question.
+4. **Measure:** `python -m eval.accuracy`: accuracy with the verifier on and off, the `verifier_false_refusal` count (draft correct, shown answer refused), refusal of the unanswerable questions, and wrong claims in shown answers (README, Phase 3).
+5. **Wrong:** the checker can be too strict (drops true points, refuses good drafts) or too lenient (lets an answer to an unanswerable question through). Fix: look at the `claim` / `why` of each point in `eval/results/accuracy_*.json`; if unanswerable questions slip through, tighten the `answers_the_question` rule in the prompt, not the point check. It is another LLM, so it shares blind spots with the writer; the judge is a third model on purpose.
 
 
 ## Stage 3 and 5 revisited: chunking and embedding experiments
@@ -140,3 +140,12 @@ For each stage built: 1. What is it? 2. How does it work here? 3. Why do we need
 3. **Why:** people describe symptoms in words the docs never use ("tables take more disk space" vs "VACUUM, dead tuples"), and a question about Kafka on Kubernetes needs a search in each product.
 4. **Measure:** passage recall, passage MRR and answer-in-context per plan part, plus how often the routing names exactly the right products (Groq 26 of 26, local 3B 88.5%).
 5. **Wrong:** the plan can drift from the question (the local 3B did), HyDE can invent facts that pull in wrong passages, and every plan costs an LLM call (0.7 s Groq, 4.6 s local). Here none of it beat plain search on the strict metric, and the metric itself under-counts (a different chunk of the right page can answer the question), so the next fix is a better judge, not a better rewrite.
+
+
+## Stage 15 (answers): accuracy, the judge and the failure breakdown
+
+1. **What:** measure whether the answers a user sees are *right*, not just whether they are backed by the text they cite. The score is (answerable questions answered correctly + unanswerable questions refused) / all questions.
+2. **Here:** every test question has a few reference `key_points` (what a correct answer must say; "essential" ones decide). `eval/accuracy.py` runs the real pipeline, then `eval/judge.py` asks a different model family (Groq Qwen 27B) which key points the answer states and whether it contains a wrong claim; code turns those flags into correct / partially correct / incorrect. A refusal needs no judge: right for an unanswerable question, a miss for an answerable one. Each wrong answer is put in one bucket: retrieval miss, generation error, verifier false refusal, or unsafe/wrong claim.
+3. **Why:** the earlier "unsupported steps" number used the verifier's own model to grade the verifier, and "not refused" is not "correct". Without a real accuracy number every change is a guess, and the buckets say where to work next.
+4. **Measure:** accuracy with a 95% Wilson interval (21 of 70 is 30.0% with an interval of 20.5-41.5%, about +-10 points), per question type, the buckets, and the judge itself: 30 answers labelled by hand before looking at the judge, agreement on correct-vs-not (96.7% here, required 90%). Run the answer step twice to see the run-to-run spread.
+5. **Wrong:** the judge can be too strict or too loose, and a model grading with a model's labels flatters itself (a human should spot-check some). Reference points can be too literal (`err-21`) or too narrow when a question has several valid fixes (written as "at least one of"). A small set hides differences: one question is 1.4 points. Fix: validate the judge first, keep the failure buckets next to the headline number, never tune on the holdout.

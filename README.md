@@ -11,7 +11,8 @@ public docs. Free and local only (4 GB GPU). Pipeline details: `docs/DATAFLOW.md
 ## How to run
 
 Built: stages 1-6 (ingest, embed, store), 8-11 (search), 12-14 (answer with citations, verifier, output safety) and the
-evals. Question rewriting / product routing / HyDE (7) is built but off (no proven gain). Not built yet: login and input safety (7), UI and API, agentic retry (16).
+evals (retrieval, answer support, and end-to-end answer **accuracy** with a correctness judge). Question rewriting / product routing / HyDE (7) is built but off (no proven gain). Not built yet: login and input safety (7), UI and API, agentic retry (16).
+Accuracy: baseline 30% (local writer), 45% after Phase 2 on the dev subset (82.5% with the verifier off, which Phase 3 fixes); see Results. `docs/IMPROVEMENT_PLAN.md` is the plan.
 
 ```
 python -m venv .venv
@@ -29,20 +30,22 @@ docker compose up -d                            # Qdrant on :6333
 .venv\Scripts\python -m src.index              # embed + store in Qdrant; safe to re-run
 .venv\Scripts\python -m src.search "pod stuck in CrashLoopBackOff" --product kubernetes
 .venv\Scripts\python -m src.answer "pod stuck in CrashLoopBackOff" --role member --licenses kubernetes
-.venv\Scripts\python -m eval.answer --name answer_v7    # verifier off vs on, tuning split
+.venv\Scripts\python -m eval.answer --name answer_v7    # verifier off vs on, tuning split (support only, no correctness)
+.venv\Scripts\python -m eval.accuracy --name baseline  # end-to-end accuracy on the tuning split (judge = Groq qwen3.8-27b; resumable, cached)
+.venv\Scripts\python -m eval.judge --validate          # judge vs my 30 labels (eval/judge_labels.jsonl)
 .venv\Scripts\python -m src.ingest --strategy recursive --size 250 --out chunks_x.jsonl   # chunking experiment, leaves chunks.jsonl alone
 .venv\Scripts\python -m src.index --chunks chunks_x.jsonl --collection exp_x --embedding BAAI/bge-m3 --device cuda --recreate
 .venv\Scripts\python -m eval.run --name x --mode hybrid --collection exp_x --embedding BAAI/bge-m3   # page + passage metrics
-.venv\Scripts\python -m pytest                          # about 10 minutes (loads the models)
+.venv\Scripts\python -m pytest                          # about 16 minutes with Qdrant running (loads the models, searches the real index)
 ```
 
-Copy `.env.example` to `.env` and set `GROQ_API_KEY` (failsafe only).
-Start the LM Studio server and load `qwen2.5-3b-instruct`.
+Copy `.env.example` to `.env` and set `GROQ_API_KEY` (the default answer writer `gpt-oss-120b`, the judge and question drafting of the accuracy eval; only public docs and test questions are sent).
+Start the LM Studio server and load `qwen2.5-3b-instruct` (the failsafe writer).
 `make up | ingest | index | eval | ui` (`make` is not installed on this machine yet).
 
 ## Results
 
-Retrieval, one change at a time. Tuning split, 26 answerable questions, top 10 chunks searched. Every number is
+Retrieval, one change at a time. Tuning split, 26 answerable questions (the original set; the tuning split now has 58, so rerunning `eval.run` gives different numbers), top 10 chunks searched. Every number is
 copied from `eval/results/*.json` by `python -m eval.table` (saved as `eval/results/retrieval_steps.md`); per-question
 before/after lists are in `eval/results/compare_*.md` (`python -m eval.compare <before> <after>`).
 Roles are **simulated** (the docs are public; levels come from `configs/access_rules.yaml`). Rows 0-3 and 4a use role admin
@@ -177,6 +180,263 @@ table: `eval/results/query_plan_hybrid.md`.
   right ephemeral-storage page; both answer the question, but the labelled sentence is a different one on the same page. So 0.64 "answer in context" is
   a floor, not the true retrieval accuracy (page recall@10 is 0.90). Only a correctness judge can tell; that is the next step.
 - The plan code stays in (`query.use: []` in `config.yaml` means plain search); nothing here justifies turning it on yet.
+<!-- accuracy:start -->
+### Answer accuracy: baseline of the current pipeline (Phase 1)
+
+The user's metric: **accuracy = (answerable questions answered correctly + unanswerable questions refused) / all questions.** A judge (Groq
+`qwen/qwen3.8-27b`, a different model family from the answer writer) compares each answer the user would see with the question's reference key
+points (decision D2 in `docs/IMPROVEMENT_PLAN.md`); a partially correct answer does not count as correct. This is the **unchanged** pipeline:
+local Qwen2.5-3B, bge-small, hybrid search, 5 chunks / 8,000 characters, NLI verifier at 0.3 (4 answers fell back to Groq `gpt-oss-120b` after a
+local timeout: see the token table). Tuning split only; the holdout has not been run. `python -m eval.accuracy --name baseline`, copied from
+`eval/results/accuracy_baseline_tune.md`:
+
+**Accuracy: 21/70 = 30.0% (95% CI 20.5-41.5%)** on tune (70 questions: 58 answerable, 12 unanswerable).
+
+| | Verifier on (pipeline as configured) | Verifier off (draft) |
+|---|--:|--:|
+| Accuracy (correct + correctly refused) / all | 30.0% | 40.0% |
+| Answerable answered correctly | 12 of 58 | 27 of 58 |
+| Answerable partially correct (not counted as correct) | 5 of 58 | 10 of 58 |
+| Answerable incorrect | 9 of 58 | 21 of 58 |
+| Answerable refused (false refusals) | 32 of 58 | 0 of 58 |
+| Unanswerable refused (correct) | 9 of 12 | 1 of 12 |
+
+| Question type | n | Correct (verifier on) | Correct (verifier off) |
+|---|--:|--:|--:|
+| error_message | 16 | 5 | 8 |
+| symptom | 17 | 2 | 8 |
+| version | 14 | 5 | 11 |
+| cross_product | 11 | 0 | 0 |
+| unanswerable | 12 | 9 | 1 |
+
+**Failure breakdown** (49 questions not correct, verifier on):
+
+| Category | Questions |
+|---|--:|
+| retrieval_miss | 12 |
+| generation_error | 18 |
+| verifier_false_refusal | 15 |
+| unsafe_or_wrong_claim | 4 |
+
+Of the 18 generation errors, 0 were the model refusing by itself. Evidence fully inside the context for 38 of 58 answerable questions. Shown answers with a wrong or dangerous claim: 6.
+
+| Tokens behind these results | calls | of which cached | prompt | completion | total | spent in this run |
+|---|--:|--:|--:|--:|--:|--:|
+| groq/openai/gpt-oss-120b | 4 | 4 | 7587 | 1259 | 8846 | 0 |
+| groq/qwen/qwen3.8-27b | 84 | 84 | 49776 | 8643 | 58419 | 0 |
+| local/qwen2.5-3b-instruct | 66 | 66 | 124097 | 8040 | 132137 | 0 |
+
+Split: tune. Role: admin. Collection support_docs (BAAI/bge-small-en-v1.5), k_context 5, max_context_chars 8000. Answer providers: {'local': 66, 'groq': 4}. Judge qwen/qwen3.8-27b (prompt v2). Answer salt: (none).
+
+Run to run, with the answer step sampled again (`python -m eval.accuracy --name baseline_run2 --salt run2`; `python -m eval.spread baseline baseline_run2`,
+copied from `eval/results/spread_baseline_vs_baseline_run2.md`; second run in `eval/results/accuracy_baseline_run2_tune.md`):
+
+Same questions (70, tune split), two runs, verifier on:
+
+- `baseline`: 21/70 = 30.0% (95% CI 20.5-41.5%); verifier off: 28/70 = 40.0% (95% CI 29.3-51.7%)
+- `baseline_run2`: 26/70 = 37.1% (95% CI 26.8-48.9%); verifier off: 26/70 = 37.1% (95% CI 26.8-48.9%)
+- difference: 5 questions (7.1 points)
+- same outcome (correct or not) on 63 of 70 questions; correct in both 20, only in `baseline` 1, only in `baseline_run2` 6
+
+| Failure category (verifier on) | `baseline` | `baseline_run2` |
+|---|--:|--:|
+| retrieval_miss | 12 | 11 |
+| generation_error | 18 | 20 |
+| verifier_false_refusal | 15 | 10 |
+| unsafe_or_wrong_claim | 4 | 3 |
+
+Can the judge be trusted? `python -m eval.judge --validate`, copied from `eval/results/judge_validation.md`. The 30 answers were labelled by the
+assistant from the answer, the key points and the source text *before* it saw the judge's verdicts; labels and notes are in `eval/judge_labels.jsonl`.
+A model checking a model overstates reliability, so a human spot-check of about 10 of the 30 is still worth doing.
+
+Judge `qwen/qwen3.8-27b`, prompt v2, against 30 answers labelled by the assistant (docs/IMPROVEMENT_PLAN.md D4).
+
+- Agreement on correct vs not correct: 29/30 = 96.7% (95% CI 83.3-99.4%)
+- Agreement on the exact verdict: 27/30 = 90.0% (95% CI 74.4-96.5%)
+
+| my label -> judge | count |
+|---|--:|
+| correct -> correct | 16 |
+| correct -> incorrect | 1 |
+| incorrect -> incorrect | 8 |
+| partially_correct -> incorrect | 2 |
+| partially_correct -> partially_correct | 3 |
+
+How to read it:
+- **The headline is low, and the judge is not the reason.** The plan guessed 45-55% because it counted every answer that was not refused as correct. Of the
+  answerable questions, the verifier turns many into "No documented fix found." (see the false-refusal row), and many of the shown answers are wrong
+  or incomplete. The judge agrees with the assistant's labels on correct vs not correct for 29 of 30 answers.
+- **The verifier costs accuracy on answerable questions and buys it back on unanswerable ones.** First run: with it on, 9 of 12 unanswerable questions are
+  refused (1 of 12 with it off), but 32 of 58 answerable questions are refused too (second run: 10 of 12 and 29 of 58). The "verifier off" column is the 3B model's draft.
+- **Cross-product questions are the weakest type** (0 of 11 correct in the first run, 1 of 11 in the second) and also the ones where retrieval most often misses one of the two products.
+- **Noise is large.** Two runs of the same pipeline differ by 5 questions (see above), and one question is 1.4 points, so a change has to move the
+  headline by well over 7 points on this split to count. Every later phase is judged against both runs, not the better one.
+- The failure categories are exclusive and checked in this order: verifier_false_refusal (the draft was correct, the verifier's answer is not), retrieval_miss
+  (a labelled page group is missing from the context), unsafe_or_wrong_claim (an unanswerable question was answered, or the judge found a wrong claim in a shown answer), generation_error
+  (the rest). Two `acceptable_pages` entries (`ver-07`, `x-06`) were added after the first baseline; they change the buckets, not the accuracy.
+<!-- accuracy:end -->
+
+<!-- phase2:start -->
+### Answer accuracy after Phase 2: Groq writer, new answer format, wider context
+
+Three changes at once (`docs/DECISIONS.md`, Phase 2), measured on the **dev subset** (40 of the 70 tuning questions, spread over the five types; the other
+30 are still running, see below). The writer is Groq `gpt-oss-120b` (the local Qwen2.5-3B is only the failsafe). It answers in a format with a `kind` (fix /
+explanation / fact / not_found), a short summary and cited points, and reads 10 chunks / 12,000 characters instead of 5 / 8,000. The verifier is **unchanged**
+(the NLI model built for the 3B model); Phase 3 (below) replaces it. `python -m eval.accuracy --name p2_dev --dev`, copied from `eval/results/accuracy_p2_dev_tune.md`:
+
+**Accuracy: 18/40 = 45.0% (95% CI 30.7-60.2%)** on tune (dev subset) (40 questions: 33 answerable, 7 unanswerable).
+
+| | Verifier on (pipeline as configured) | Verifier off (draft) |
+|---|--:|--:|
+| Accuracy (correct + correctly refused) / all | 45.0% | 82.5% |
+| Answerable answered correctly | 11 of 33 | 26 of 33 |
+| Answerable partially correct (not counted as correct) | 1 of 33 | 3 of 33 |
+| Answerable incorrect | 0 of 33 | 3 of 33 |
+| Answerable refused (false refusals) | 21 of 33 | 1 of 33 |
+| Unanswerable refused (correct) | 7 of 7 | 7 of 7 |
+
+| Question type | n | Correct (verifier on) | Correct (verifier off) |
+|---|--:|--:|--:|
+| error_message | 9 | 4 | 9 |
+| symptom | 10 | 2 | 7 |
+| version | 8 | 5 | 8 |
+| cross_product | 6 | 0 | 2 |
+| unanswerable | 7 | 7 | 7 |
+
+The writer's own `coverage` flag against the draft (verifier off; unanswerable questions count as correct when refused):
+
+| Writer says | Questions | Draft correct |
+|---|--:|--:|
+| full | 28 | 24 |
+| partial | 4 | 2 |
+| none | 8 | 7 |
+
+**Failure breakdown** (22 questions not correct, verifier on):
+
+| Category | Questions |
+|---|--:|
+| retrieval_miss | 2 |
+| generation_error | 5 |
+| verifier_false_refusal | 15 |
+| unsafe_or_wrong_claim | 0 |
+
+Of the 5 generation errors, 1 were the model refusing by itself. Evidence fully inside the context for 25 of 33 answerable questions. Shown answers with a wrong or dangerous claim: 0.
+
+| Tokens behind these results | calls | of which cached | prompt | completion | total | spent in this run |
+|---|--:|--:|--:|--:|--:|--:|
+| groq/openai/gpt-oss-120b | 40 | 40 | 131804 | 9413 | 141217 | 0 |
+| groq/qwen/qwen3.8-27b | 44 | 44 | 27570 | 3606 | 31176 | 0 |
+
+Split: tune. Role: admin. Collection support_docs (BAAI/bge-small-en-v1.5), k_context 10, max_context_chars 12000, max_section_chars 2000. Answer LLM groq (reasoning_effort low). Answer providers: {'groq': 40}. Judge qwen/qwen3.8-27b (prompt v2). Answer salt: (none).
+
+The same 40 questions, baseline vs Phase 2 (`python -m eval.spread baseline p2_dev --dev`, copied from `eval/results/spread_baseline_vs_p2_dev_dev.md`):
+
+Same questions (40, the dev subset, tune split), two runs, verifier on:
+
+- `baseline`: 11/40 = 27.5% (95% CI 16.1-42.8%); verifier off: 17/40 = 42.5% (95% CI 28.5-57.8%)
+- `p2_dev`: 18/40 = 45.0% (95% CI 30.7-60.2%); verifier off: 33/40 = 82.5% (95% CI 68.0-91.3%)
+- difference: 7 questions (17.5 points)
+- same outcome (correct or not) on 31 of 40 questions; correct in both 10, only in `baseline` 1, only in `p2_dev` 8
+
+| Failure category (verifier on) | `baseline` | `p2_dev` |
+|---|--:|--:|
+| retrieval_miss | 6 | 2 |
+| generation_error | 11 | 5 |
+| verifier_false_refusal | 10 | 15 |
+| unsafe_or_wrong_claim | 2 | 0 |
+
+How much of the labelled evidence reaches the writer, by context size (`python -m eval.run --k-context K --max-context-chars C --max-section-chars S`, then
+`python -m eval.ctx_sweep`; no LLM involved; copied from `eval/results/context_sweep.md`; passage level, so strict):
+
+| k_context | max_context_chars | max_section_chars | ctx_recall (all) | ctx_recall (cross_product) |
+|--:|--:|--:|--:|--:|
+| 5 | 8000 | 2800 | 0.716 | 0.318 |
+| 6 | 10000 | 2000 | 0.767 | 0.318 |
+| 8 | 10000 | 2000 | 0.767 | 0.318 |
+| 8 | 10000 | 2800 | 0.733 | 0.318 |
+| 8 | 12000 | 1500 | 0.724 | 0.364 |
+| 8 | 12000 | 2000 | 0.784 | 0.409 |
+| 10 | 10000 | 1500 | 0.707 | 0.273 |
+| 10 | 10000 | 2000 | 0.750 | 0.318 |
+| 10 | 12000 | 1500 | 0.724 | 0.364 |
+| 10 | 12000 | 2000 | 0.810 | 0.455 |
+
+How to read it:
+- **The writer was the main limit.** With the verifier off, 33 of 40 answers are correct (the baseline's draft: 17 of 40), and the writer refuses all 7 unanswerable
+  questions by itself. The judge found no wrong or dangerous claim in any shown answer.
+- **With the old verifier on, accuracy is 45.0%, not 82.5%**: the NLI verifier refuses most of the good drafts (`verifier_false_refusal`), so the pipeline as configured
+  is held back by its own check. That is what Phase 3 (an LLM claim check) is for; the "verifier off" column is not a shippable number because nothing then stops an invented claim.
+- **Cross-product is still the weak type** and, with the new context, most of what is left besides the verifier is retrieval and a few generation errors.
+- 40 questions give a wide interval (about +-14 points), and the baseline had a 7-point run-to-run spread; the 82.5% vs 42.5% gap is far outside both, the 45.0% vs 27.5% gap is not by much.
+- **Not run:** `reasoning_effort: medium` (would cost another day of the 120b quota; `low` is in use), and the full 70-question tuning split (about 250k tokens, more than the 200k/day limit; it is
+  running with `python -m eval.accuracy --name p2 --wait` and fills in as the quota window rolls over: `python -m eval.spread baseline p2` then compares the two on all 70).
+<!-- phase2:end -->
+
+<!-- phase3:start -->
+### Answer accuracy after Phase 3: LLM claim check instead of the NLI verifier
+
+Only the verifier changed (`docs/DECISIONS.md`, Phase 3). The NLI model is replaced by one Groq `gpt-oss-20b` call per answer that sees the question, the answer and only the
+cited excerpts, and marks the summary and every point supported / partially supported / unsupported and whether the answer answers the question. Unsupported points are dropped;
+the answer is refused if no point is left or it does not answer the question. The 120b answers are the cached ones from the Phase 2 dev run, so the writer is identical.
+`python -m eval.accuracy --name p3_dev --dev`, copied from `eval/results/accuracy_p3_dev_tune.md`:
+
+**Accuracy: 33/40 = 82.5% (95% CI 68.0-91.3%)** on tune (dev subset) (40 questions: 33 answerable, 7 unanswerable).
+
+| | Verifier on (pipeline as configured) | Verifier off (draft) |
+|---|--:|--:|
+| Accuracy (correct + correctly refused) / all | 82.5% | 82.5% |
+| Answerable answered correctly | 26 of 33 | 26 of 33 |
+| Answerable partially correct (not counted as correct) | 3 of 33 | 3 of 33 |
+| Answerable incorrect | 3 of 33 | 3 of 33 |
+| Answerable refused (false refusals) | 1 of 33 | 1 of 33 |
+| Unanswerable refused (correct) | 7 of 7 | 7 of 7 |
+
+| Question type | n | Correct (verifier on) | Correct (verifier off) |
+|---|--:|--:|--:|
+| error_message | 9 | 9 | 9 |
+| symptom | 10 | 7 | 7 |
+| version | 8 | 8 | 8 |
+| cross_product | 6 | 2 | 2 |
+| unanswerable | 7 | 7 | 7 |
+
+The writer's own `coverage` flag against the draft (verifier off; unanswerable questions count as correct when refused):
+
+| Writer says | Questions | Draft correct |
+|---|--:|--:|
+| full | 28 | 24 |
+| partial | 4 | 2 |
+| none | 8 | 7 |
+
+**Failure breakdown** (7 questions not correct, verifier on):
+
+| Category | Questions |
+|---|--:|
+| retrieval_miss | 2 |
+| generation_error | 3 |
+| verifier_false_refusal | 0 |
+| unsafe_or_wrong_claim | 2 |
+
+Of the 3 generation errors, 1 were the model refusing by itself. Evidence fully inside the context for 25 of 33 answerable questions. Shown answers with a wrong or dangerous claim: 3.
+
+| Tokens behind these results | calls | of which cached | prompt | completion | total | spent in this run |
+|---|--:|--:|--:|--:|--:|--:|
+| groq/openai/gpt-oss-120b | 40 | 40 | 131804 | 9413 | 141217 | 0 |
+| groq/openai/gpt-oss-20b | 32 | 0 | 48508 | 5137 | 53645 | 53645 |
+| groq/qwen/qwen3.8-27b | 64 | 61 | 41133 | 5453 | 46586 | 2124 |
+
+Split: tune. Role: admin. Collection support_docs (BAAI/bge-small-en-v1.5), k_context 10, max_context_chars 12000, max_section_chars 2000. Answer LLM groq (reasoning_effort low). Answer providers: {'groq': 40}. Verifier: llm (openai/gpt-oss-20b), used for: {'llm': 32, '': 8}. Judge qwen/qwen3.8-27b (prompt v2). Answer salt: (none).
+
+Phase 2 against Phase 3 on the same 40 questions (`python -m eval.spread p2_dev p3_dev --dev`, `eval/results/spread_p2_dev_vs_p3_dev_dev.md`): 45.0% -> 82.5%; `verifier_false_refusal` 15 -> 0.
+
+How to read it:
+- **The verifier is no longer the bottleneck**: with the claim check on, accuracy equals the verifier-off draft (82.5%), all 7 unanswerable questions are still refused, and no good answer is lost.
+- **It also changed almost nothing**: of 95 checked claims 87 were supported, 5 partially and 3 unsupported; 3 of the 40 shown answers differ from the draft, none was a net gain or loss in correctness.
+  It did not stop the 3 shown answers the judge calls wrong (`sym-02`, `sym-15`, `x-04`): the checker marked their claims supported (`x-04`: partially supported, kept), while the judge finds them wrong for the question. Why was not investigated.
+- **The refusal rule was not stress-tested**: the writer refused all 7 unanswerable questions by itself, so `answers_the_question: no` never had to stop a made-up answer here. That needs a test where the writer does answer.
+- What is left is the writer and retrieval: 2 `retrieval_miss`, 3 `generation_error` and 2 wrong claims, mostly cross-product (2 of 6 correct) and symptom questions. Phase 4 targets these.
+- 40 questions: +-14 points. Tokens: 54k on the 20b bucket for 32 checks (about 1.7k each).
+<!-- phase3:end -->
+
 ### Answer quality: verifier off vs on
 
 `python -m eval.answer --name answer_v8_small --collection exp_fixed500_small --embedding BAAI/bge-small-en-v1.5` (copied from
@@ -227,12 +487,16 @@ In production the levels would come from the company's own docs metadata instead
 
 ## Evaluation
 
-Test set: `eval/questions.jsonl`, 40 questions (10 exact error messages, 10 symptoms, 8 versions, 6 across
-products, 6 the docs cannot answer), all marked `verified=true` after human review. 30 are for tuning, 10 are a holdout
-for the final run only (`python -m eval.run --final --name final`). Each answerable question lists the right page(s),
-the section and a verbatim quote. Scoring is page-level: Recall@k = share of required page groups found in the top-k
-chunks; MRR = 1 / rank of the first chunk from a correct page (top 10 searched). The 4 unanswerable tuning questions
-have no correct page, so they are skipped here; they matter once refusing is built.
+Test set: `eval/questions.jsonl`, **104 questions**: 24 exact error messages, 24 symptoms, 20 versions/facts, 16 across
+products, 20 the docs cannot answer. **70 are for tuning** (58 answerable, 12 unanswerable) and **34 are a holdout** for the final run only
+(`python -m eval.accuracy --final --name final`). A fixed 40-question **dev subset** of the tuning split (`"dev": true`) is for quick runs.
+The first 40 questions were written and reviewed by a human; the 64 added in Phase 1 and all the key points of the tuning split were drafted by
+Groq models and then checked against their source text and edited by the assistant (`verified_by: "assistant"`, with a `verify_note`; decision D4 in
+`docs/IMPROVEMENT_PLAN.md`). A human has not re-checked them; the judge validation below has the same limit. The 10 original holdout questions are
+untouched and still lack key points (they get them before the final run).
+Each answerable question lists the right page(s), the section and a verbatim quote (used by the retrieval metrics: Recall@k = share of required
+page groups found in the top-k chunks; MRR = 1 / rank of the first chunk from a correct page), and for the answer accuracy metric 1-4 reference
+`key_points` (each essential or optional) and `acceptable_pages`. Unanswerable questions name a tool that occurs nowhere in the corpus (checked by a test).
 
 Ingest output (from `data/processed/ingest_report.json`, run 2026-10-18):
 

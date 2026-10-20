@@ -25,7 +25,7 @@ import time
 from pathlib import Path
 
 from src.access import Principal
-from src.answer import finalize, generate
+from src.answer import Draft, answer_cfg, finalize, generate
 from src.context import build_context
 from src.llm import LLMClient, load_config
 
@@ -57,7 +57,8 @@ def main():
 
     from src.search import search
 
-    cfg = load_config()
+    cfg = answer_cfg(load_config())
+    cfg["verify"] = {**cfg["verify"], "method": "nli"}  # this eval measures the NLI verifier (Phase 1-2 numbers); the LLM check is measured by eval.accuracy
     if a.collection:
         cfg["qdrant"]["collection"] = a.collection
     if a.embedding:
@@ -79,13 +80,14 @@ def main():
         t0 = time.perf_counter()
         hits = search(q["question"], k=cfg["retrieval"]["k_context"], principal=who, cfg=cfg)
         items = build_context(hits, who, cfg)
-        steps, refused, provider = generate(q["question"], items, cfg, llm) if items else ([], True, "")
+        draft, refused, provider = generate(q["question"], items, cfg, llm) if items else (Draft("not_found", "none", "", "", []), True, "")
+        steps = draft.steps
         gen_s = time.perf_counter() - t0
         ctx_text = "\n".join(it["text"] for it in items)
         row = {"id": q["id"], "type": q["type"], "answerable": q["expected"] == "answer", "provider": provider,
                "drafted_steps": len(steps), "seconds": round(gen_s, 1)}
         for mode, verify in (("off", False), ("on", True)):
-            ans = finalize(q["question"], items, copy.deepcopy(steps), refused, provider, who, cfg, verify)
+            ans = finalize(q["question"], items, copy.deepcopy(draft), refused, provider, who, cfg, verify)
             scored = ans.checked if verify else None
             row[mode] = {
                 "refused": ans.refused, "blocked": ans.blocked, "steps_shown": len(ans.steps),

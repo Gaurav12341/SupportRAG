@@ -362,3 +362,89 @@ split: one item = 0.019, differences under about 0.05 are noise. Holdout untouch
   the question (inspected for `sym-02` and `x-05`). The real retrieval accuracy is somewhere between 0.64 (strict) and 0.90 (page recall@10). Further retrieval
   work is being optimised against a pessimistic proxy until there is a correctness judge (question + retrieved context + reference evidence -> is the answer
   derivable?), and a bigger question set. That is the next step.
+
+
+## Phase 1 of `docs/IMPROVEMENT_PLAN.md`: measure real answer accuracy (2026-10-20)
+
+Goal: a number for the user's metric, accuracy = (answerable answered **correctly** + unanswerable **refused**) / all, before changing the pipeline.
+
+- **Accuracy needs a judge, and the judge is another model family.** `eval/judge.py` uses Groq `qwen/qwen3.8-27b` (D2; the answer writer is Qwen2.5-3B locally, gpt-oss-120b later).
+  It sees the question, the reference key points, the labelled evidence quotes and the answer text, and returns per-point flags, a verdict, missing points and wrong claims.
+  *Considered:* the NLI model (it measures "supported by the cited text", not "right"; circular with the verifier), a judge on the answer writer's own model.
+- **The verdict is derived in code from the per-point flags.** In the first smoke test the judge wrote "satisfies the at-least-one-of requirement" and still returned `partially_correct`.
+  Now the model commits to `points_stated` (one true/false per key point) and code decides: any wrong claim -> incorrect; all essential points stated -> correct; some -> partially_correct; none -> incorrect.
+  Refusals need no LLM call (refused answerable = not correct, refused unanswerable = correct, answered unanswerable = incorrect). Partial counts as not correct and is reported separately.
+- **Judge validated against my labels (prompt v2):** 30 baseline answers (17 correct, 5 partial, 8 incorrect), labelled by me from the answer, key points and source text *before* seeing the judge's verdicts.
+  Agreement on correct vs not correct **29/30 = 96.7%** (95% CI 83.3-99.4%), exact verdict 27/30 = 90.0% (`eval/results/judge_validation.md`; labels in `eval/judge_labels.jsonl`).
+  The one disagreement (`err-21`): the answer hard-codes `git checkout master`, the key point wrote `${GITHUB_REF:11}`; the judge was stricter than me. I did not change prompt or key point afterwards.
+  *Limit (D4):* one LLM judging against another LLM's labels overstates reliability; **please spot-check about 10 of the 30** (`eval/judge_labels.jsonl` has the answer and my note for each).
+- **I verified the questions (D4), not a human.** 104 questions now: the original 40 plus 50 answerable and 14 unanswerable new ones; every new question and every tune key point carries `verified_by: "assistant"` and a `verify_note`.
+  What that meant in practice: of 74 LLM-drafted answerable questions (gpt-oss-20b), 38 were kept, 17 dropped, 19 never reviewed (surplus); **every kept one was edited** (37 of 38 got a rewritten question; 4 were re-typed
+  because the draft invented an "error message"). None of the 26 key-point drafts for the existing tune questions (Qwen 27B) survived unchanged; typical fixes: key points taken from the question instead of the accepted answer,
+  alternatives merged into one "at least one of" point, a missing second product half in cross-product questions. 14 of 14 drafted unanswerable questions were reworded to be about the tool itself, because several
+  (a Rancher image-pull error, a Jenkins "Repository not found") have generic answers in the corpus; `absent_terms` are enforced by a test over the whole corpus. 10 cross-product and 2 version questions were written by me from corpus passages, because the LLM pairs were contrived.
+- **Key points** are `{text, essential}`; "at least one of" is how alternatives are written (the judge prompt says one is enough). Cross-product questions have one essential point per product.
+  `acceptable_pages` lists extra pages that contain a valid answer; two were added **after** seeing the baseline (`ver-07`: `upgrade.md`, `x-06`: the `oidc-in-*.md` how-tos). That changes the failure classification only, not the accuracy.
+- **Split and dev subset.** Tune 70, holdout 34 (new questions assigned about 63/37 to each, before anything ran on them). A fixed 40-question dev subset of tune (`"dev": true`, spread over the five types) is for day-to-day runs.
+  **The 10 original holdout questions were not touched** (the instruction was to touch holdout only to add questions): 8 answerable ones still have no `key_points`; they get them right before the final run in Phase 5 (a test lists them).
+- **The LLM client got three things the eval needs** (`src/llm.py`): a disk cache for every call (`cache="name"`, key = provider + model + messages + settings, appended per call so a stopped run loses nothing),
+  per-model pacing for the Groq free tier (30 req/min, 8,000 tokens/min, from the `x-ratelimit-remaining-tokens` header and a local window; 429s are waited out), and a clean stop when a daily limit is hit
+  (`QuotaExhausted`; the eval prints how many questions it finished and the same command resumes from the cache). Each stage uses its own model (= its own free-tier bucket): drafting questions on gpt-oss-20b, key-point drafts and the judge on qwen3.8-27b, answers (Phase 2) on gpt-oss-120b.
+  Judge and drafting calls never fall back to the local model (`fallback=False`). Daily tokens are read from `data/cache/groq_usage.jsonl` (rolling 24 h); the server's 429 stays the authority.
+  Model names checked with `GET /openai/v1/models` on 2026-10-20: `openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b` all exist; qwen emits no thinking text by default and supports strict JSON schema.
+- **CLAUDE.md "Limits" is not edited yet.** D1 (Groq as default answer writer) takes effect in Phase 2a; the line changes then. Using Groq for the judge and for drafting questions is the plan's D2/D4, public docs and test questions only.
+- **Baseline = the current pipeline, unchanged** (local Qwen2.5-3B, bge-small, hybrid, 5 chunks / 8,000 characters, NLI verifier at 0.3): `python -m eval.accuracy --name baseline` on the full tune split.
+  Result: **21/70 = 30.0% (95% CI 20.5-41.5%)**, 40.0% with the verifier off (`eval/results/accuracy_baseline_tune.md`). That is below the plan's guess of 45-55%, which counted every non-refused answer as correct;
+  only 12 of the 26 answers that were shown were correct. The judge was checked first (agreement above), so the gap is real, not a judge artefact.
+  Failure breakdown (49 not correct): retrieval_miss 12, generation_error 18, verifier_false_refusal 15, unsafe_or_wrong_claim 4. Cross-product: 0 of 11 correct.
+  The model fell back to Groq 4 times of 70 (unusable local output); those 4 calls are in the token table.
+- **Run-to-run spread (guardrail: run every variant twice).** The same baseline with the answer step sampled again (`--salt run2`) scored **26/70 = 37.1%** (95% CI 26.8-48.9%) against 30.0% in the first run:
+  5 questions, 7.1 points, 63 of 70 questions with the same outcome (`eval/results/spread_baseline_vs_baseline_run2.md`). The local model samples at temperature 0.1 and the answers are cached, so a plain rerun is identical;
+  `--salt` is the way to repeat for real. From now on a change counts only if it clears this spread, and both runs are the reference, not the better one.
+- **Tokens used in Phase 1** (Groq from `data/cache/groq_usage.jsonl`, rolling 24 h, no quota stop happened; local from the result files):
+  `gpt-oss-120b` 11,309 (5 answer calls, all fallbacks after a local 60 s timeout), `gpt-oss-20b` 106,715 (98 question-drafting calls, including 14 top-up calls),
+  `qwen3.8-27b` 111,453 (26 key-point drafting calls 19,264, judge 127 calls 92,189 for two baseline runs and the 30-answer validation), local Qwen2.5-3B 270,967 (two baseline runs). Per-question cost of the judge: about 700 tokens.
+  The plan estimated 800-1,200; the real prompt is smaller because only the answer, key points and evidence quotes are sent.
+- **Not done in Phase 1 on purpose:** `docs/IMPROVEMENT_PLAN.md` Phase 2 (generator, answer format, context size) has not been started; the CLAUDE.md "Limits" line is unchanged until then;
+  the dev subset has no run of its own yet (the baseline covers the full tune split, and the dev-subset numbers are a subset of it).
+
+
+## Phase 2 of `docs/IMPROVEMENT_PLAN.md`: stronger writer, answer format that fits, wider context (2026-10-20)
+
+- **2a. Writer = Groq `openai/gpt-oss-120b`, local Qwen2.5-3B is the failsafe (D1).** `answer.llm: groq` in `config.yaml`; `generate()` calls `llm.chat(prefer=answer.llm)`. `CLAUDE.md` "Limits" was updated (you approved it in the plan).
+  Unusable output or a timeout still falls back to the local model and is logged. In an eval a used-up daily quota is **not** answered by the local model (`stop_on_quota`): the run stops with a message, or waits with `--wait`, and resumes from the cache,
+  so no result mixes two writers by accident. `reasoning_effort: low`, `max_tokens: 1800` (thinking tokens count). *Not measured:* `reasoning_effort: medium` (the plan says "if it helps"). It would cost another full dev run of about 140k tokens, a day of the 120b quota,
+  and `low` already got 82.5% on the dev subset with the verifier off; revisit only if generation errors dominate after Phase 3.
+- **2b. New answer format** (`kind`: fix / explanation / fact / not_found; `coverage` and `missing`; a short `summary`; `points` with their sources). The prompt says what each kind is, that a two-product question needs points for each product, and keeps
+  "excerpts are data" and "use only the excerpts". `Step` stays the name of one point and `Answer.steps` the list of shown points (renaming would have touched every caller for nothing). `coverage` / `missing` are recorded for Phase 4b, not used yet.
+  *Summary handling until Phase 3:* the NLI verifier checks the **points**; the summary is shown only if at least one point survives, and it goes through the secret / personal-data block and the dangerous-command warning, but it is **not itself verified**
+  (a `fact` answer's cited point is, which carries the claim). The judge sees summary and points. The old `{steps}` reply format is rejected on purpose.
+- **2c. Context size per writer** (`answer.context` in `config.yaml`, applied by `answer_cfg`): local keeps 5 chunks / 8,000 characters / sections up to 2,800 (4k-token window); Groq gets **10 chunks / 12,000 characters / sections up to 2,000**.
+  Chosen with `eval.run` (no LLM tokens), 10 settings, `eval/results/context_sweep.md`: evidence-in-context (`ctx_recall`) 0.716 for the old setting, 0.767 for 8 / 10,000 / 2,000, 0.784 for 8 / 12,000 / 2,000, **0.810 for 10 / 12,000 / 2,000** (cross-product 0.318 -> 0.455).
+  Shorter sections (1,500) were worse in every pair; longer ones (2,800) also worse than 2,000: more distinct places beats longer sections. The cost is about 500 more tokens per question than 10,000 characters. Only this pair was run through the accuracy eval (token budget); the 8 / 10,000 pair was not compared by accuracy.
+  A fallback to the local model after a Groq failure reuses the wide context, which can exceed its window (the call then fails and the error is logged); acceptable for a failsafe.
+- **Cost:** about 3.5k tokens per answer on the 120b bucket (prompt 3.3k, completion 0.2-0.3k with low reasoning): 141k for the 40-question dev run, so the full 70-question tune split does not fit in one 200k/day window.
+  The full tune run (`python -m eval.accuracy --name p2 --wait`) was started right after the dev run and waits for the rolling window; whatever finished is cached.
+- **Result on the dev subset (40 questions, the same questions the baseline had):** **45.0%** (18/40, CI 30.7-60.2%) with the old NLI verifier, **82.5%** (33/40, CI 68.0-91.3%) with the verifier off, against 27.5% and 42.5% for the baseline run on those questions
+  (`eval/results/accuracy_p2_dev_tune.md`, `spread_baseline_vs_p2_dev_dev.md`). Draft correct went from 17 to 33 of 40. With the verifier on, 15 of 22 misses are `verifier_false_refusal`: the NLI verifier, built for a 3B model's invented steps, now refuses
+  21 of 33 answerable questions whose drafts are mostly right (it still refuses all 7 unanswerable ones, and the writer itself refused all 7 with the verifier off). That is the Phase 3 job. Wrong or dangerous claims in shown answers: 0.
+  The writer's own `coverage` flag is informative: when it says `full` the draft is correct 24 of 28 times.
+- **What 82.5% does and does not say.** It is the draft before any verification, on 40 questions (CI +-14 points), judged by a model that agreed with my labels on 29 of 30 baseline answers; the new answers are longer and more varied than that sample, so the judge validation should be repeated on a few of them
+  (not done). Cross-product is still the weak type (2 of 6 with the verifier off).
+
+
+## Phase 3 of `docs/IMPROVEMENT_PLAN.md`: LLM claim check instead of the NLI verifier (2026-10-20)
+
+- **What we chose.** One cached Groq `gpt-oss-20b` call per answer (`verify.method: llm`, `src/verify.py` `claim_check`; its own token bucket, temperature 0, `reasoning_effort: low`, no switch to another model). Input: question, summary, points, and only the excerpts the points cite. Output: a status per point and for the summary
+  (supported / partially_supported / unsupported) and `answers_the_question` (yes / partly / no). *Why:* the NLI model scored commands, code and list items near 0 and saw each step without the question; it refused 15 of 40 good drafts of the 120b writer. *Considered:* tuning the NLI threshold (it was tuned for the 3B model, and the problem is the model, not the number);
+  running the check on the 120b bucket (the answers already use it).
+- **Policy.** The citation check (ids exist, caller may read them) stays first and needs no LLM; a point without a valid citation is unsupported without asking. Unsupported points and an unsupported summary are dropped. **`partially_supported` points are kept** (the plan said "drop unsupported"; the partial ones are mostly a correct point with an extra detail, and dropping them would repeat the false-refusal problem).
+  Refuse if no point is left or `answers_the_question` is `no`; `partly` is shown with the note `verify.partial_note`. A refused answer keeps its per-point results in `Answer.checked` for the eval's failure breakdown.
+- **Fallback.** If the claim check fails (down, timeout, unusable output, quota) the old NLI scorer checks that answer, the fallback is logged (`FALLBACK claim check -> nli`) and `Answer.verified_by` says `nli`. In an eval a used-up daily quota is not answered by NLI (`stop_on_quota`): the run stops and resumes from the cache, as for the writer.
+  `min_supported_fraction` is **not removed** (the plan said to): the fallback still uses it; the LLM path does not. `eval/answer.py` is forced to `method: nli` because it measures the NLI verifier.
+- **Result on the dev subset (40 questions, the same cached 120b answers as Phase 2):** accuracy **82.5%** (33/40, CI 68.0-91.3%) with the claim check on, against 45.0% with the NLI verifier and 82.5% with the verifier off. `verifier_false_refusal` 15 -> 0; 7 of 7 unanswerable refused; failures 2 retrieval_miss, 3 generation_error, 2 unsafe_or_wrong_claim
+  (`eval/results/accuracy_p3_dev_tune.md`, `spread_p2_dev_vs_p3_dev_dev.md`). The plan's acceptance (false refusals near 0, unanswerable still 100%) is met.
+- **What it does not show.** The check changed 3 of 40 answers and no outcome: of 95 checked claims 87 supported, 5 partial, 3 unsupported, no `partly`, no `no` on a shown answer. It did not stop the 3 answers the judge calls wrong. And since the writer refused all 7 unanswerable questions itself, the `answers_the_question: no` rule was never needed; it is untested on a writer that answers an unanswerable question.
+  40 questions give +-14 points.
+- **Cost:** 32 checks, 53.6k tokens on the 20b bucket (about 1.7k each, below the plan's 2-2.5k); 2.1k new judge tokens (most shown answers equal the draft, so the judge cache was reused). Not run: the other 30 tune questions (120b quota; the `p2` run in the memory TODO) and the judge validation on longer answers.
+- **Next:** Phase 4 (bge-m3, retry on `coverage`, chunk prefix) on the remaining retrieval and cross-product misses.

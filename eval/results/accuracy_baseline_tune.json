@@ -1,0 +1,4937 @@
+{
+  "meta": {
+    "split": "tune",
+    "dev": false,
+    "role": "admin",
+    "collection": "support_docs",
+    "embedding": "BAAI/bge-small-en-v1.5",
+    "k_context": 5,
+    "max_context_chars": 8000,
+    "providers": {
+      "local": 66,
+      "groq": 4
+    },
+    "judge": "qwen/qwen3.8-27b",
+    "salt": "",
+    "prefer": "local",
+    "min_nli_entailment": 0.3,
+    "min_supported_fraction": 0.5,
+    "tokens_spent_in_this_run": {
+      "local/qwen2.5-3b-instruct": {
+        "calls": 66,
+        "cached_calls": 66,
+        "prompt_tokens": 124097,
+        "completion_tokens": 8040,
+        "total_tokens": 132137,
+        "fresh_total_tokens": 0
+      },
+      "groq/qwen/qwen3.8-27b": {
+        "calls": 84,
+        "cached_calls": 84,
+        "prompt_tokens": 49776,
+        "completion_tokens": 8643,
+        "total_tokens": 58419,
+        "fresh_total_tokens": 0
+      },
+      "groq/openai/gpt-oss-120b": {
+        "calls": 4,
+        "cached_calls": 4,
+        "prompt_tokens": 7587,
+        "completion_tokens": 1259,
+        "total_tokens": 8846,
+        "fresh_total_tokens": 0
+      }
+    }
+  },
+  "summary": {
+    "n": 70,
+    "answerable": 58,
+    "unanswerable": 12,
+    "on": {
+      "correct": 21,
+      "accuracy": 0.3,
+      "ci95": [
+        0.2053645673851015,
+        0.4154453825618119
+      ],
+      "answerable_correct": 12,
+      "answerable_partially_correct": 5,
+      "answerable_incorrect": 9,
+      "answerable_refused": 32,
+      "unanswerable_refused": 9
+    },
+    "off": {
+      "correct": 28,
+      "accuracy": 0.4,
+      "ci95": [
+        0.2933408057355693,
+        0.5170641692378874
+      ],
+      "answerable_correct": 27,
+      "answerable_partially_correct": 10,
+      "answerable_incorrect": 21,
+      "answerable_refused": 0,
+      "unanswerable_refused": 1
+    },
+    "by_type": {
+      "error_message": {
+        "n": 16,
+        "correct": 5,
+        "correct_verifier_off": 8
+      },
+      "symptom": {
+        "n": 17,
+        "correct": 2,
+        "correct_verifier_off": 8
+      },
+      "version": {
+        "n": 14,
+        "correct": 5,
+        "correct_verifier_off": 11
+      },
+      "cross_product": {
+        "n": 11,
+        "correct": 0,
+        "correct_verifier_off": 0
+      },
+      "unanswerable": {
+        "n": 12,
+        "correct": 9,
+        "correct_verifier_off": 1
+      }
+    },
+    "failures": {
+      "verifier_false_refusal": 15,
+      "generation_error": 18,
+      "retrieval_miss": 12,
+      "unsafe_or_wrong_claim": 4
+    },
+    "generation_error_model_refused": 0,
+    "wrong_claim_shown": 6,
+    "evidence_in_context_all": 38
+  },
+  "tokens": {
+    "local/qwen2.5-3b-instruct": {
+      "calls": 66,
+      "cached_calls": 66,
+      "prompt_tokens": 124097,
+      "completion_tokens": 8040,
+      "total_tokens": 132137,
+      "fresh_total_tokens": 0
+    },
+    "groq/qwen/qwen3.8-27b": {
+      "calls": 84,
+      "cached_calls": 84,
+      "prompt_tokens": 49776,
+      "completion_tokens": 8643,
+      "total_tokens": 58419,
+      "fresh_total_tokens": 0
+    },
+    "groq/openai/gpt-oss-120b": {
+      "calls": 4,
+      "cached_calls": 4,
+      "prompt_tokens": 7587,
+      "completion_tokens": 1259,
+      "total_tokens": 8846,
+      "fresh_total_tokens": 0
+    }
+  },
+  "per_question": [
+    {
+      "id": "err-01",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "postgres/auth-password.html",
+        "stackoverflow/10845998",
+        "stackoverflow/2942485",
+        "stackoverflow/9736085"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 8,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 8,
+        "answer": "1. cd /etc/postgresql-9.1/\n2. cp pg_hba.conf pg_hba.conf-backup\n3. local all all trust\n4. sudo /etc/init.d/postgresql restart\n5. psql -U postgres\n6. ALTER USER postgres with password 'my_secure_password';\n7. cp pg_hba.conf-backup pg_hba.conf\n8. sudo /etc/init.d/postgresql restart",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly outlines the steps to edit pg_hba.conf for trust authentication, restart the server, reset the password, and restore the original configuration, matching all essential and optional key points.",
+          "points_stated": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 8,
+        "answer": "1. cd /etc/postgresql-9.1/\n2. cp pg_hba.conf pg_hba.conf-backup\n3. local all all trust\n4. sudo /etc/init.d/postgresql restart\n5. psql -U postgres\n6. ALTER USER postgres with password 'my_secure_password';\n7. cp pg_hba.conf-backup pg_hba.conf\n8. sudo /etc/init.d/postgresql restart",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly outlines the steps to edit pg_hba.conf for trust authentication, restart the server, reset the password, and restore the original configuration, matching all essential and optional key points.",
+          "points_stated": [
+            true,
+            true,
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1862,
+          "completion_tokens": 177,
+          "total_tokens": 2039,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1246,
+          "completion_tokens": 162,
+          "total_tokens": 1408,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 29.9
+    },
+    {
+      "id": "err-03",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "postgres/hot-standby.html",
+        "stackoverflow/14592436"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Start a repeatable read transaction on the primary server and run a dummy query, then sit idle.\n2. On the standby server, set the `max_standby_archive_delay` or `max_standby_streaming_delay` parameters to a higher value if needed. This will allow longer delays in WAL application without forcing query cancellation.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [
+            "set hot_standby_feedback on the standby"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer provides two of the three valid solutions (repeatable read transaction and max_standby_streaming_delay) but omits the primary recommended solution (hot_standby_feedback) and incorrectly suggests max_standby_archive_delay which is not the standard parameter for streaming replication conflicts.",
+          "points_stated": [
+            false,
+            true,
+            false
+          ],
+          "corrected": true,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1397,
+          "completion_tokens": 98,
+          "total_tokens": 1495,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 610,
+          "completion_tokens": 106,
+          "total_tokens": 716,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.6
+    },
+    {
+      "id": "err-04",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/concepts/configuration/manage-resources-containers.md",
+        "kubernetes/concepts/workloads/pods/pod-lifecycle.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. ```shell\nkubectl describe pod simmemleak-hra99\ncurl -s https://raw.githubusercontent.com/Saadali/simmemleak/master/README.md | grep 'OOMKilled'\n```\nto check the details and find more information about OOMKilled reason, including how to fix it.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Reason OOMKilled / exit code 137 means the container tried to use more memory than its limit",
+            "Check the application code for a memory leak, or if it behaves as expected set a higher memory limit (and possibly request) for the container"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer does not explain the meaning of OOMKilled/exit code 137 nor provide the required troubleshooting steps (checking for memory leaks or adjusting limits).",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. ```shell\nkubectl describe pod simmemleak-hra99\ncurl -s https://raw.githubusercontent.com/Saadali/simmemleak/master/README.md | grep 'OOMKilled'\n```\nto check the details and find more information about OOMKilled reason, including how to fix it.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Reason OOMKilled / exit code 137 means the container tried to use more memory than its limit",
+            "Check the application code for a memory leak, or if it behaves as expected set a higher memory limit (and possibly request) for the container"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer does not explain the meaning of OOMKilled/exit code 137 nor provide the required troubleshooting steps (checking for memory leaks or adjusting limits).",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1960,
+          "completion_tokens": 90,
+          "total_tokens": 2050,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1150,
+          "completion_tokens": 256,
+          "total_tokens": 1406,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.0
+    },
+    {
+      "id": "err-05",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/tasks/configure-pod-container/assign-cpu-resource.md",
+        "kubernetes/tasks/debug/debug-application/debug-running-pod.md"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Scale the Deployment to have fewer replicas, for example, scale it down to one replica.\n2. Use kubectl get events --namespace=<your-namespace> to check if the issue is resolved and no more FailedScheduling events are generated.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Free up capacity: add more nodes to the cluster or terminate unneeded Pods to make room for the pending Pod",
+            "Check that the Pod's CPU request is not larger than what the nodes offer (e.g. a request of cpu: 1.1 never schedules on nodes with capacity cpu: 1); compare with `kubectl describe nodes`"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer suggests scaling down the deployment, which does not address the root cause of insufficient CPU capacity for the pending pod, and fails to mention checking node capacity or adding resources.",
+          "points_stated": [
+            false,
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1661,
+          "completion_tokens": 81,
+          "total_tokens": 1742,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 590,
+          "completion_tokens": 147,
+          "total_tokens": 737,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.0
+    },
+    {
+      "id": "err-07",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/tasks/administer-cluster/access-cluster-api.md",
+        "kubernetes/tasks/debug/debug-application/debug-service.md",
+        "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md",
+        "stackoverflow/36650642",
+        "stackoverflow/47484312"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Run `gcloud container clusters get-credentials \"CLUSTER NAME\"` to auto-generate the correct kubeconfig\n2. Try running your command again after generating the kubeconfig",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "The cause is that the kubeconfig is not right (missing or wrong), so kubectl tries localhost"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer provides the correct fix but fails to explain the root cause (incorrect kubeconfig causing connection to localhost).",
+          "points_stated": [
+            false,
+            true
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Run `gcloud container clusters get-credentials \"CLUSTER NAME\"` to auto-generate the correct kubeconfig",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "The cause is that the kubeconfig is not right (missing or wrong), so kubectl tries localhost"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer provides the correct fix for GKE but fails to explain the underlying cause (incorrect kubeconfig) which is an essential key point.",
+          "points_stated": [
+            false,
+            true
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2191,
+          "completion_tokens": 66,
+          "total_tokens": 2257,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1033,
+          "completion_tokens": 175,
+          "total_tokens": 1208,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.4
+    },
+    {
+      "id": "err-08",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/30880811",
+        "stackoverflow/32302444",
+        "stackoverflow/38457706",
+        "stackoverflow/63714401"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Add code to dump topics during producer initialization as a temporary fix\n2. Remove the added code after resolving the issue",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Missing runtime classes from jackson-databind and jackson-core were the real problem; add those dependencies to the Java producer's project"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to identify the missing Jackson dependencies as the root cause and instead suggests an irrelevant temporary workaround.",
+          "points_stated": [
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Add code to dump topics during producer initialization as a temporary fix\n2. Remove the added code after resolving the issue",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Missing runtime classes from jackson-databind and jackson-core were the real problem; add those dependencies to the Java producer's project"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to identify the missing Jackson dependencies as the root cause and instead suggests an irrelevant temporary workaround.",
+          "points_stated": [
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2287,
+          "completion_tokens": 56,
+          "total_tokens": 2343,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 976,
+          "completion_tokens": 172,
+          "total_tokens": 1148,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.6
+    },
+    {
+      "id": "err-09",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/operations/hardware-and-os.md",
+        "kafka/streams/developer-guide/running-app.md",
+        "stackoverflow/50135591"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 4,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "1. Check if your vm.max_map_count is set appropriately by running the command: ulimit -n\n2. If vm.max_map_count is not sufficient, increase it to a higher value that can accommodate tens of thousands of partitions. For example, you might run 'ulimit -n 262144' or higher if needed.\n3. Ensure your Kafka data directories are on separate drives from application logs and other OS filesystem activity to improve latency and throughput.\n4. Consider using RAID for load balancing, but be aware of the performance hit and potential I/O intensive rebuilds during disk failures. Evaluate if RAID is necessary based on your specific requirements and trade-offs.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Cause: vm.max_map_count (around 65535 by default on many Linux systems) is exceeded; each log segment uses 2 map areas (index and timeindex files), so e.g. 50000 partitions need 100000 map areas and crash the broker with OutOfMemoryError (Map failed)"
+          ],
+          "wrong_or_dangerous_claims": [
+            "Check if your vm.max_map_count is set appropriately by running the command: ulimit -n",
+            "If vm.max_map_count is not sufficient, increase it to a higher value that can accommodate tens of thousands of partitions. For example, you might run 'ulimit -n 262144' or higher if needed."
+          ],
+          "reason": "The answer fails to identify the correct cause (vm.max_map_count limit) and suggests the wrong command (ulimit -n) to check or fix it, which is incorrect.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1668,
+          "completion_tokens": 186,
+          "total_tokens": 1854,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 680,
+          "completion_tokens": 218,
+          "total_tokens": 898,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.6
+    },
+    {
+      "id": "sym-01",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/hot-standby.html",
+        "postgres/monitoring-stats.html",
+        "postgres/warm-standby.html"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 7,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 7,
+        "answer": "1. On the primary server, run `SELECT pg_current_wal_lsn();` to get the current WAL write location.\n2. On the standby server, run `SELECT pg_last_wal_receive_lsn();` to get the last WAL location received.\n3. Compare the two LSN values; a large difference indicates network delay or that the standby is falling behind receiving WAL.\n4. On the primary, query the `pg_stat_replication` view and note the `sent_lsn` field for the standby.\n5. If `pg_current_wal_lsn` and `sent_lsn` differ significantly, the primary is generating WAL faster than it can send it (primary load bottleneck).\n6. If `sent_lsn` and the standby's `pg_last_wal_receive_lsn` differ significantly, the network is causing delay.\n7. On the standby, query the `pg_stat_wal_receiver` view and compare `pg_last_wal_replay_lsn` with `flushed_lsn`; a large gap indicates the standby is replaying WAL slower than it is receiving (standby load bottleneck).",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the specific LSN comparisons required to distinguish between primary load, network delay, and standby replay bottlenecks, matching all essential and optional key points.",
+          "points_stated": [
+            true,
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1793,
+          "completion_tokens": 431,
+          "total_tokens": 2224,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 778,
+          "completion_tokens": 75,
+          "total_tokens": 853,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 3.3
+    },
+    {
+      "id": "sym-02",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "postgres/routine-vacuuming.html",
+        "stackoverflow/9407442"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 5,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 5,
+        "answer": "1. Check for `UNLOGGED` tables, as they are not subject to VACUUM and can retain deleted data.\n2. Review your table usage patterns and consider if there might be a better way to manage the data that is being deleted frequently.\n3. If you have `UNLOGGED` tables, ensure they are not used for critical data. If necessary, convert them to regular tables with proper management strategies in place.\n4. Consider using `TRUNCATE TABLE` instead of `DELETE FROM` when deleting large amounts of data. This can be more efficient and faster.\n   WARNING: TRUNCATE deletes every row at once. Back up first.\n5. Run `ANALYZE` on the tables to update statistics, which might help in generating better query plans if your workload involves frequent deletions.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "UPDATE or DELETE does not remove the old row version immediately (MVCC); dead row versions stay until VACUUM cleans them up",
+            "Standard VACUUM only marks the space reusable and does not return it to the operating system; VACUUM FULL compacts the table and returns space, but needs an exclusive lock and extra disk space while it runs"
+          ],
+          "wrong_or_dangerous_claims": [
+            "Check for `UNLOGGED` tables, as they are not subject to VACUUM and can retain deleted data."
+          ],
+          "reason": "The answer fails to explain the core MVCC mechanism and the difference between VACUUM and VACUUM FULL, instead offering unrelated or incorrect advice about UNLOGGED tables.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1675,
+          "completion_tokens": 217,
+          "total_tokens": 1892,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 729,
+          "completion_tokens": 176,
+          "total_tokens": 905,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 3.0
+    },
+    {
+      "id": "sym-03",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "postgres/indexes-intro.html",
+        "postgres/populate.html"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. Check if the issue is related to loading data using `COPY` or not, and consider increasing maintenance_work_mem configuration variable temporarily.\n2. Verify if disabling WAL archiving and streaming replication might help by setting wal_level to 'minimal', archive_mode to 'off', and max_wal_senders to zero. However, note that this requires a server restart and makes base backups unavailable for recovery.\n3. Review the use of indexes after loading data. Check if any index usage is being affected by the large load operation and consider dropping and re-creating indexes if necessary.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "After a bulk load the planner statistics are missing or obsolete; run ANALYZE (or VACUUM ANALYZE) on the table"
+          ],
+          "wrong_or_dangerous_claims": [
+            "Verify if disabling WAL archiving and streaming replication might help by setting wal_level to 'minimal', archive_mode to 'off', and max_wal_senders to zero."
+          ],
+          "reason": "The answer fails to identify the missing or obsolete planner statistics and the need to run ANALYZE, which is the primary cause of slow queries after a bulk load.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1732,
+          "completion_tokens": 157,
+          "total_tokens": 1889,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 604,
+          "completion_tokens": 136,
+          "total_tokens": 740,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 3.4
+    },
+    {
+      "id": "sym-05",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/concepts/workloads/pods/pod-condition.md",
+        "kubernetes/tasks/debug/debug-application/debug-pods.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Check if there are any ValidatingWebhookConfiguration or MutatingWebhookConfiguration that target UPDATE operations for pods resources.\n2. If the webhook is provided by a third-party, make sure you are using the latest version and disable the webhook for UPDATE operations. If it's your own webhook, ensure it never changes immutable fields on UPDATE operations or only applies to new changes.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Terminating means a deletion was issued but the control plane cannot delete the Pod object; typically the Pod has a finalizer and an admission webhook prevents the finalizer from being removed"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer provides troubleshooting steps but fails to state the essential explanation of why the pod is stuck (finalizer + webhook preventing removal).",
+          "points_stated": [
+            false,
+            true,
+            true
+          ],
+          "corrected": true,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1653,
+          "completion_tokens": 107,
+          "total_tokens": 1760,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 598,
+          "completion_tokens": 106,
+          "total_tokens": 704,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.5
+    },
+    {
+      "id": "sym-06",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/concepts/scheduling-eviction/api-eviction.md",
+        "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md",
+        "kubernetes/concepts/storage/ephemeral-storage.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 5,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 5,
+        "answer": "1. Understand the eviction signals and thresholds, focusing on memory and disk usage.\n2. Monitor node-level resources like memory and disk space using tools provided by Kubernetes or third-party monitoring solutions.\n3. Adjust eviction thresholds based on your cluster's resource capacity and requirements. Lower the thresholds if you want to prevent evictions more frequently, or raise them for less frequent evictions.\n4. Configure soft eviction thresholds with a higher `eviction-max-pod-grace-period` value to allow pods more time to terminate gracefully before being evicted. This can help in reducing the impact of resource starvation on other pods.\n5. If you are running static pods, ensure they have appropriate priority settings so that they do not get evicted under resource pressure unless absolutely necessary. You may need to set a higher priority for critical static pods.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "The kubelet compares eviction signals (e.g. memory.available, nodefs.available, imagefs.available) with eviction thresholds, the minimum amount of the resource that should be available on the node, and evicts Pods when a threshold is met",
+            "Tune it by setting eviction thresholds on the kubelet: soft thresholds (eviction-soft with eviction-soft-grace-period, optionally eviction-max-pod-grace-period) or hard thresholds (eviction-hard, no grace period), written like memory.available<1Gi or as percentages"
+          ],
+          "wrong_or_dangerous_claims": [
+            "Lower the thresholds if you want to prevent evictions more frequently, or raise them for less frequent evictions."
+          ],
+          "reason": "The answer fails to explain the mechanism of comparing signals to thresholds and does not provide the specific kubelet configuration parameters (eviction-hard, eviction-soft, etc.) required to tune the behavior.",
+          "points_stated": [
+            false,
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1940,
+          "completion_tokens": 229,
+          "total_tokens": 2169,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 755,
+          "completion_tokens": 211,
+          "total_tokens": 966,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 2.1
+    },
+    {
+      "id": "sym-07",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/tasks/administer-cluster/configure-feature-gates.md",
+        "kubernetes/tasks/debug/debug-application/debug-pods.md",
+        "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 5,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 5,
+        "answer": "1. Check kubeconfig to ensure it is correctly configured for connecting to your cluster.\n2. Verify that you have installed and configured kubectl correctly on your local machine, including checking the version with `kubectl version`.\n3. Ensure that your laptop's network connection is stable and can reach the control-plane host of your Kubernetes cluster.\n4. Check for any network connectivity issues between your laptop and the control-plane host, such as firewalls or security groups blocking traffic.\n5. If using a Virtual Private Network (VPN), ensure it is active and stable. Reconnect to the VPN if necessary.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies checking the VPN connection, network reachability, and firewalls, which satisfies the essential key point, and also includes optional checks for kubeconfig.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1966,
+          "completion_tokens": 178,
+          "total_tokens": 2144,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 627,
+          "completion_tokens": 72,
+          "total_tokens": 699,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 4.9
+    },
+    {
+      "id": "sym-08",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/design/design.md",
+        "kafka/implementation/distribution.md",
+        "stackoverflow/58894281"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 5,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 5,
+        "answer": "1. Check if the consumer group coordinator is moving or not, and if so, the consumer needs to rediscover the new coordinator by sending a FindCoordinatorRequest.\n2. Verify that the batch processing time is within the configured transaction timeout. If it exceeds, consider increasing the transaction.timeout.ms configuration in Kafka.\n3. Ensure that the consumer's offset commits are being done automatically or manually as per your requirement and broker settings.\n4. Review the batch processing logic to ensure it is idempotent, meaning it can be retried without causing duplicate data. This helps in handling long-running batches gracefully.\n5. Check for any static membership issues that might cause dynamic rebalancing and task reassignment during administrative operations like code deploys or restarts.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Give the consumer more time per batch or smaller batches, at least one of: increase max.poll.interval.ms or decrease max.poll.records"
+          ],
+          "wrong_or_dangerous_claims": [
+            "Verify that the batch processing time is within the configured transaction timeout. If it exceeds, consider increasing the transaction.timeout.ms configuration in Kafka."
+          ],
+          "reason": "The answer fails to mention the essential configuration changes (max.poll.interval.ms or max.poll.records) required to prevent rebalancing due to slow batch processing, and instead suggests irrelevant or incorrect settings like transaction.timeout.ms.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1575,
+          "completion_tokens": 211,
+          "total_tokens": 1786,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 660,
+          "completion_tokens": 136,
+          "total_tokens": 796,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 2.4
+    },
+    {
+      "id": "sym-10",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "github/how-tos/monitor-workflows/add-a-status-badge.md",
+        "github/how-tos/write-workflows/choose-what-workflows-do/find-and-customize-actions.md",
+        "github/reference/workflows-and-actions/events-that-trigger-workflows.md",
+        "stackoverflow/61989951"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Ensure the `.github` folder is on the same branch as where you want the workflow to run from, and that any other branches you want to trigger the workflow from are also included.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that the .github folder must be on the branch where the push occurs for the workflow to trigger, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Ensure the `.github` folder is on the same branch as where you want the workflow to run from, and that any other branches you want to trigger the workflow from are also included.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that the .github folder must be on the branch where the push occurs for the workflow to trigger, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2023,
+          "completion_tokens": 58,
+          "total_tokens": 2081,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 998,
+          "completion_tokens": 134,
+          "total_tokens": 1132,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.5
+    },
+    {
+      "id": "ver-01",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/getting-started/upgrade.md",
+        "kafka/operations/java-version.md",
+        "stackoverflow/36970622"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. For the latest LTS release (Java 25 at the time of writing), we generally recommend running Apache Kafka with this version for performance, efficiency and support reasons.\n2. Apache Kafka 4.0 only supports KRaft mode - ZooKeeper mode has been removed. For clusters in KRaft mode with versions older than 3.3.x, we recommend upgrading to 3.9.x before upgrading to 4.0.x.\n3. For Apache Kafka 4.2 only supports KRaft mode - ZooKeeper mode has been removed. For clusters in KRaft mode with versions older than 3.3.x, we recommend upgrading to 3.9.x before upgrading to 4.2.x.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Java 17, Java 21 and Java 25 are fully supported"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to state the specific Java versions (17, 21, 25) that are fully supported for the broker, instead providing irrelevant information about KRaft mode and upgrade paths.",
+          "points_stated": [
+            false,
+            false,
+            true
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Apache Kafka 4.0 only supports KRaft mode - ZooKeeper mode has been removed. For clusters in KRaft mode with versions older than 3.3.x, we recommend upgrading to 3.9.x before upgrading to 4.0.x.\n2. For Apache Kafka 4.2 only supports KRaft mode - ZooKeeper mode has been removed. For clusters in KRaft mode with versions older than 3.3.x, we recommend upgrading to 3.9.x before upgrading to 4.2.x.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Java 17, Java 21 and Java 25 are fully supported"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer discusses Kafka version modes (KRaft vs ZooKeeper) instead of the requested Java version support, failing to state any essential key points.",
+          "points_stated": [
+            false,
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2261,
+          "completion_tokens": 191,
+          "total_tokens": 2452,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1298,
+          "completion_tokens": 190,
+          "total_tokens": 1488,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.6
+    },
+    {
+      "id": "ver-02",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/streams/developer-guide/scala-migration.md",
+        "kafka/streams/upgrade-guide.md"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. The kafka-streams-scala library is deprecated as of Kafka 4.3 and will be removed in Kafka 5.0.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that kafka-streams-scala is deprecated as of Kafka 4.3 and will be removed in Kafka 5.0, matching both essential key points.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. The kafka-streams-scala library is deprecated as of Kafka 4.3 and will be removed in Kafka 5.0.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that kafka-streams-scala is deprecated as of Kafka 4.3 and will be removed in Kafka 5.0, matching both essential key points.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1809,
+          "completion_tokens": 46,
+          "total_tokens": 1855,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 984,
+          "completion_tokens": 150,
+          "total_tokens": 1134,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.9
+    },
+    {
+      "id": "ver-04",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "github/reference/workflows-and-actions/metadata-syntax.md",
+        "stackoverflow/64124831",
+        "stackoverflow/68639588",
+        "stackoverflow/73524574"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. `runs.using` for JavaScript actions specifies the runtime used to execute the code specified in `main`. The valid values are 'node20' and 'node24'.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies node20 and node24 as the valid runtimes for JavaScript GitHub Actions.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2109,
+          "completion_tokens": 57,
+          "total_tokens": 2166,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 488,
+          "completion_tokens": 58,
+          "total_tokens": 546,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.5
+    },
+    {
+      "id": "ver-06",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "postgres/auth-password.html",
+        "postgres/auth-pg-hba-conf.html",
+        "postgres/runtime-config-connection.html"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. The documentation states that support for MD5-encrypted passwords is deprecated and will be removed in a future release of PostgreSQL.\n2. It also mentions to refer to Section 20.5 for details about migrating to another password type, which includes information on the deprecation of MD5.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that MD5 is deprecated and will be removed, satisfying the essential key point, but it does not mention using SCRAM as the recommended alternative.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": true,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. The documentation states that support for MD5-encrypted passwords is deprecated and will be removed in a future release of PostgreSQL.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that MD5 is deprecated and will be removed, satisfying the essential key point, and contains no wrong claims.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1967,
+          "completion_tokens": 87,
+          "total_tokens": 2054,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1075,
+          "completion_tokens": 137,
+          "total_tokens": 1212,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.7
+    },
+    {
+      "id": "ver-07",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/design/protocol.md",
+        "kafka/getting-started/upgrade.md",
+        "kafka/operations/transaction-protocol.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Yes, according to the compatibility policy stated in S1, new clients can talk to old servers and vice versa.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "No: Kafka 0.x clients (also 1.x and 2.0) are not compatible with Kafka 4.0, because pre-0.10.x protocols are fully removed in Kafka 4.0 (KIP-896)"
+          ],
+          "wrong_or_dangerous_claims": [
+            "Yes, according to the compatibility policy stated in S1, new clients can talk to old servers and vice versa."
+          ],
+          "reason": "The answer incorrectly claims compatibility, contradicting the documentation that pre-0.10.x protocols are removed in Kafka 4.0.",
+          "points_stated": [
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1738,
+          "completion_tokens": 42,
+          "total_tokens": 1780,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 517,
+          "completion_tokens": 143,
+          "total_tokens": 660,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.6
+    },
+    {
+      "id": "ver-08",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/concepts/storage/storage-classes.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. The feature state of Ceph RBD (deprecated) is v1.28, as noted in the documentation.\n2. Therefore, since Kubernetes version 1.28, the in-tree Ceph RBD StorageClass provisioner is deprecated.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies Kubernetes v1.28 as the version where the in-tree Ceph RBD provisioner was deprecated, matching the key point and documentation.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1572,
+          "completion_tokens": 80,
+          "total_tokens": 1652,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 505,
+          "completion_tokens": 70,
+          "total_tokens": 575,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.8
+    },
+    {
+      "id": "x-01",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/continuous-archiving.html",
+        "postgres/runtime-config-wal.html"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.5,
+      "drafted_steps": 4,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "1. Mount a PersistentVolumeClaim to the PostgreSQL pod and set the data directory (including `pg_wal/`) to reside on that volume so that the files survive pod restarts.\n2. In `postgresql.conf` (or on the server command line) set `archive_mode = on` and define an `archive_command` that copies each completed WAL segment to durable external storage (e.g., cloud bucket or network share).\n3. Optionally set `archive_timeout` (e.g., `archive_timeout = 60s`) to force periodic WAL segment switches so that recent changes are archived promptly.\n4. Monitor the archiving process; if it falls behind, free space in `pg_wal/` or increase archive throughput, because unarchived WAL can fill the directory and cause a PANIC shutdown.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "Kubernetes: keep the data directory on a PersistentVolume claimed through a PersistentVolumeClaim, whose lifecycle is independent of any individual Pod, so data survives pod restarts",
+            "PostgreSQL: combine a file-system-level base backup with continuously archived WAL files; this supports point-in-time recovery to any time since the base backup"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to mention the requirement for a file-system-level base backup, which is essential for point-in-time recovery, and does not explicitly state that the PersistentVolume's lifecycle is independent of the Pod.",
+          "points_stated": [
+            true,
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1835,
+          "completion_tokens": 350,
+          "total_tokens": 2185,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 735,
+          "completion_tokens": 149,
+          "total_tokens": 884,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.7
+    },
+    {
+      "id": "x-02",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/concepts/configuration/manage-resources-containers.md",
+        "kubernetes/tasks/configure-pod-container/assign-memory-resource.md"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.5,
+      "drafted_steps": 4,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "1. Check your Kafka broker's container resource limits using `kubectl describe pod` or similar commands to identify the current memory request and limit.\n2. If the container is being killed due to hitting a memory limit, consider increasing the memory limit for the container. Ensure that the new limit does not exceed the available resources on your nodes.\n3. Review and optimize your Kafka broker's application code for potential memory leaks or inefficiencies. Adjust resource requests and limits based on the actual usage patterns of your application.\n4. If increasing the limit does not resolve the issue, consider using Quality of Service (QoS) classes to prioritize your pods if you are running a large number of containers with varying resource requirements.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "Kafka: size memory so active readers and writers can be buffered; a back-of-the-envelope estimate is to buffer 30 seconds of writes, i.e. memory = write_throughput * 30"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer addresses the general Kubernetes OOMKilled issue but fails to provide the specific Kafka memory sizing guideline (buffering 30 seconds of writes) required by the second essential key point.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1921,
+          "completion_tokens": 193,
+          "total_tokens": 2114,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 711,
+          "completion_tokens": 123,
+          "total_tokens": 834,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 3.0
+    },
+    {
+      "id": "x-04",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/kafka-connect/user-guide.md",
+        "stackoverflow/13410686",
+        "stackoverflow/59978213"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.5,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. In your Debezium configuration, add or update the property `plugin.name: pgoutput` to explicitly specify the plugin name.\n2. Ensure that your PostgreSQL server is running and accepting connections on Unix domain socket. Check if the file `/tmp/.s.PGSQL.5432` exists, as it might be missing or not accessible due to permissions issues.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "PostgreSQL ships two logical output plugins in the standard distribution, pgoutput and test_decoding"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the connector property to set but fails to mention the standard plugins provided by PostgreSQL as required by the second key point.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. In your Debezium configuration, add or update the property `plugin.name: pgoutput` to explicitly specify the plugin name.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "PostgreSQL ships two logical output plugins in the standard distribution, pgoutput and test_decoding (the default of output_plugin_libraries)"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the required connector property but fails to mention the standard PostgreSQL output plugins provided by the database.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2270,
+          "completion_tokens": 107,
+          "total_tokens": 2377,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1166,
+          "completion_tokens": 178,
+          "total_tokens": 1344,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.9
+    },
+    {
+      "id": "x-05",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/concepts/configuration/manage-resources-containers.md",
+        "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md",
+        "kubernetes/concepts/storage/ephemeral-storage.md"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Ensure that you have enabled project quotas for monitoring storage use and make sure the filesystem backing the `emptyDir` volumes, on the node, provides project quota support.\n2. Set a size limit for your memory-backed `emptyDir` volume to prevent it from consuming up to the pod's memory limit. This can be done by specifying a `sizeLimit` in the Pod specification.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Kubernetes: limit the Pod's local disk use with ephemeral-storage limits in the Pod spec",
+            "Kafka: bound how much data a topic stores with the topic settings retention.bytes (size) and retention.ms (time)"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to mention the required ephemeral-storage limits for Kubernetes or the retention.bytes/retention.ms settings for Kafka, instead providing irrelevant advice about emptyDir and project quotas.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Set a size limit for your memory-backed `emptyDir` volume to prevent it from consuming up to the pod's memory limit. This can be done by specifying a `sizeLimit` in the Pod specification.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Kubernetes: limit the Pod's local disk use with ephemeral-storage limits in the Pod spec",
+            "Kafka: bound how much data a topic stores with the topic settings retention.bytes (size) and retention.ms (time)"
+          ],
+          "wrong_or_dangerous_claims": [
+            "Set a size limit for your memory-backed `emptyDir` volume to prevent it from consuming up to the pod's memory limit."
+          ],
+          "reason": "The answer fails to address the core issue of local disk eviction by suggesting a memory-backed emptyDir limit, which does not bound local disk usage, and omits the required Kafka retention settings.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1747,
+          "completion_tokens": 109,
+          "total_tokens": 1856,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1142,
+          "completion_tokens": 272,
+          "total_tokens": 1414,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.1
+    },
+    {
+      "id": "x-06",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-jfrog.md",
+        "kubernetes/concepts/security/hardening-guide/authentication-mechanisms.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Use TokenRequest API tokens for service authentication, which can be configured to have a short lifespan to reduce the impact of compromised tokens.\n2. Configure your GitHub Actions workflow to use these short-lived TokenRequest API tokens for authenticating to the Kubernetes cluster.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "GitHub: yes, use OpenID Connect; give the job the id-token: write permission so the workflow can request a short-lived OIDC token (JWT) from GitHub's OIDC provider instead of storing long-lived credentials as secrets",
+            "Kubernetes: the cluster must be set up to accept an external authentication source such as OIDC, which is recommended over client certificates and service account tokens for users reaching the API"
+          ],
+          "wrong_or_dangerous_claims": [
+            "Use TokenRequest API tokens for service authentication, which can be configured to have a short lifespan to reduce the impact of compromised tokens.",
+            "Configure your GitHub Actions workflow to use these short-lived TokenRequest API tokens for authenticating to the Kubernetes cluster."
+          ],
+          "reason": "The answer incorrectly suggests using Kubernetes TokenRequest API tokens for GitHub Actions authentication, whereas the correct method is using GitHub's OpenID Connect (OIDC) to issue short-lived JWTs that the Kubernetes cluster accepts via external authentication.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1532,
+          "completion_tokens": 92,
+          "total_tokens": 1624,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 611,
+          "completion_tokens": 217,
+          "total_tokens": 828,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.1
+    },
+    {
+      "id": "none-02",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/runtime-config-locks.html",
+        "postgres/transaction-iso.html",
+        "stackoverflow/18389124",
+        "stackoverflow/2979369"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2056,
+          "completion_tokens": 35,
+          "total_tokens": 2091,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.1
+    },
+    {
+      "id": "none-03",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "context_pages": [
+        "github/reference/security/secure-use.md",
+        "stackoverflow/58282791",
+        "stackoverflow/64124831",
+        "stackoverflow/70730786",
+        "stackoverflow/72851548"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Check if the issue is related to the security settings of your repository and check if 'Read and write permissions' are enabled for all action workflows.\n2. If the problem persists, try updating the actions in your workflow to the latest version by opening pull requests. This can help resolve any reported vulnerabilities.",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2005,
+          "completion_tokens": 92,
+          "total_tokens": 2097,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.5
+    },
+    {
+      "id": "none-04",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/51297136",
+        "stackoverflow/52668938",
+        "stackoverflow/68639588",
+        "stackoverflow/69984660"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. Run `terraform state rm <resource_name>` to remove the resource from the state file.\n2. Delete the state file using `rm -f .terraform/state.tfstate`.\n3. Re-run your Terraform commands to recreate the resources.",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1956,
+          "completion_tokens": 88,
+          "total_tokens": 2044,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.8
+    },
+    {
+      "id": "none-05",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "context_pages": [
+        "kafka/streams/developer-guide/config-streams.md",
+        "postgres/runtime-config-client.html",
+        "postgres/runtime-config-wal.html"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 4,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "1. Set the `default_toast_compression` parameter to 'pglz' or 'lz4', depending on your PostgreSQL compilation options, in the `postgresql.conf` file or via the server command line.\n2. Restart the PostgreSQL server for changes to take effect.\n3. Create a hypertable and specify compression by setting the `compression` column option during table creation, e.g., `CREATE TABLE my_table (my_column TYPE, ... COMPRESSION pglz);`.\n4. Ensure that your PostgreSQL version supports TimescaleDB's hypertables feature. Check the compatibility matrix in the official documentation for TimescaleDB.",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2016,
+          "completion_tokens": 173,
+          "total_tokens": 2189,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 2.1
+    },
+    {
+      "id": "none-07",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/tasks/administer-cluster/configure-upgrade-etcd.md",
+        "stackoverflow/63346728"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. Run the command `kubectl get secret -n linkerd-system -o wide` to find out which secret contains the identity issuer certificate.\n2. Once you identify the secret, use the command `kubectl edit secret <secret-name> -n linkerd-system` to open it for editing.\n3. Inside the secret, look for the field named 'issuer' and find out which certificate is used. Then rotate this certificate following the instructions provided by cert-manager's troubleshooting guide.",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. Run the command `kubectl get secret -n linkerd-system -o wide` to find out which secret contains the identity issuer certificate.\n2. Once you identify the secret, use the command `kubectl edit secret <secret-name> -n linkerd-system` to open it for editing.\n3. Inside the secret, look for the field named 'issuer' and find out which certificate is used. Then rotate this certificate following the instructions provided by cert-manager's troubleshooting guide.",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "category": "unsafe_or_wrong_claim",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2194,
+          "completion_tokens": 138,
+          "total_tokens": 2332,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 3.7
+    },
+    {
+      "id": "none-08",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/tasks/administer-cluster/change-pv-access-mode-readwriteoncepod.md",
+        "postgres/runtime-config-wal.html",
+        "stackoverflow/51297136",
+        "stackoverflow/64125048"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 4,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "1. kubectl scale --replicas=0 deployment cat-pictures-writer\n2. kubectl delete pvc cat-pictures-pvc\n   WARNING: kubectl delete removes cluster objects. Check the namespace and name first (--dry-run=client shows what would go).\n3. kubectl patch pv cat-pictures-pv -p '{\"spec\":{\"claimRef\":{\"uid\":\"\"}}}'\n4. kubectl patch pv cat-pictures-pv -p '{\"spec\":{\"accessModes\":[\"ReadWriteOncePod\"]}}'",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "1. kubectl scale --replicas=0 deployment cat-pictures-writer\n2. kubectl delete pvc cat-pictures-pvc\n   WARNING: kubectl delete removes cluster objects. Check the namespace and name first (--dry-run=client shows what would go).\n3. kubectl patch pv cat-pictures-pv -p '{\"spec\":{\"claimRef\":{\"uid\":\"\"}}}'\n4. kubectl patch pv cat-pictures-pv -p '{\"spec\":{\"accessModes\":[\"ReadWriteOncePod\"]}}'",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "category": "unsafe_or_wrong_claim",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2345,
+          "completion_tokens": 131,
+          "total_tokens": 2476,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.8
+    },
+    {
+      "id": "none-09",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/concepts/services-networking/ingress-controllers.md",
+        "stackoverflow/61365202",
+        "stackoverflow/61616203"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. Run `kubectl patch deployment -n kube-system traefik -p '{\n2. Add `\n3. Apply the changes by running `kubectl apply -f <your_patch_file>.yaml` after making sure your Traefik deployment is in a paused or stopped state.",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2070,
+          "completion_tokens": 96,
+          "total_tokens": 2166,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 3.5
+    },
+    {
+      "id": "none-10",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "context_pages": [
+        "postgres/hot-standby.html",
+        "postgres/runtime-config-replication.html",
+        "postgres/warm-standby-failover.html",
+        "stackoverflow/37294996"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. In your `patroni.yml` file, check for the 'ttl', 'loop_wait' and 'retry_timeout' settings related to failover timing. These parameters control how long Patroni waits before attempting a new leader election or retrying failed operations.",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1823,
+          "completion_tokens": 73,
+          "total_tokens": 1896,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.2
+    },
+    {
+      "id": "none-11",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/12505158",
+        "stackoverflow/15301826",
+        "stackoverflow/18389124"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. <html>CREATE EXTENSION IF NOT EXISTS \"citus\";</html>\n2. <html>SELECT * FROM citus_shard_placement();</html>",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1944,
+          "completion_tokens": 101,
+          "total_tokens": 2045,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.2
+    },
+    {
+      "id": "none-12",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "context_pages": [
+        "kafka/streams/developer-guide/dsl-api.md",
+        "stackoverflow/43612072",
+        "stackoverflow/48986780",
+        "stackoverflow/63714401"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 4,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "1. Check if the message being sent to the Kafka topic is correctly formatted and matches the expected schema. If not, adjust the payload accordingly.\n2. Ensure that the `key.serializer` and `value.serializer` properties in the producer props are set to match the serialization format of your messages (e.g., StringSerializer for string payloads).\n3. Verify if there is a custom deserializer defined. If so, ensure it can handle the JSON payload correctly.\n4. If none of the above works, check the `kafka-streams-scala` deprecation notice and consider migrating to the Java API for Kafka Streams DSL.",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1741,
+          "completion_tokens": 174,
+          "total_tokens": 1915,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.8
+    },
+    {
+      "id": "none-13",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "context_pages": [
+        "kafka/operations/geo-replication-(cross-cluster-data-mirroring).md",
+        "kafka/security/authentication-using-sasl.md",
+        "kafka/streams/developer-guide/config-streams.md",
+        "stackoverflow/21448907"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. export KAFKA_HEAP_OPTS=\"-Xmx256M -Xms128M\"\n2. Save and apply the changes to your Strimzi Kafka custom resource.",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. export KAFKA_HEAP_OPTS=\"-Xmx256M -Xms128M\"",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "category": "unsafe_or_wrong_claim",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1939,
+          "completion_tokens": 74,
+          "total_tokens": 2013,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.6
+    },
+    {
+      "id": "none-14",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "context_pages": [
+        "kafka/getting-started/quickstart.md",
+        "kafka/kafka-connect/administration.md",
+        "stackoverflow/57965731",
+        "stackoverflow/59978213"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Check if you have set the correct `plugin.path` in your `connect-standalone.properties` file to include the MongoDB source connector jar, e.g., `$ echo 'plugin.path=libs/mongodb-source-4.3.1.jar' >> config/connect-standalone.properties`.\n2. Verify that you have correctly configured your `mongodb.source.config` properties file with the appropriate MongoDB connection details such as host, port, username, and password if required.",
+        "judge": {
+          "verdict": "incorrect",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [
+            "answered a question the documentation cannot answer"
+          ],
+          "reason": "answered an unanswerable question",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2146,
+          "completion_tokens": 126,
+          "total_tokens": 2272,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.1
+    },
+    {
+      "id": "err-11",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/59844622",
+        "stackoverflow/61365202"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Instead of creating the ingress `app-ingress` in `ingress-nginx` namespace you should create it in the namespace where you have the service `api-sand`.\n2. Alternatively there is way to achieve ingress in one namespace and service in another namespace via externalName. Checkout Kubernetes Cross Namespace Ingress Network",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies that the Ingress must be in the same namespace as the Service or use an ExternalName service, covering the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Instead of creating the ingress `app-ingress` in `ingress-nginx` namespace you should create it in the namespace where you have the service `api-sand`.\n2. Alternatively there is way to achieve ingress in one namespace and service in another namespace via externalName. Checkout Kubernetes Cross Namespace Ingress Network",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies that the Ingress must be in the same namespace as the Service or use an ExternalName service, covering the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1986,
+          "completion_tokens": 94,
+          "total_tokens": 2080,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1176,
+          "completion_tokens": 134,
+          "total_tokens": 1310,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.0
+    },
+    {
+      "id": "err-12",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/41604499",
+        "stackoverflow/44673957"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. Check the Docker image's log to see if there are any error messages.\n2. Verify that the container is pulling the correct image and not stuck in a pull loop.\n3. Ensure that the security context for the container does not prevent it from starting properly.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "The container starts and immediately exits, so Kubernetes keeps restarting it (CrashLoopBackOff); the image needs a long-running command, set either in the Dockerfile or in the ReplicationController/pod spec"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to identify the root cause (container exiting immediately due to lack of a long-running command) and instead suggests unrelated troubleshooting steps.",
+          "points_stated": [
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1832,
+          "completion_tokens": 99,
+          "total_tokens": 1931,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 560,
+          "completion_tokens": 108,
+          "total_tokens": 668,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 2.5
+    },
+    {
+      "id": "err-13",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/53571823",
+        "stackoverflow/59592518",
+        "stackoverflow/65241105"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. Check if the directories and files required for volume mounts exist in your project directory.\n2. Ensure that all necessary environment variables are set correctly within your `docker-compose.yml` file.\n3. Verify that the Docker Desktop experimental features, specifically 'Use gRPC FUSE for file sharing', is disabled in Preferences > Experimental Features.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [
+            "The problem comes from Docker Desktop 3.0.0 for Mac",
+            "Update to Docker Desktop 3.0.1 where it is resolved"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies disabling the gRPC FUSE feature as a fix but misses the alternative solution of updating to Docker Desktop 3.0.1 and fails to explicitly link the issue to the specific Docker Desktop 3.0.0 version mentioned in the key points.",
+          "points_stated": [
+            true
+          ],
+          "corrected": true,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2652,
+          "completion_tokens": 108,
+          "total_tokens": 2760,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 591,
+          "completion_tokens": 125,
+          "total_tokens": 716,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 2.1
+    },
+    {
+      "id": "err-14",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/57938784",
+        "stackoverflow/64124831",
+        "stackoverflow/73524574"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Add an extra `/` before `_authToken` in the .npmrc file, like this: `//npm.pkg.github.com/:_authToken=XXXXXXXXX`. This change was suggested by GitHub support to resolve the 401 Unauthorized error.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the missing slash in the .npmrc authentication line as the cause of the 401 error, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2204,
+          "completion_tokens": 72,
+          "total_tokens": 2276,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 561,
+          "completion_tokens": 68,
+          "total_tokens": 629,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.6
+    },
+    {
+      "id": "err-15",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/57830375",
+        "stackoverflow/58282791",
+        "stackoverflow/69014742",
+        "stackoverflow/72851548"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. git update-index --chmod=+x gradlew\n2. git commit -m 'Make gradlew executable'",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer provides the correct command to make the wrapper executable and commit it, satisfying the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. git update-index --chmod=+x gradlew\n2. git commit -m 'Make gradlew executable'",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer provides the correct command to make the wrapper executable and commit it, satisfying the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1871,
+          "completion_tokens": 55,
+          "total_tokens": 1926,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 984,
+          "completion_tokens": 116,
+          "total_tokens": 1100,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.9
+    },
+    {
+      "id": "sym-11",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "postgres/checksums.html",
+        "postgres/wal-reliability.html",
+        "stackoverflow/9407442"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. `SET ignore_checksum_failure TO ON;`\n2. Perform recovery steps to fix the corruption.\n3. `SET ignore_checksum_failure TO OFF;`",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the essential step of setting ignore_checksum_failure to bypass the check, but it omits the optional point regarding checking or managing checksums with SHOW data_checksums or pg_checksums.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": true,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1918,
+          "completion_tokens": 69,
+          "total_tokens": 1987,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 525,
+          "completion_tokens": 81,
+          "total_tokens": 606,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.2
+    },
+    {
+      "id": "sym-12",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/10845998",
+        "stackoverflow/18664074",
+        "stackoverflow/9736085"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Ensure that you have restarted your PostgreSQL server after making changes to the `pg_hba.conf` file. On Linux, this can be done with: `sudo systemctl restart postgresql` (or `sudo service postgresql restart` for older systems).\n2. Verify that the new rules are correctly applied by checking the PostgreSQL server logs or using a tool like `pg_ctl status` to see if it's running with the updated configuration.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "pg_hba.conf is read at start-up and on SIGHUP: signal the postmaster to re-read it, at least one of `pg_ctl reload`, the SQL function pg_reload_conf(), or `kill -HUP`"
+          ],
+          "wrong_or_dangerous_claims": [
+            "Ensure that you have restarted your PostgreSQL server after making changes to the `pg_hba.conf` file."
+          ],
+          "reason": "The answer incorrectly states that a full restart is required, whereas the documentation specifies that a reload signal (SIGHUP) is sufficient and preferred for applying changes without downtime.",
+          "points_stated": [
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Ensure that you have restarted your PostgreSQL server after making changes to the `pg_hba.conf` file. On Linux, this can be done with: `sudo systemctl restart postgresql` (or `sudo service postgresql restart` for older systems).",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "pg_hba.conf is read at start-up and on SIGHUP: signal the postmaster to re-read it, at least one of `pg_ctl reload`, the SQL function pg_reload_conf(), or `kill -HUP`"
+          ],
+          "wrong_or_dangerous_claims": [
+            "Ensure that you have restarted your PostgreSQL server after making changes to the `pg_hba.conf` file."
+          ],
+          "reason": "The answer incorrectly states that a full restart is required, whereas the documentation specifies that a reload signal (SIGHUP) is sufficient to apply changes to pg_hba.conf.",
+          "points_stated": [
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1827,
+          "completion_tokens": 117,
+          "total_tokens": 1944,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1152,
+          "completion_tokens": 281,
+          "total_tokens": 1433,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.5
+    },
+    {
+      "id": "sym-13",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "postgres/auth-pg-hba-conf.html",
+        "postgres/indexes-partial.html",
+        "stackoverflow/72070748"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. The query uses an IP address that is excluded from the partial index, as shown in Example 11.1 of the documentation: `SELECT * FROM access_log WHERE url = '/index.html' AND client_ip = inet '192.168.100.23';`. The predicate for the partial index excludes this IP address range.\n2. The query does not match the condition defined in the predicate of the partial index, which is `CREATE INDEX access_log_client_ip_ix ON access_log (client_ip) WHERE NOT (client_ip > inet '192.168.100.0' AND client_ip < inet '192.168.100.255');`. This means the index is not used because it only contains entries for rows that do not match this condition.\n3. Therefore, the partial index on `client_ip` is ignored by the query optimizer as it does not cover the predicate of the query.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies that the IP address is excluded from the partial index, satisfying the essential point, but it does not mention the optional point about predetermined values.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1958,
+          "completion_tokens": 243,
+          "total_tokens": 2201,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 749,
+          "completion_tokens": 71,
+          "total_tokens": 820,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 3.1
+    },
+    {
+      "id": "sym-14",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/concepts/storage/ephemeral-volumes.md",
+        "kubernetes/concepts/storage/storage-classes.md",
+        "kubernetes/concepts/storage/storage-limits.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Check if cluster autoscaler is configured with `--enable-csi-node-aware-scheduling=true`.\n2. If not, set `spec.preventPodSchedulingIfMissing` to true in the CSIDriver object to prevent pods from being scheduled on nodes without a CSI driver.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Only set spec.preventPodSchedulingIfMissing to true when cluster autoscaler runs with --enable-csi-node-aware-scheduling=true; otherwise its scheduling simulations lack the CSINode information for new nodes and it may fail to scale up for pending Pods that use CSI volumes"
+          ],
+          "wrong_or_dangerous_claims": [
+            "If not, set spec.preventPodSchedulingIfMissing to true in the CSIDriver object to prevent pods from being scheduled on nodes without a CSI driver."
+          ],
+          "reason": "The answer incorrectly advises setting spec.preventPodSchedulingIfMissing to true when the flag is not enabled, which contradicts the key point that this setting should only be used when --enable-csi-node-aware-scheduling=true is active.",
+          "points_stated": [
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1832,
+          "completion_tokens": 88,
+          "total_tokens": 1920,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 544,
+          "completion_tokens": 171,
+          "total_tokens": 715,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.0
+    },
+    {
+      "id": "err-19",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/19363481",
+        "stackoverflow/20878932",
+        "stackoverflow/512451",
+        "stackoverflow/695289"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Ensure that you are using double quotes around the column name when querying, as PostgreSQL treats identifiers (including column names) case-sensitively and non-quoted identifiers are folded to lower case.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "String values go in single quotes ('xyz'), not double quotes, which are for identifiers"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the need to quote the identifier but fails to mention that string literals must use single quotes, which is an essential part of the correct syntax.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1932,
+          "completion_tokens": 60,
+          "total_tokens": 1992,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 554,
+          "completion_tokens": 91,
+          "total_tokens": 645,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.6
+    },
+    {
+      "id": "sym-15",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/runtime-config-resource.html",
+        "postgres/runtime-config-wal.html",
+        "postgres/wal-configuration.html",
+        "stackoverflow/9407442"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 6,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 6,
+        "answer": "1. Check and lower `bgwriter_flush_after` in `postgresql.conf` to reduce forced OS writebacks that cause write bursts; set it to a smaller value (e.g., 0 or a lower block count) to spread writes more evenly.\n2. Adjust `backend_flush_after` in `postgresql.conf` to limit how much data a single backend forces to disk at once, preventing large write spikes from individual sessions.\n3. Tune Linux VM dirty settings such as `dirty_writeback_centisecs` (and related `dirty_*` parameters) to make the OS flush dirty pages less aggressively, smoothing out write bursts.\n4. Ensure `vm.zone_reclaim_mode` is set to 0 on NUMA systems to avoid performance issues caused by aggressive zone reclaiming that can trigger write stalls.\n5. Separate the WAL (xlog) directory and main data tables/indexes onto different physical drives to isolate WAL writes from regular query I/O.\n6. Review and adjust `random_page_cost`, `seq_page_cost`, and `effective_cache_size` to match the hardware characteristics, then use `EXPLAIN (BUFFERS, ANALYZE)` and enable the `auto_explain` module to identify and fix slow queries.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Checkpoints must flush all dirty data pages to disk, which can cause significant I/O load; the checkpointer starts one every checkpoint_timeout seconds or when max_wal_size is about to be exceeded (defaults 5 minutes and 1 GB)",
+            "Set checkpoint_timeout and max_wal_size high enough that checkpoints do not happen too often; checkpoint_warning can be set as a sanity check"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to identify checkpoints as the cause of the write bursts and does not mention the essential settings checkpoint_timeout or max_wal_size.",
+          "points_stated": [
+            false,
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1903,
+          "completion_tokens": 443,
+          "total_tokens": 2346,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 806,
+          "completion_tokens": 146,
+          "total_tokens": 952,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 2.7
+    },
+    {
+      "id": "sym-16",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/streams/developer-guide/dsl-api.md",
+        "kafka/streams/developer-guide/processor-api.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 4,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "1. To understand why your in-memory key-value store loses its data upon restart, check if log compaction is enabled for this store. If enabled, disable it as it can cause older records to be purged.\n2. For an in-memory key-value store, consider switching to a persistent one by using `Stores.persistentKeyValueStore` instead of `Stores.inMemoryKeyValueStore`. This will ensure that the data persists across application restarts.\n3. If you need to maintain state between app instances and want fault-tolerance, enable log compaction for your in-memory key-value store by using `Stores.persistentKeyValueStoreWithHeaders` or similar persistent stores. This will allow the store to be backed up to a Kafka topic, making it fault-tolerant.\n4. For session and windowed stores, use their respective persistent variants (`Stores.persistentSessionStoreWithHeaders`, `Stores.persistentTimestampedWindowStoreWithHeaders`) if you need headers retention. These will also be backed up to a Kafka topic for fault tolerance.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "An in-memory KeyValueStore keeps its data only in memory (heap), so it is not kept on local disk across restarts; it is meant for environments where local disk is unavailable or wiped between restarts"
+          ],
+          "wrong_or_dangerous_claims": [
+            "check if log compaction is enabled for this store. If enabled, disable it as it can cause older records to be purged",
+            "enable log compaction for your in-memory key-value store by using `Stores.persistentKeyValueStoreWithHeaders`"
+          ],
+          "reason": "The answer fails to explain the fundamental reason for data loss (in-memory nature) and instead provides incorrect advice about log compaction and non-existent methods.",
+          "points_stated": [
+            false,
+            true
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. For an in-memory key-value store, consider switching to a persistent one by using `Stores.persistentKeyValueStore` instead of `Stores.inMemoryKeyValueStore`. This will ensure that the data persists across application restarts.\n2. If you need to maintain state between app instances and want fault-tolerance, enable log compaction for your in-memory key-value store by using `Stores.persistentKeyValueStoreWithHeaders` or similar persistent stores. This will allow the store to be backed up to a Kafka topic, making it fault-tolerant.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "An in-memory KeyValueStore keeps its data only in memory (heap), so it is not kept on local disk across restarts; it is meant for environments where local disk is unavailable or wiped between restarts"
+          ],
+          "wrong_or_dangerous_claims": [
+            "enable log compaction for your in-memory key-value store by using `Stores.persistentKeyValueStoreWithHeaders` or similar persistent stores"
+          ],
+          "reason": "The answer fails to explain why the data is gone (it is stored only in memory) and contains a wrong claim that log compaction can be enabled for an in-memory store.",
+          "points_stated": [
+            false,
+            true
+          ],
+          "corrected": true,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "unsafe_or_wrong_claim",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1518,
+          "completion_tokens": 252,
+          "total_tokens": 1770,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1308,
+          "completion_tokens": 304,
+          "total_tokens": 1612,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 4.6
+    },
+    {
+      "id": "sym-17",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/streams/architecture.md",
+        "kafka/streams/developer-guide/running-app.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 5,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 5,
+        "answer": "1. When a new instance of your Kafka Streams application is started, it will automatically join the existing consumer group and take over the stream tasks that were run by the previous instances. As a result, the new instance may need to replay the changelog topics from the earliest offset to restore its state store. This can cause a delay in processing as the task waits for the state restoration to complete.\n2. To reduce this pause during the state restoration process, you can configure your application with `num.standby.replicas` to specify that there should be standby replicas of local state stores. This allows Kafka Streams to assign a task to an instance where such a replica already exists, minimizing the time required for task initialization.\n3. Starting in version 2.6, Kafka Streams will also ensure that tasks are only assigned to instances with fully caught-up local copies of state stores, reducing the likelihood of needing to restore from an earlier offset and thus decreasing the pause during processing resumption.\n4. Additionally, you can configure your application to use warmup replicas. These replicas will be used for tasks that require a lot of state restoration, allowing other active tasks to continue processing while they are being restored. This approach minimizes downtime and reduces the overall pause during task initialization.\n5. For more detailed information on configuring standby replicas and warmup replicas, refer to the Kafka Streams Configs section in the documentation.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies that state restoration (replaying changelogs) causes the delay and recommends using standby replicas (num.standby.replicas) and warmup replicas (since 2.6) to reduce or eliminate the pause.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1591,
+          "completion_tokens": 338,
+          "total_tokens": 1929,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 808,
+          "completion_tokens": 87,
+          "total_tokens": 895,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 4.1
+    },
+    {
+      "id": "sym-18",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "github/how-tos/deploy/configure-and-manage-deployments/configure-custom-protection-rules.md",
+        "github/how-tos/deploy/configure-and-manage-deployments/control-deployments.md",
+        "github/how-tos/deploy/configure-and-manage-deployments/create-custom-protection-rules.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. Ensure that the custom deployment protection rule is enabled for all environments in your repository by checking the box next to each rule under 'Deployment protection rules' and clicking **Save protection rules**.\n2. Verify that the installation of the custom deployment protection rule has been completed successfully. Check if it appears in the list of available deployment protection rules for your environments.\n3. Check if there are any issues with the webhook configuration or setup, including verifying the callback URL and permissions settings.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the essential step of enabling the rule for the environment and saving the settings, which matches the key point; the optional point about automatic execution is not explicitly stated but is implied by the context of the rule working, and no wrong claims are present.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1677,
+          "completion_tokens": 137,
+          "total_tokens": 1814,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 598,
+          "completion_tokens": 92,
+          "total_tokens": 690,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.9
+    },
+    {
+      "id": "sym-19",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "github/reference/workflows-and-actions/contexts.md",
+        "stackoverflow/57850553",
+        "stackoverflow/58858429",
+        "stackoverflow/62045967"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Update the workflow file as follows:\n\n```yaml\ntitle: CI\non: [pull_request]\njobs:\n  myjob:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Step 1\n        id: hello\n        run: <any>\n        continue-on-error: true\n      - name: Step 2\n        id: world\n        run: <any>\n        continue-on-error: true\n      - name: Check on failures\n        if: steps.hello.outcome != 'success' || steps.world.outcome != 'success'\n        run: exit 1```",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly provides the step IDs, sets continue-on-error, and uses the steps context outcome property in a final step to fail the job if any previous step failed.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Update the workflow file as follows:\n\n```yaml\ntitle: CI\non: [pull_request]\njobs:\n  myjob:\n    runs-on: ubuntu-latest\n    steps:\n      - name: Step 1\n        id: hello\n        run: <any>\n        continue-on-error: true\n      - name: Step 2\n        id: world\n        run: <any>\n        continue-on-error: true\n      - name: Check on failures\n        if: steps.hello.outcome != 'success' || steps.world.outcome != 'success'\n        run: exit 1```",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly provides the step IDs, sets continue-on-error, and uses the steps context outcome property in a final step to fail the job if any previous step failed.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2149,
+          "completion_tokens": 157,
+          "total_tokens": 2306,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1288,
+          "completion_tokens": 142,
+          "total_tokens": 1430,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.6
+    },
+    {
+      "id": "ver-09",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/concepts/workloads/pods/pod-hostname.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. The feature state for setHostnameAsFQDN in v1.22 is described as 'stable'.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that the feature is stable since Kubernetes v1.22, satisfying the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. The feature state for setHostnameAsFQDN in v1.22 is described as 'stable'.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that the feature is stable since Kubernetes v1.22, satisfying the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1386,
+          "completion_tokens": 44,
+          "total_tokens": 1430,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1010,
+          "completion_tokens": 120,
+          "total_tokens": 1130,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.1
+    },
+    {
+      "id": "ver-10",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "github/concepts/runners/actions-runner-controller.md",
+        "github/concepts/runners/support-for-arc.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. ARC is only supported on GitHub Enterprise Server versions 3.9 and greater.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that ARC is only supported on GitHub Enterprise Server versions 3.9 and greater, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. ARC is only supported on GitHub Enterprise Server versions 3.9 and greater.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that ARC is only supported on GitHub Enterprise Server versions 3.9 and greater, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1519,
+          "completion_tokens": 35,
+          "total_tokens": 1554,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 914,
+          "completion_tokens": 128,
+          "total_tokens": 1042,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.6
+    },
+    {
+      "id": "ver-11",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "postgres/runtime-config-connection.html",
+        "postgres/runtime-config-replication.html"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. The default TCP port that PostgreSQL listens on is 5432. This can be changed using the 'port' parameter in the postgresql.conf file or on the server command line.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the default port as 5432 and the 'port' parameter as the setting used to change it, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1558,
+          "completion_tokens": 57,
+          "total_tokens": 1615,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 484,
+          "completion_tokens": 70,
+          "total_tokens": 554,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.1
+    },
+    {
+      "id": "ver-12",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/configuration/broker-configs.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 5,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 5,
+        "answer": "1. To alter the current broker configs for broker id 0 (for example, the number of log cleaner threads): $ bin/kafka-configs.sh --bootstrap-server localhost:9092 --entity-type brokers --entity-name 0 --alter --add-config log.cleaner.threads=2\n2. To describe the current dynamic broker configs for broker id 0: $ bin/kafka-configs.sh --bootstrap-server localhost:9092 --entity-type brokers --entity-name 0 --describe\n3. In Kafka version 1.1.x, the listener used by the inter-broker listener may not be updated dynamically. To update the inter-broker listener to a new listener, the new listener may be added on all brokers without restarting the broker.\n4. To update the inter-broker listener to a new listener: $ bin/kafka-configs.sh --bootstrap-server localhost:9092 --entity-type brokers --alter --add-config listeners=PLAINTEXT://new-listener-host:port\n5. A rolling restart is then required to update inter.broker.listener.name.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that the inter-broker listener cannot be updated dynamically in Kafka 1.1.x, matching the essential key point, and contains no wrong or dangerous claims.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1840,
+          "completion_tokens": 281,
+          "total_tokens": 2121,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 691,
+          "completion_tokens": 73,
+          "total_tokens": 764,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 2.3
+    },
+    {
+      "id": "ver-13",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "postgres/backup-dump.html",
+        "stackoverflow/20427689"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. - Use the `-X` (`--no-psqlrc`) option.\n2. To ensure psql runs with its default settings, use the `-X` (\"--no-psqlrc\") option.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the -X (--no-psqlrc) option as the method to run psql with default settings, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1724,
+          "completion_tokens": 75,
+          "total_tokens": 1799,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 509,
+          "completion_tokens": 68,
+          "total_tokens": 577,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.4
+    },
+    {
+      "id": "ver-14",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/tasks/administer-cluster/controller-manager-leader-migration.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 4,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "1. Set `--enable-leader-migration` on both `kube-controller-manager` and `cloud-controller-manager`. This enables Leader Migration during the upgrade.\n2. For `cloud-controller-manager`, set `--leader-migration-config=` to specify the configuration file for migration. Also, mount `/etc/leadermigration.conf` if it is not already mounted.\n3. After upgrading and verifying that everything works as expected, disable Leader Migration by unsetting both `--enable-leader-migration` and `--leader-migration-config=` flags in the `cloud-controller-manager` manifest. Remove `/etc/leadermigration.conf` if it exists.\n4. To re-enable Leader Migration for rollback, recreate the configuration file with mount and flags that enable Leader Migration back to `cloud-controller-manager`.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states the essential requirement to set --enable-leader-migration on the controller managers, and the additional steps provided are consistent with standard Kubernetes upgrade procedures for this feature.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. After upgrading and verifying that everything works as expected, disable Leader Migration by unsetting both `--enable-leader-migration` and `--leader-migration-config=` flags in the `cloud-controller-manager` manifest. Remove `/etc/leadermigration.conf` if it exists.\n2. To re-enable Leader Migration for rollback, recreate the configuration file with mount and flags that enable Leader Migration back to `cloud-controller-manager`.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Set --enable-leader-migration on kube-controller-manager or cloud-controller-manager"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer describes how to disable Leader Migration rather than how to enable it, failing to state the essential key point.",
+          "points_stated": [
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "verifier_false_refusal",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1886,
+          "completion_tokens": 207,
+          "total_tokens": 2093,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1145,
+          "completion_tokens": 149,
+          "total_tokens": 1294,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 3.4
+    },
+    {
+      "id": "ver-15",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/operations/tiered-storage.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. No support for compacted topics",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that tiered storage is not supported for compacted topics, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. No support for compacted topics",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that tiered storage is not supported for compacted topics, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1724,
+          "completion_tokens": 28,
+          "total_tokens": 1752,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 938,
+          "completion_tokens": 118,
+          "total_tokens": 1056,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.4
+    },
+    {
+      "id": "ver-16",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-azure.md",
+        "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-docker.md",
+        "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-octopus-deploy.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. The OIDC example workflow uses the `OctopusDeploy/login@34b6dcc1e86fa373c14e6a28c5507d221e4de629` action version.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "The example uses OctopusDeploy/login at v1.0.2"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer provides a specific commit hash instead of the required version tag v1.0.2, failing to state the essential key point.",
+          "points_stated": [
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. The OIDC example workflow uses the `OctopusDeploy/login@34b6dcc1e86fa373c14e6a28c5507d221e4de629` action version.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "The example uses OctopusDeploy/login at v1.0.2"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer provides a specific commit hash instead of the required version tag v1.0.2, failing to state the essential key point.",
+          "points_stated": [
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2019,
+          "completion_tokens": 74,
+          "total_tokens": 2093,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 972,
+          "completion_tokens": 160,
+          "total_tokens": 1132,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.6
+    },
+    {
+      "id": "x-07",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/security/authentication-using-sasl.md",
+        "stackoverflow/45756543"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 5,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 5,
+        "answer": "1. Add a suitably modified JAAS file similar to the one below to each Kafka broker's config directory, let's call it kafka_server_jaas.conf for this example:\n2. Configure SASL port and SASL mechanisms in server.properties as described here. For example: listeners=SASL_SSL://host.name:port security.inter.broker.protocol=SASL_SSL sasl.mechanism.inter-broker.protocol=PLAIN sasl.enabled.mechanisms=PLAIN\n3. Configure the JAAS configuration property for each client in producer.properties or consumer.properties. The login module describes how the clients like producer and consumer can connect to the Kafka Broker. The following is an example configuration for a client for the PLAIN mechanism: sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"alice\" password=\"alice-secret\".\n4. Configure the JAAS configuration property for each client in producer.properties or consumer.properties. The login module describes how the clients like producer and consumer can connect to the Kafka Broker. The following is an example configuration for a client for the PLAIN mechanism: sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"alice\" password=\"alice-secret\".\n5. Pass the JAAS config file location as JVM parameter to each Kafka broker and clients. For brokers, pass it via -Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf. For clients, pass it via --command-config or similar.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "Kubernetes: keep the credentials in a Secret and give them to the pod as environment variables (env[].valueFrom.secretKeyRef) or as files from a Secret volume instead of baking them into the image"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the JAAS configuration methods but completely fails to address the Kubernetes-specific requirement of using Secrets to keep credentials out of the container image.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 5,
+        "answer": "1. Add a suitably modified JAAS file similar to the one below to each Kafka broker's config directory, let's call it kafka_server_jaas.conf for this example:\n2. Configure SASL port and SASL mechanisms in server.properties as described here. For example: listeners=SASL_SSL://host.name:port security.inter.broker.protocol=SASL_SSL sasl.mechanism.inter-broker.protocol=PLAIN sasl.enabled.mechanisms=PLAIN\n3. Configure the JAAS configuration property for each client in producer.properties or consumer.properties. The login module describes how the clients like producer and consumer can connect to the Kafka Broker. The following is an example configuration for a client for the PLAIN mechanism: sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"alice\" password=\"alice-secret\".\n4. Configure the JAAS configuration property for each client in producer.properties or consumer.properties. The login module describes how the clients like producer and consumer can connect to the Kafka Broker. The following is an example configuration for a client for the PLAIN mechanism: sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"alice\" password=\"alice-secret\".\n5. Pass the JAAS config file location as JVM parameter to each Kafka broker and clients. For brokers, pass it via -Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf. For clients, pass it via --command-config or similar.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "Kubernetes: keep the credentials in a Secret and give them to the pod as environment variables (env[].valueFrom.secretKeyRef) or as files from a Secret volume instead of baking them into the image"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the JAAS configuration methods but completely fails to address the Kubernetes-specific requirement of using Secrets to keep credentials out of the container image.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1836,
+          "completion_tokens": 374,
+          "total_tokens": 2210,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1842,
+          "completion_tokens": 226,
+          "total_tokens": 2068,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 5.0
+    },
+    {
+      "id": "x-08",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/operations/basic-kafka-operations.md",
+        "kafka/streams/developer-guide/write-streams-app.md",
+        "kubernetes/concepts/workloads/pods/pod-lifecycle.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 0.5,
+      "drafted_steps": 4,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "1. Set `controlled.shutdown.enable=true` in the broker configuration properties.\n2. Ensure all partitions hosted by the broker have replicas (replication factor > 1).\n3. Enable automatic leadership migration during controlled shutdown by setting `auto.leader.rebalance.enable=true` in the broker configuration properties.\n4. Run the command `bin/kafka-leader-election.sh --bootstrap-server localhost:9092 --election-type preferred --all-topic-partitions` to manually restore leadership if needed.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "Kubernetes: on termination the kubelet runs any preStop hook, then sends a TERM signal to process 1 in the container; the Pod has terminationGracePeriodSeconds (default 30 seconds) to finish, so raise it if the broker needs longer"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the Kafka controlled shutdown setting and replication requirement but completely omits the essential Kubernetes configuration regarding terminationGracePeriodSeconds and preStop hooks.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1714,
+          "completion_tokens": 147,
+          "total_tokens": 1861,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 671,
+          "completion_tokens": 124,
+          "total_tokens": 795,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 2.8
+    },
+    {
+      "id": "x-09",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/concepts/configuration/manage-resources-containers.md",
+        "kubernetes/tasks/configure-pod-container/assign-cpu-resource.md",
+        "kubernetes/tasks/debug/debug-application/debug-running-pod.md"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.5,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. Check if there are enough CPU resources on any of the nodes by using `kubectl describe pod` or `kubectl get events`.\n2. If there is not enough CPU resource, consider adding more nodes to the cluster. Alternatively, you can terminate unneeded Pods to make room for pending Pods.\n3. To see detailed information about the Pod and its events, use `kubectl describe pod` or `kubectl get events`.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "ARC: the controller creates the runner pods (retrying up to 5 times if a pod's status is failed) and the job waits for a runner; after 24 hours the GitHub Actions service unassigns the job if no runner accepts it"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer addresses the Kubernetes scheduling issue but completely omits the essential information about what happens to the GitHub Actions jobs (the 24-hour unassignment policy).",
+          "points_stated": [
+            false,
+            true
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. If there is not enough CPU resource, consider adding more nodes to the cluster. Alternatively, you can terminate unneeded Pods to make room for pending Pods.\n2. To see detailed information about the Pod and its events, use `kubectl describe pod` or `kubectl get events`.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "ARC: the controller creates the runner pods (retrying up to 5 times if a pod's status is failed) and the job waits for a runner; after 24 hours the GitHub Actions service unassigns the job if no runner accepts it",
+            "check that the pod's CPU request is not larger than the nodes' capacity (compare with kubectl describe nodes)"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer addresses the Kubernetes scheduling issue but completely omits the essential information about what happens to the GitHub Actions jobs (the 24-hour unassignment policy) and the specific check for CPU requests vs node capacity.",
+          "points_stated": [
+            false,
+            true
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1869,
+          "completion_tokens": 132,
+          "total_tokens": 2001,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1310,
+          "completion_tokens": 287,
+          "total_tokens": 1597,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 2.4
+    },
+    {
+      "id": "x-10",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/10845998",
+        "stackoverflow/18389124",
+        "stackoverflow/9736085"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.5,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Set the PGPASSWORD environment variable as described in S1\n2. Add an entry to pg_hba.conf with trust authentication for the user and connection type, then restart PostgreSQL service.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "Kubernetes: store the password in a Secret and expose it to the container as an environment variable (secretKeyRef) or as a mounted file, instead of putting it in the image"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer provides a valid PostgreSQL method (PGPASSWORD) but completely omits the essential Kubernetes requirement to use a Secret to securely supply the password to the container.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Add an entry to pg_hba.conf with trust authentication for the user and connection type, then restart PostgreSQL service.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "PostgreSQL: supply the password non-interactively, at least one of: set the PGPASSWORD environment variable, or use a .pgpass file (other choices: trust authentication for that user, or a connection string)",
+            "Kubernetes: store the password in a Secret and expose it to the container as an environment variable (secretKeyRef) or as a mounted file, instead of putting it in the image"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer only mentions trust authentication (a valid alternative for point 1) but completely omits the essential Kubernetes requirement to use Secrets, and does not mention the primary non-interactive methods like PGPASSWORD or .pgpass.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1906,
+          "completion_tokens": 74,
+          "total_tokens": 1980,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1129,
+          "completion_tokens": 282,
+          "total_tokens": 1411,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.4
+    },
+    {
+      "id": "x-11",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/58849770",
+        "stackoverflow/60618118"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.5,
+      "drafted_steps": 1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. Add `env` with `POSTGRES_PASSWORD: postgres` in the job configuration",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "psql step: supply the password non-interactively, at least one of: the PGPASSWORD environment variable, or a .pgpass file"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the need to set POSTGRES_PASSWORD for the service container but fails to address the second essential point regarding how to supply the password non-interactively to the psql step.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2494,
+          "completion_tokens": 38,
+          "total_tokens": 2532,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 543,
+          "completion_tokens": 109,
+          "total_tokens": 652,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.3
+    },
+    {
+      "id": "x-12",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kubernetes/concepts/workloads/pods/pod-lifecycle.md",
+        "kubernetes/concepts/workloads/pods/probes.md"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. Define a readiness probe that verifies if your Kafka Connect worker is ready to accept traffic. For example, you might check the status of network connections or file loading tasks.\n2. Set the `initialDelaySeconds` for the readiness probe to ensure it runs after the startup probe has succeeded and before the liveness probe starts running periodically.\n3. Configure the `failureThreshold` of the readiness probe high enough to allow your Kafka Connect worker time to complete its initial tasks, such as establishing network connections or loading files. This helps prevent premature termination due to a failed readiness check.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Kafka Connect: its REST server listens on port 8083 over HTTP unless the listeners setting says otherwise",
+            "Kubernetes: use an httpGet readiness probe against the Pod's IP on that port and a REST path; the check succeeds if the response status code is at least 200 and below 400"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer provides generic Kubernetes probe advice but fails to specify the required httpGet probe against the Kafka Connect REST API on port 8083.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1634,
+          "completion_tokens": 157,
+          "total_tokens": 1791,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 650,
+          "completion_tokens": 138,
+          "total_tokens": 788,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 2.6
+    },
+    {
+      "id": "err-20",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "postgres/monitoring-stats.html",
+        "stackoverflow/16609724",
+        "stackoverflow/46079791",
+        "stackoverflow/796008"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "1. Use INTERVAL type to perform subtraction\n2. Modify the query as follows:\n3. SELECT org_id, count(accounts) AS COUNT, ((date_at) - INTERVAL '1 DAY') AS dateat FROM sourcetable WHERE date_at <= NOW() - INTERVAL '130 DAYS' GROUP BY org_id, dateat;",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the need to use the INTERVAL type and provides the exact syntax for subtracting one day and filtering for the last 130 days as required by the key points.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Modify the query as follows:\n2. SELECT org_id, count(accounts) AS COUNT, ((date_at) - INTERVAL '1 DAY') AS dateat FROM sourcetable WHERE date_at <= NOW() - INTERVAL '130 DAYS' GROUP BY org_id, dateat;",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies that an INTERVAL type must be used instead of an integer for date arithmetic and provides the exact syntax required to subtract one day and filter for the last 130 days.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 2066,
+          "completion_tokens": 105,
+          "total_tokens": 2171,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1159,
+          "completion_tokens": 151,
+          "total_tokens": 1310,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.5
+    },
+    {
+      "id": "err-21",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "stackoverflow/57597367"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. git remote rm origin && git remote add origin \"https://$GITHUB_ACTOR:$GITHUB_PAT@github.com/apollo-elements/apollo-elements.git\"\n2. git checkout master && git pull",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Re-checkout and pull the branch in the workflow with `git checkout \"${GITHUB_REF:11}\" && git pull` so lerna finds the branch"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer uses a hardcoded branch name 'master' instead of the dynamic `${GITHUB_REF:11}` required to ensure the correct branch is checked out and pulled, which is the essential fix for the ENOREMOTEBRANCH error.",
+          "points_stated": [
+            false,
+            true,
+            false
+          ],
+          "corrected": true,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. git remote rm origin && git remote add origin \"https://$GITHUB_ACTOR:$GITHUB_PAT@github.com/apollo-elements/apollo-elements.git\"",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Re-checkout and pull the branch in the workflow with `git checkout \"${GITHUB_REF:11}\" && git pull` so lerna finds the branch"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer provides the optional remote URL configuration but fails to state the essential step of re-checking out and pulling the branch, which is required to resolve the ENOREMOTEBRANCH error.",
+          "points_stated": [
+            false,
+            true,
+            false
+          ],
+          "corrected": true,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "generation_error",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1852,
+          "completion_tokens": 74,
+          "total_tokens": 1926,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1237,
+          "completion_tokens": 244,
+          "total_tokens": 1481,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 0.9
+    },
+    {
+      "id": "err-22",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "context_pages": [
+        "kafka/streams/core-concepts.md",
+        "kafka/streams/developer-guide/config-streams.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "1. Use WallclockTimestampExtractor as your timestamp extractor\n2. If the application still fails, switch to LogAndSkipOnInvalidTimestamp or UsePartitionTimeOnInvalidTimestamp extractors",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [
+            "Use another timestamp extractor, at least one of: LogAndSkipOnInvalidTimestamp (logs a warning and drops the record so Streams can make progress) or UsePartitionTimeOnInvalidTimestamp (uses the previous valid timestamp of the same partition as an estimate, and throws if none exists)"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer states the essential key point by suggesting the correct alternative extractors (LogAndSkipOnInvalidTimestamp or UsePartitionTimeOnInvalidTimestamp) in step 2, although it incorrectly prioritizes WallclockTimestampExtractor which does not solve the negative timestamp issue.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": true,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "1. If the application still fails, switch to LogAndSkipOnInvalidTimestamp or UsePartitionTimeOnInvalidTimestamp extractors",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the two alternative timestamp extractors required to handle invalid timestamps, satisfying the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "category": "correct",
+      "tokens": {
+        "local/qwen2.5-3b-instruct": {
+          "calls": 1,
+          "cached_calls": 1,
+          "prompt_tokens": 1428,
+          "completion_tokens": 68,
+          "total_tokens": 1496,
+          "fresh_total_tokens": 0
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 2,
+          "prompt_tokens": 1102,
+          "completion_tokens": 210,
+          "total_tokens": 1312,
+          "fresh_total_tokens": 0
+        }
+      },
+      "seconds": 1.5
+    }
+  ]
+}

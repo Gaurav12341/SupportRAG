@@ -15,6 +15,11 @@ llm:
     timeout_s: 30
     max_tokens: 1500        # gpt-oss thinks first; the thinking tokens count against this
     reasoning_effort: low
+    # Free tier, per model (gpt-oss-120b, gpt-oss-20b and qwen/qwen3.8-27b each have their own bucket); checked against the
+    # x-ratelimit-* headers on 2026-10-20. src/llm.py waits for the minute limits and stops cleanly at the daily ones.
+    limits: {requests_per_min: 30, requests_per_day: 1000, tokens_per_min: 8000, tokens_per_day: 200000}
+    usage_log: data/cache/groq_usage.jsonl   # every Groq call's tokens; the rolling 24-hour total is read from here
+  cache_dir: data/cache     # llm_<name>.jsonl: finished replies of calls made with cache="<name>"
   prefer: local    # which provider goes first by default (the other is the failsafe); a call can override it
   temperature: 0.1
   max_tokens: 700
@@ -61,6 +66,12 @@ access:
   licensed_levels: [internal, restricted]
   admin_levels: [public, internal, restricted]
 
+verify:          # stage 14: how a drafted answer is checked against the excerpts it cites (src/verify.py, Phase 3 in docs/IMPROVEMENT_PLAN.md)
+  method: llm                   # llm = one claim check per answer; nli = the local scorer below (also the automatic fallback when the llm call fails)
+  llm: {model: "openai/gpt-oss-20b", max_tokens: 1200, reasoning_effort: low}   # its own Groq bucket (answers use 120b, the eval judge qwen)
+  partial_note: "The docs only cover part of this."   # shown when the check says the answer covers only part of the question
+
+# The NLI settings below are used only by verify.method: nli (the fallback), and by eval/answer.py
 thresholds:      # placeholder
   min_rerank_score: 0.0
   min_nli_entailment: 0.3       # a step is supported if NLI entailment against its cited text is at least this; 0.3 picked on the tune split (docs/DECISIONS.md)
@@ -72,7 +83,13 @@ context:         # stage 12; sizes in characters (about 4 per token), so LM Stud
   max_context_chars: 8000       # total text sent to the model
 
 answer:
+  llm: groq                 # which LLM writes the answer first; the other is the failsafe and every fallback is logged (D1 in docs/IMPROVEMENT_PLAN.md)
+  reasoning_effort: low     # Groq gpt-oss only; its thinking tokens count against max_tokens and the token budget
+  max_tokens: 1800
   refuse_text: "No documented fix found."
+  context:                  # how much the writer reads (stage 12), applied by src.answer.answer_cfg
+    local: {k_context: 5, max_context_chars: 8000, max_section_chars: 2800}    # fits LM Studio's 4k-token window
+    groq: {k_context: 10, max_context_chars: 12000, max_section_chars: 2000}   # eval.run ctx_recall 0.716 -> 0.810 (docs/DECISIONS.md, Phase 2)
 
 safety:          # stage 14, output side. Warn when a step contains one of these commands (regex, case-insensitive)
   dangerous_commands:
@@ -80,6 +97,11 @@ safety:          # stage 14, output side. Warn when a step contains one of these
     - {pattern: '\bdrop\s+(table|database|schema)\b', warning: "DROP permanently deletes data. Back up first and check you are connected to the right database."}
     - {pattern: '\btruncate\s+(table\s+)?\w', warning: "TRUNCATE deletes every row at once. Back up first."}
     - {pattern: 'kafka-topics[^\n]*--delete\b|--delete\b[^\n]*kafka-topics', warning: "Deleting a Kafka topic destroys its messages. Check the topic name and that no consumer still needs it."}
+
+eval:            # LLM jobs of the answer eval (docs/IMPROVEMENT_PLAN.md Phase 1); each runs on its own Groq model = its own free-tier bucket
+  judge: {model: "qwen/qwen3.8-27b", max_tokens: 500}   # grades answers against reference key points; another family than the answer writer
+  draft: {model: "openai/gpt-oss-20b", max_tokens: 1500}   # drafts new test questions (then checked by hand)
+  keypoints: {model: "qwen/qwen3.8-27b", max_tokens: 900}  # drafts key points for existing questions (then checked by hand)
 
 paths:
   raw_docs: data/raw

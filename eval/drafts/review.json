@@ -1,0 +1,1496 @@
+{
+ "err-01": {
+  "key_points": [
+   {
+    "text": "Edit pg_hba.conf (after backing it up) so local connections use trust authentication, e.g. `local all all trust`",
+    "essential": true
+   },
+   {
+    "text": "Restart the PostgreSQL server",
+    "essential": true
+   },
+   {
+    "text": "Connect as the superuser (e.g. `psql -U postgres`) and reset the password with `ALTER USER <name> WITH PASSWORD '<new>'`",
+    "essential": true
+   },
+   {
+    "text": "Restore the original pg_hba.conf and restart again, because leaving trust authentication is very dangerous",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read the accepted answer (steps 1-8). Question realistic; key points match steps 3-8; restore step optional (safety, not needed to get back in)."
+ },
+ "err-03": {
+  "key_points": [
+   {
+    "text": "Cause: the primary's VACUUM removes old row versions that the standby query still needs, so the standby cancels the query",
+    "essential": false
+   },
+   {
+    "text": "Stop the cancellations with at least one of: set hot_standby_feedback on the standby, raise max_standby_streaming_delay, or keep a repeatable read transaction open on the primary so old row versions are not vacuumed",
+    "essential": true
+   },
+   {
+    "text": "Trade-off: hot_standby_feedback or a held transaction delays cleanup of dead rows on the primary (table bloat)",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read the SO accepted answer (dummy repeatable read transaction) and postgres/hot-standby.html conflict section (hot_standby_feedback, max_standby_*_delay). Fix point merges these documented alternatives."
+ },
+ "err-04": {
+  "key_points": [
+   {
+    "text": "Reason OOMKilled / exit code 137 means the container tried to use more memory than its limit",
+    "essential": true
+   },
+   {
+    "text": "Check the application code for a memory leak, or if it behaves as expected set a higher memory limit (and possibly request) for the container",
+    "essential": true
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read kubernetes manage-resources-containers 'My container is terminated'. Both points are stated verbatim in the last paragraphs."
+ },
+ "err-05": {
+  "key_points": [
+   {
+    "text": "Free up capacity: add more nodes to the cluster or terminate unneeded Pods to make room for the pending Pod",
+    "essential": true
+   },
+   {
+    "text": "Check that the Pod's CPU request is not larger than what the nodes offer (e.g. a request of cpu: 1.1 never schedules on nodes with capacity cpu: 1); compare with `kubectl describe nodes`",
+    "essential": true
+   },
+   {
+    "text": "Check node taints: if most nodes are tainted and the Pod does not tolerate the taint, only the remaining nodes are considered",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read manage-resources-containers 'My Pods are pending with event message FailedScheduling': the four listed remedies; first two are the core, taints optional."
+ },
+ "err-07": {
+  "key_points": [
+   {
+    "text": "The cause is that the kubeconfig is not right (missing or wrong), so kubectl tries localhost",
+    "essential": true
+   },
+   {
+    "text": "Fix the kubeconfig; on GKE auto-generate it with `gcloud container clusters get-credentials \"CLUSTER NAME\"`",
+    "essential": true
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read SO 36650642 accepted answer; only GKE fix is given. Corpus has no other documented fix for this error (grep localhost:8080)."
+ },
+ "err-08": {
+  "key_points": [
+   {
+    "text": "Missing runtime classes from jackson-databind and jackson-core were the real problem; add those dependencies to the Java producer's project",
+    "essential": true
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read SO 63714401 accepted answer; single anecdotal fix (add jackson-databind/jackson-core), no other answer in corpus. Kept because it is the only documented fix; narrow."
+ },
+ "err-09": {
+  "key_points": [
+   {
+    "text": "Cause: vm.max_map_count (around 65535 by default on many Linux systems) is exceeded; each log segment uses 2 map areas (index and timeindex files), so e.g. 50000 partitions need 100000 map areas and crash the broker with OutOfMemoryError (Map failed)",
+    "essential": true
+   },
+   {
+    "text": "Keep an eye on vm.max_map_count when planning the number of partitions per broker (raise it or have fewer partitions/segments); segments per partition are usually more than one",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read kafka hardware-and-os OS section, vm.max_map_count bullet in full. The page states the cause; it only implies the remedy, so remedy is optional."
+ },
+ "sym-01": {
+  "key_points": [
+   {
+    "text": "Compare pg_current_wal_lsn on the primary with the sent_lsn field of pg_stat_replication: a large difference means the primary is under heavy load",
+    "essential": true
+   },
+   {
+    "text": "Compare sent_lsn with pg_last_wal_receive_lsn on the standby: a large difference means network delay or a standby under heavy load",
+    "essential": true
+   },
+   {
+    "text": "On a hot standby, a large difference between pg_last_wal_replay_lsn and flushed_lsn in pg_stat_wal_receiver means WAL is received faster than it is replayed",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read warm-standby.html 26.2.5.2 Monitoring: all three comparisons are stated; the first two answer primary/network/standby."
+ },
+ "sym-02": {
+  "key_points": [
+   {
+    "text": "UPDATE or DELETE does not remove the old row version immediately (MVCC); dead row versions stay until VACUUM cleans them up",
+    "essential": true
+   },
+   {
+    "text": "Standard VACUUM only marks the space reusable and does not return it to the operating system; VACUUM FULL compacts the table and returns space, but needs an exclusive lock and extra disk space while it runs",
+    "essential": true
+   },
+   {
+    "text": "Run standard VACUUM often enough (autovacuum does this and never issues VACUUM FULL); do not disable autovacuum",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read routine-vacuuming 24.1.2 Recovering Disk Space in full. Points 1-2 are the explanation the question asks for; routine-vacuum advice optional."
+ },
+ "sym-03": {
+  "key_points": [
+   {
+    "text": "After a bulk load the planner statistics are missing or obsolete; run ANALYZE (or VACUUM ANALYZE) on the table",
+    "essential": true
+   },
+   {
+    "text": "With no or obsolete statistics the planner makes poor plans; autovacuum, if enabled, may run ANALYZE automatically",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read populate.html 14.4.8 Run ANALYZE Afterwards (whole section); both points are stated."
+ },
+ "sym-05": {
+  "key_points": [
+   {
+    "text": "Terminating means a deletion was issued but the control plane cannot delete the Pod object; typically the Pod has a finalizer and an admission webhook prevents the finalizer from being removed",
+    "essential": true
+   },
+   {
+    "text": "Identify it by checking for ValidatingWebhookConfiguration or MutatingWebhookConfiguration objects that target UPDATE operations on pods",
+    "essential": false
+   },
+   {
+    "text": "For a third-party webhook: use the latest version, disable the webhook for UPDATE operations, or report an issue to the provider",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read debug-pods.md 'My pod stays terminating' in full; the cause is the core answer, the checks are optional."
+ },
+ "sym-06": {
+  "key_points": [
+   {
+    "text": "The kubelet compares eviction signals (e.g. memory.available, nodefs.available, imagefs.available) with eviction thresholds, the minimum amount of the resource that should be available on the node, and evicts Pods when a threshold is met",
+    "essential": true
+   },
+   {
+    "text": "Tune it by setting eviction thresholds on the kubelet: soft thresholds (eviction-soft with eviction-soft-grace-period, optionally eviction-max-pod-grace-period) or hard thresholds (eviction-hard, no grace period), written like memory.available<1Gi or as percentages",
+    "essential": true
+   },
+   {
+    "text": "Default hard thresholds include memory.available<100Mi, nodefs.available<10% and imagefs.available<15%; changing one parameter resets the others to 0 unless all are given",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read node-pressure-eviction 'Eviction signals' and 'Eviction thresholds' (soft/hard, defaults). Draft only covered signals; tuning points added from the thresholds section."
+ },
+ "sym-07": {
+  "key_points": [
+   {
+    "text": "Check the connection from the laptop to the API server, at least one of: the VPN connection is active and stable (reconnect if it dropped); the API server host is reachable (e.g. ping) and network/firewall allow it; the load balancer in front of the API servers is healthy",
+    "essential": true
+   },
+   {
+    "text": "Also check the kubeconfig (server address, KUBECONFIG, correct context) and credentials on the laptop",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [
+   "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md"
+  ],
+  "verify_note": "Read the whole troubleshoot-kubectl page (VPN, API server and load balancer, kubeconfig, contexts, TLS). Draft only had the VPN section; reachability/firewall/LB checks added."
+ },
+ "sym-08": {
+  "key_points": [
+   {
+    "text": "Give the consumer more time per batch or smaller batches, at least one of: increase max.poll.interval.ms (OK to spend more time on a large batch, favours throughput) or decrease max.poll.records (take fewer records per poll, favours latency)",
+    "essential": true
+   },
+   {
+    "text": "Also check whether something else makes the poll loop slow; explore that before changing configuration so a bigger problem is not masked",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read SO 50135591 question (poll interval exceeded, group rebalanced) and accepted answer. Fix is the either/or in the answer."
+ },
+ "sym-10": {
+  "key_points": [
+   {
+    "text": "The workflow file (.github/workflows/...) must exist on the branch the push goes to (and on any other branch that should trigger the workflow); a workflow file only on another branch does not run",
+    "essential": true
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read SO 61989951 question and accepted answer: the .github folder must be on the branch (x) and on any branch that should trigger the workflow. Single fact."
+ },
+ "ver-01": {
+  "key_points": [
+   {
+    "text": "Java 17, Java 21 and Java 25 are fully supported",
+    "essential": true
+   },
+   {
+    "text": "Java 11 is supported only for a subset of modules (clients, streams and related), not the broker",
+    "essential": false
+   },
+   {
+    "text": "Running the most recent LTS release is recommended (Java 25 at the time of writing); versions newer than the latest LTS are best-effort",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read kafka/operations/java-version.md in full. 17/21/25 fully supported; Java 11 limited to modules (so not brokers)."
+ },
+ "ver-02": {
+  "key_points": [
+   {
+    "text": "kafka-streams-scala is deprecated as of Kafka 4.3",
+    "essential": true
+   },
+   {
+    "text": "It will be removed in Kafka 5.0",
+    "essential": true
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read the upgrade.md bullet: 'deprecated as of Kafka 4.3 and will be removed in Kafka 5.0'. Both facts stated."
+ },
+ "ver-04": {
+  "key_points": [
+   {
+    "text": "runs.using accepts node20 (Node.js v20) and node24 (Node.js v24) for JavaScript actions",
+    "essential": true
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read metadata-syntax 'runs.using for JavaScript actions': node20 and node24 listed."
+ },
+ "ver-06": {
+  "key_points": [
+   {
+    "text": "No: support for MD5-encrypted passwords is deprecated and will be removed in a future PostgreSQL release, and the MD5 hash is no longer considered secure against determined attackers",
+    "essential": true
+   },
+   {
+    "text": "Use SCRAM (scram-sha-256) instead; if md5 is given in pg_hba.conf but the user's password is SCRAM-encrypted, SCRAM authentication is chosen automatically",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read auth-password.html md5/scram sections: deprecation warning and 'no longer considered secure' stated; SCRAM called most secure method."
+ },
+ "ver-07": {
+  "key_points": [
+   {
+    "text": "No: Kafka 0.x clients (also 1.x and 2.0) are not compatible with Kafka 4.0, because pre-0.10.x protocols are fully removed in Kafka 4.0 (KIP-896)",
+    "essential": true
+   }
+  ],
+  "acceptable_pages": [
+   "kafka/getting-started/upgrade.md"
+  ],
+  "verify_note": "Read compatibility.md forward-compatibility table: 0.x, 1.x, 2.0 clients are 'Not Compatible' with 4.0. Acceptable page added after the baseline run: upgrade.md 4.0.0 notes say old protocol API versions are removed and clients must be 2.1 or higher, which also answers the question."
+ },
+ "ver-08": {
+  "key_points": [
+   {
+    "text": "The in-tree Ceph RBD provisioner has been deprecated since Kubernetes v1.28 (use the CephFS RBD CSI driver instead)",
+    "essential": true
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read storage-classes 'Ceph RBD (deprecated)': 'Feature state: deprecated v1.28'; CSI driver recommended."
+ },
+ "x-01": {
+  "key_points": [
+   {
+    "text": "Kubernetes: keep the data directory on a PersistentVolume claimed through a PersistentVolumeClaim, whose lifecycle is independent of any individual Pod, so data survives pod restarts",
+    "essential": true
+   },
+   {
+    "text": "PostgreSQL: combine a file-system-level base backup with continuously archived WAL files; this supports point-in-time recovery to any time since the base backup",
+    "essential": true
+   },
+   {
+    "text": "Enable WAL archiving by setting wal_level to replica or higher, archive_mode to on, and an archive_command (or archive_library) that copies finished WAL segments; pg_dump cannot be used for this",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read persistent-volumes Introduction (PV/PVC lifecycle independent of Pod) and continuous-archiving 25.3 and 25.3.1 (base backup + WAL, archive_mode/archive_command). One point per product, both essential."
+ },
+ "x-02": {
+  "key_points": [
+   {
+    "text": "Kubernetes: OOMKilled means the container tried to use more memory than its limit; check the application for a memory leak, or if it behaves as expected set a higher memory limit (and possibly request) for the container",
+    "essential": true
+   },
+   {
+    "text": "Kafka: size memory so active readers and writers can be buffered; a back-of-the-envelope estimate is to buffer 30 seconds of writes, i.e. memory = write_throughput * 30",
+    "essential": true
+   },
+   {
+    "text": "Kafka relies on the OS page cache for data being written out, which uses free memory on the machine",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read manage-resources-containers 'My container is terminated' and hardware-and-os (memory paragraph: write_throughput*30; pagecache section). Draft had only the Kubernetes half; Kafka sizing rule added."
+ },
+ "x-04": {
+  "key_points": [
+   {
+    "text": "On the Debezium connector, set the property plugin.name to pgoutput; without it the connector uses its default, decoderbufs, which causes 'could not access file decoderbufs'",
+    "essential": true
+   },
+   {
+    "text": "PostgreSQL ships two logical output plugins in the standard distribution, pgoutput and test_decoding (the default of output_plugin_libraries)",
+    "essential": true
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read SO 59978213 accepted answer (plugin.name=pgoutput, default decoderbufs) and runtime-config-replication output_plugin_libraries (pgoutput, test_decoding are the two included plugins). Both halves stated."
+ },
+ "x-05": {
+  "key_points": [
+   {
+    "text": "Kubernetes: limit the Pod's local disk use with ephemeral-storage limits in the Pod spec (a namespace ResourceQuota for ephemeral-storage set by an admin is only enforced when Pods specify the limit)",
+    "essential": true
+   },
+   {
+    "text": "Kafka: bound how much data a topic stores with the topic settings retention.bytes (size) and retention.ms (time)",
+    "essential": true
+   }
+  ],
+  "acceptable_pages": [],
+  "verify_note": "Read ephemeral-storage Note (admin sets quota, user sets limits in Pod spec) and multi-tenancy 'Data Retention' (retention.bytes / retention.ms). Draft had only the Kubernetes half."
+ },
+ "x-06": {
+  "key_points": [
+   {
+    "text": "GitHub: yes, use OpenID Connect; give the job the id-token: write permission so the workflow can request a short-lived OIDC token (JWT) from GitHub's OIDC provider instead of storing long-lived credentials as secrets",
+    "essential": true
+   },
+   {
+    "text": "Kubernetes: the cluster must be set up to accept an external authentication source such as OIDC, which is recommended over client certificates and service account tokens for users reaching the API",
+    "essential": true
+   },
+   {
+    "text": "Define at least one trust condition (audience/subject claims) on the receiving side so untrusted repositories cannot obtain access",
+    "essential": false
+   }
+  ],
+  "acceptable_pages": [
+   "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-aws.md",
+   "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-azure.md",
+   "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-cloud-providers.md",
+   "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-docker.md",
+   "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-google-cloud-platform.md",
+   "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-jfrog.md",
+   "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-octopus-deploy.md",
+   "github/reference/security/secure-use.md"
+  ],
+  "verify_note": "Read github oidc.md (id-token: write, claims, trust conditions), oidc-in-cloud-providers and secure-use (no long-lived secrets, short-lived tokens) and k8s authentication-mechanisms (OIDC recommended). Labelled evidence quote is only the claims section; no page covers Kubernetes+GitHub OIDC end to end, so the answer combines both halves. Acceptable pages widened after the baseline run: every oidc-in-*.md how-to states that OIDC lets workflows reach a service without long-lived stored credentials and shows permissions id-token: write."
+ },
+ "none-02": {
+  "verify_note": "Question realistic (PgBouncer pooling in front of PostgreSQL); 'pgbouncer' occurs nowhere in the corpus (0 hits, also enforced by tests)."
+ },
+ "none-03": {
+  "verify_note": "Realistic Copilot question; 'copilot' occurs nowhere in the corpus (0 hits, also enforced by tests)."
+ },
+ "none-04": {
+  "verify_note": "Realistic Terraform state-lock question; 'terraform' occurs nowhere in the corpus (0 hits, also enforced by tests)."
+ },
+ "none-05": {
+  "verify_note": "Realistic TimescaleDB question; 'timescale' occurs nowhere in the corpus (0 hits, also enforced by tests)."
+ },
+ "draft-una-t-linkerd": {
+  "question": "Linkerd's `linkerd check` fails with 'linkerd-identity: issuer cert is not valid' on my cluster. How do I rotate the identity issuer certificate?",
+  "verify_note": "Rewritten by assistant to ask about Linkerd's own certificate rotation; 'linkerd' has 0 hits in the corpus, so no generic page answers it."
+ },
+ "draft-una-t-argocd": {
+  "question": "ArgoCD keeps showing my application as OutOfSync because the HPA changes spec.replicas. How do I make ArgoCD ignore that field?",
+  "verify_note": "Rewritten by assistant (draft was a generic container-start error that Kubernetes docs could partly answer); now about ArgoCD ignoreDifferences only. 'argocd' / 'argo cd' have 0 hits."
+ },
+ "draft-una-t-k3s": {
+  "question": "How do I disable the bundled Traefik ingress controller when installing k3s?",
+  "verify_note": "Rewritten by assistant to a k3s-install question; 'k3s' has 0 hits in the corpus."
+ },
+ "draft-una-t-patroni": {
+  "question": "Patroni logs 'failed to acquire leader lock' and my replica never gets promoted after the primary dies. Which patroni.yml settings (ttl, loop_wait, retry_timeout) control the failover timing?",
+  "verify_note": "Rewritten by assistant to a Patroni-config question ('loop_wait' and 'patroni' have 0 hits)."
+ },
+ "draft-una-t-citus": {
+  "question": "I installed the Citus extension on PostgreSQL 15 and added citus to shared_preload_libraries, but `SELECT * FROM citus_shard_placement();` fails with 'function citus_shard_placement() does not exist'. How do I enable the Citus functions?",
+  "verify_note": "Draft kept, shortened by assistant; Citus-specific, 'citus' has 0 hits."
+ },
+ "draft-una-t-ksqldb": {
+  "question": "ksqlDB: my CREATE STREAM on a JSON topic fails with 'SerializationException: Error deserializing key/value for partition'. Which format property do I set in the statement?",
+  "verify_note": "Rewritten by assistant to a ksqlDB statement question; 'ksqldb' has 0 hits."
+ },
+ "draft-una-t-strimzi": {
+  "question": "How do I set the JVM heap size for the Kafka brokers in a Strimzi Kafka custom resource?",
+  "verify_note": "Rewritten by assistant; asks about the Strimzi custom resource only (generic Kafka heap options exist in the corpus, the Strimzi resource does not). 'strimzi' has 0 hits."
+ },
+ "draft-una-t-mongodb": {
+  "question": "I'm using the Kafka Connect MongoDB source connector and get 'UnknownHostException: mongodb://localhost:27017' even though the mongo shell connects fine. What is wrong with my connector config?",
+  "verify_note": "Draft kept, shortened by assistant; 'mongodb' has 0 hits so the connector's own settings are undocumented in the corpus."
+ },
+ "draft-una-h-rancher": {
+  "question": "In Rancher, my imported downstream cluster is stuck in 'Waiting for cluster agent to connect'. How do I debug the cattle-cluster-agent?",
+  "verify_note": "Rewritten by assistant (draft was a generic image-pull problem answerable from Kubernetes docs); Rancher-specific now, 'rancher' has 0 hits."
+ },
+ "draft-una-h-pgbackrest": {
+  "question": "`pgbackrest stanza-create` fails with 'unable to find primary cluster - cannot proceed'. What do I need to set in pgbackrest.conf?",
+  "verify_note": "Draft was degenerate repeated text; rewritten by assistant. 'pgbackrest' has 0 hits."
+ },
+ "draft-una-h-postgis": {
+  "question": "`CREATE EXTENSION postgis;` fails on my PostgreSQL 15 server with 'could not open extension control file ... postgis.control: No such file or directory'. How do I install PostGIS?",
+  "verify_note": "Draft shortened by assistant; PostGIS-specific, 'postgis' has 0 hits."
+ },
+ "draft-una-h-cruisecontrol": {
+  "question": "Cruise Control's rebalance request returns 'NotEnoughValidWindowsException'. What does that mean and how do I fix it?",
+  "verify_note": "Rewritten by assistant to a Cruise Control-specific error; 'cruise control' has 0 hits."
+ },
+ "draft-una-h-kafdrop": {
+  "question": "Kafdrop shows a 403 Forbidden page when I open the topic list, even though my brokers are healthy. What could be causing this?",
+  "verify_note": "Draft shortened by assistant; Kafdrop-specific, 'kafdrop' has 0 hits."
+ },
+ "draft-una-h-circleci": {
+  "question": "How do I rerun a failed CircleCI job with SSH enabled so I can debug the build machine?",
+  "verify_note": "Rewritten by assistant (draft was a generic git permission error); CircleCI-specific, 'circleci' has 0 hits."
+ },
+ "draft-err-t-53ab5d": {
+  "question": "My ingress controller logs 'error obtaining service endpoints: error getting service resources/api-sand from the cache: service resources/api-sand was not found'. The Ingress is in the ingress-nginx namespace and my app runs in another namespace. How do I fix it?",
+  "evidence": [
+   {
+    "page": "stackoverflow/59844622",
+    "section": "Accepted answer (Ingress must be in the Service's namespace, or use ExternalName)",
+    "quote": "you should create it in the namespace where you have the service"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "An Ingress can only route to a Service in its own namespace: create the Ingress in the namespace where the Service and pod live, or, alternatively, create a Service of type ExternalName in the Ingress's namespace that points to the other namespace's service (<service>.<namespace>.svc.cluster.local)",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the SO question (ingress in ingress-nginx, service in 'resources') and accepted answer; draft key points were fine but the evidence quote was the error text, replaced by the answer sentence."
+ },
+ "draft-err-t-fc8697": {
+  "question": "My pods show 'FailedSync Error syncing pod, skipping: failed to \"StartContainer\" for \"web\" with CrashLoopBackOff: \"Back-off 10s restarting failed container=web\"', and kubectl logs (even with -p) prints nothing. What is wrong?",
+  "evidence": [
+   {
+    "page": "stackoverflow/41604499",
+    "section": "Accepted answer (container exits immediately)",
+    "quote": "The pod is crashing because it starts up then immediately exits"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "The container starts and immediately exits, so Kubernetes keeps restarting it (CrashLoopBackOff); the image needs a long-running command, set either in the Dockerfile or in the ReplicationController/pod spec",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the SO question (no logs, ReplicationController) and accepted answer. Draft key points ('check kubectl logs') were wrong because the question says logs are empty; replaced with the answer's cause and fix."
+ },
+ "draft-err-t-bcb51c": {
+  "question": "docker-compose up -d on my Mac fails with 'ERROR: for kafka-test_zoo1_1 Cannot start service zoo1: Mounts denied: approving /Users/test/kafka-test/zk-single-kafka-single/zoo1/datalog: file does not exist'. It worked before I updated Docker Desktop. How do I fix it?",
+  "evidence": [
+   {
+    "page": "stackoverflow/65241105",
+    "section": "Accepted answer (Docker Desktop 3.0.0 for Mac gRPC FUSE)",
+    "quote": "Use gRPC FUSE for file sharing"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "The problem comes from Docker Desktop 3.0.0 for Mac: disable Preferences > Experimental Features > 'Use gRPC FUSE for file sharing' (volume mounts work again), or update to Docker Desktop 3.0.1 where it is resolved",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the SO question (error text, worked before the Docker update) and accepted answer; draft key points (create the directory) contradicted the answer and were replaced."
+ },
+ "draft-err-t-22bfa6": {
+  "question": "npm install in my GitHub Actions workflow fails with 'npm ERR! 401 Unauthorized - GET https://npm.pkg.github.com/@xxxx%2fxxxx-analytics - Your request could not be authenticated by the GitHub Package Registry'. It works locally. What is wrong?",
+  "evidence": [
+   {
+    "page": "stackoverflow/64124831",
+    "section": "Accepted answer (extra slash before _authToken in .npmrc)",
+    "quote": "require an extra `/` before the auth token"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Workflows are stricter than local environments: in .npmrc the auth line needs an extra '/' before the token key, i.e. //npm.pkg.github.com/:_authToken=<token> instead of //npm.pkg.github.com:_authToken=<token>",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the SO question and accepted answer; draft key points (token scopes, secrets) were generic and not in the answer; replaced with the extra-slash fix."
+ },
+ "draft-err-t-04e805": {
+  "question": "My Gradle build in GitHub Actions fails with './gradlew: Permission denied'. How can I fix this?",
+  "evidence": [
+   {
+    "page": "stackoverflow/58282791",
+    "section": "Accepted answer (make gradlew executable)",
+    "quote": "git update-index --chmod=+x gradlew"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Make the wrapper executable, at least one of: `git update-index --chmod=+x gradlew` and commit it, or add a workflow step `chmod +x ./gradlew` before the build",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the SO accepted answer (both the git update-index fix and the chmod workflow step)."
+ },
+ "draft-err-t-1784ab": {
+  "type": "symptom",
+  "question": "Reading from one of my PostgreSQL tables fails with a data checksum failure because a page is corrupted. How can I get past the checksum check while I recover the data?",
+  "evidence": [
+   {
+    "page": "postgres/checksums.html",
+    "section": "28.2 Data Checksums",
+    "quote": "To do this, temporarily set the configuration parameter ignore_checksum_failure."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "When recovering from page corruption, temporarily set the configuration parameter ignore_checksum_failure to bypass the checksum protection",
+    "essential": true
+   },
+   {
+    "text": "Whether checksums are enabled can be checked with SHOW data_checksums; pg_checksums enables, disables or verifies them on an offline cluster",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read postgres/checksums.html (short page). Draft invented an error text, so it is re-typed as a symptom question; the setting is stated verbatim."
+ },
+ "draft-err-t-70c6c1": {
+  "type": "symptom",
+  "question": "I edited pg_hba.conf on a running PostgreSQL server but the new rules do not seem to apply. What do I have to do?",
+  "evidence": [
+   {
+    "page": "postgres/auth-pg-hba-conf.html",
+    "section": "20.1 The pg_hba.conf File",
+    "quote": "you will need to signal the postmaster"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "pg_hba.conf is read at start-up and on SIGHUP: signal the postmaster to re-read it, at least one of `pg_ctl reload`, the SQL function pg_reload_conf(), or `kill -HUP`",
+    "essential": true
+   },
+   {
+    "text": "On Windows changes are applied immediately by new connections; the pg_hba_file_rules view helps check the file for errors",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read postgres/auth-pg-hba-conf.html opening paragraphs; not an error message, re-typed as symptom."
+ },
+ "draft-err-t-7f3f65": {
+  "type": "symptom",
+  "question": "My partial index on access_log(client_ip) is ignored for WHERE url = '/index.html' AND client_ip = inet '192.168.100.23'. Why?",
+  "evidence": [
+   {
+    "page": "postgres/indexes-partial.html",
+    "section": "11.8 Partial Indexes",
+    "quote": "The following query cannot use the partial index, as it uses an IP address that is excluded from the index"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "The index was created WHERE NOT (client_ip within 192.168.100.0 to 192.168.100.255), so a query for an IP address inside that excluded range cannot use the partial index",
+    "essential": true
+   },
+   {
+    "text": "Such a partial index needs the common values to be predetermined, so it suits data distributions that do not change",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read postgres/indexes-partial.html example (subnet excluded from the index). Draft was not an error message; re-typed as symptom and the key point made specific."
+ },
+ "draft-err-t-0d2d5e": {
+  "drop": true,
+  "why": "Surplus in the tune symptom cell; the remedy is only implied by the doc."
+ },
+ "draft-err-t-017f28": {
+  "drop": true,
+  "why": "Invented error text; key points are fragments."
+ },
+ "draft-err-t-53e6fc": {
+  "drop": true,
+  "why": "Release-notes line, not an error or a fixable symptom."
+ },
+ "draft-err-h-3ee3b8": {
+  "question": "DROP DATABASE fails with 'database \"databasename\" is being accessed by other users' even though I stopped my web server. How do I drop it?",
+  "evidence": [
+   {
+    "page": "stackoverflow/7073773",
+    "section": "Accepted answer (DROP DATABASE ... WITH (FORCE) from v13)",
+    "quote": "you can disconnect the users automatically"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "From PostgreSQL 13 on, disconnect the other users automatically while dropping: `DROP DATABASE dbname WITH (FORCE);` or `dropdb -f dbname`",
+    "essential": true
+   },
+   {
+    "text": "Check what is still connected with `SELECT * FROM pg_stat_activity WHERE datname='database name';`; dropping requires being a superuser or the database owner",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read the SO question and accepted answer (dropdb, pg_stat_activity, FORCE option from v13). Question reworded to not give away the fix."
+ },
+ "draft-err-h-b7d849": {
+  "question": "kafka-consumer-groups.sh against a SASL_PLAINTEXT broker fails with 'KafkaException: java.lang.IllegalArgumentException: Login module not specified in JAAS config'. My --command-config properties file sets sasl.jaas.config to the path of my JAAS file, which works in my Java apps. What is wrong?",
+  "evidence": [
+   {
+    "page": "stackoverflow/45756543",
+    "section": "Accepted answer (two ways to provide the JAAS configuration)",
+    "quote": "In that case you set it to the actual JAAS configuration entry."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "sasl.jaas.config must contain the JAAS configuration entry itself, not a file path, e.g. sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"...\" password=\"...\"; and be passed with --command-config",
+    "essential": true
+   },
+   {
+    "text": "Alternatively point the Java property java.security.auth.login.config at the JAAS file, e.g. export KAFKA_OPTS=\"-Djava.security.auth.login.config=<path>\"; the console scripts pick that up automatically",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read the SO question (property holds a path) and accepted answer (two ways). The first is the direct fix; the alternative is optional."
+ },
+ "draft-err-h-aa7ef9": {
+  "question": "kafka-consumer-groups --new-consumer --bootstrap-server localhost:9092 --delete --group my_group prints 'Option [delete] is only valid with [zookeeper]. Note that there's no need to delete group metadata for the new consumer as the group is deleted when the last committed offset for that group expires.' How do I delete the consumer group so my app starts from the beginning again?",
+  "evidence": [
+   {
+    "page": "stackoverflow/42564594",
+    "section": "Question and accepted answer (new-style groups cannot be deleted with the tool)",
+    "quote": "there's no need to delete group metadata for the new consumer as the group is deleted when the last committed offset for that group expires"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Groups of the new consumer cannot be deleted with the --delete option (it only works with --zookeeper, i.e. old consumers); there is no need to delete their metadata because the group is deleted when its last committed offset expires",
+    "essential": true
+   },
+   {
+    "text": "Upgrading to Kafka 0.10.2 solved the underlying problem: after a topic is deleted and recreated, offsets are correctly reset so consumers start from the beginning of the new data",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read the SO question (error text) and accepted answer: it says new-style groups still cannot be deleted with the tool and the upgrade fixed the real problem. Draft key points (use --zookeeper) contradicted the question and were replaced."
+ },
+ "draft-err-h-3358ce": {
+  "drop": true,
+  "why": "Surplus: holdout symptom cell is full."
+ },
+ "draft-err-h-1b6362": {
+  "drop": true,
+  "why": "Surplus: holdout symptom cell is full."
+ },
+ "draft-err-h-e25064": {
+  "drop": true,
+  "why": "The doc says nothing about why a statement would be missing from the log; no answer in the source."
+ },
+ "draft-sym-t-52fd45": {
+  "question": "Cluster autoscaler does not scale up for my pending Pods that use CSI volumes. What setting should I check?",
+  "evidence": [
+   {
+    "page": "kubernetes/concepts/storage/storage-limits.md",
+    "section": "CSI volume attach limits and cluster autoscaler",
+    "quote": "its scheduling simulations do not include the required `CSINode` information for new nodes"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Only set spec.preventPodSchedulingIfMissing to true when cluster autoscaler runs with --enable-csi-node-aware-scheduling=true; otherwise its scheduling simulations lack the CSINode information for new nodes and it may fail to scale up for pending Pods that use CSI volumes",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read storage-limits.md 'CSI volume attach limits and cluster autoscaler' (whole section, 2 paragraphs). Question reworded; the key point is stated verbatim."
+ },
+ "draft-sym-t-a9ef28": {
+  "type": "error_message",
+  "question": "I run `select * from persons where first_Name=\"xyz\";` and PostgreSQL answers 'ERROR: column \"first_Name\" does not exist', although the table has a column called first_Name. What am I doing wrong?",
+  "evidence": [
+   {
+    "page": "stackoverflow/20878932",
+    "section": "Accepted answer (identifier folding and quoting)",
+    "quote": "Identifiers created with ***double quotes*** retain upper case letters"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Unquoted identifiers are folded to lower case, so a column created as \"first_Name\" must always be double-quoted: SELECT * FROM persons WHERE \"first_Name\" = 'xyz';",
+    "essential": true
+   },
+   {
+    "text": "String values go in single quotes ('xyz'), not double quotes, which are for identifiers",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the SO question and accepted answer; the query has both mistakes (unquoted mixed-case identifier, double-quoted value) and the answer covers both. Re-typed as an error-message question since it quotes the error."
+ },
+ "draft-sym-t-5ccf45": {
+  "question": "Our PostgreSQL server shows bursts of heavy disk writes and slow queries at regular intervals. What causes that and which settings can reduce it?",
+  "evidence": [
+   {
+    "page": "postgres/wal-configuration.html",
+    "section": "WAL Configuration (checkpoints)",
+    "quote": "The checkpoint requirement of flushing all dirty data pages to disk can cause a significant I/O load."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Checkpoints must flush all dirty data pages to disk, which can cause significant I/O load; the checkpointer starts one every checkpoint_timeout seconds or when max_wal_size is about to be exceeded (defaults 5 minutes and 1 GB)",
+    "essential": true
+   },
+   {
+    "text": "Set checkpoint_timeout and max_wal_size high enough that checkpoints do not happen too often; checkpoint_warning can be set as a sanity check",
+    "essential": true
+   },
+   {
+    "text": "Trade-off: more frequent checkpoints give faster crash recovery but cost more flushing and, with full_page_writes, more WAL volume",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read wal-configuration.html checkpoint paragraphs. Draft key points were inverted for the user's goal (it said reduce the settings); rewritten to the doc's advice."
+ },
+ "draft-sym-t-453469": {
+  "question": "My Kafka Streams app uses an in-memory key-value store and after a restart the data in it is gone. Why, and what are my options?",
+  "evidence": [
+   {
+    "page": "kafka/streams/developer-guide/processor-api.md",
+    "section": "State stores: in-memory KeyValueStore",
+    "quote": "Stores its data in memory."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "An in-memory KeyValueStore keeps its data only in memory (heap), so it is not kept on local disk across restarts; it is meant for environments where local disk is unavailable or wiped between restarts",
+    "essential": true
+   },
+   {
+    "text": "Use a persistent store (e.g. Stores.persistentKeyValueStore) to keep state on local disk",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read the state-store table row for In-memory KeyValueStore ('Stores its data in memory... useful when local disk is not available or wiped') and the persistent store example in the same table. The persistent option is only shown in the neighbouring example."
+ },
+ "draft-sym-t-ab2c53": {
+  "question": "After a Kafka Streams instance is added or restarted, its tasks stall for a long time before processing resumes. Why, and how can I reduce the pause?",
+  "evidence": [
+   {
+    "page": "kafka/streams/developer-guide/running-app.md",
+    "section": "State restoration during workload rebalance",
+    "quote": "the task processing state is fully restored before the application instance resumes processing"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "When a task is migrated, its state is fully restored (usually by replaying the changelog topic, from the checkpointed offset if a local store exists) before the instance resumes processing",
+    "essential": true
+   },
+   {
+    "text": "Reduce the pause with standby replicas (num.standby.replicas); since 2.6 warmup replicas restore most state in the background, so a migration usually causes no downtime when instances are caught up",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read running-app.md 'State restoration during workload rebalance' (all 4 paragraphs); both points stated."
+ },
+ "draft-sym-t-b9859c": {
+  "drop": true,
+  "why": "Question about upgrade errors not supported by the chunk (it only describes the controller.quorum.bootstrap.servers setting)."
+ },
+ "draft-sym-t-23d51b": {
+  "drop": true,
+  "why": "Doc does not explain why noexec would not take effect; draft invented feature-gate causes."
+ },
+ "draft-sym-t-62954c": {
+  "drop": true,
+  "why": "Ambiguous question; the doc only shows example StorageClass manifests."
+ },
+ "draft-sym-t-f7aec2": {
+  "drop": true,
+  "why": "Invented symptom (hang/timeout); chunk is the include_realm option description."
+ },
+ "draft-sym-t-471010": {
+  "question": "I added a custom deployment protection rule to my repository, but deployments still run without going through it. What did I miss?",
+  "evidence": [
+   {
+    "page": "github/how-tos/deploy/configure-and-manage-deployments/configure-custom-protection-rules.md",
+    "section": "Enabling custom deployment protection rules for the environment",
+    "quote": "Once a custom deployment protection rule has been enabled for an environment, it will automatically run whenever a workflow reaches a job that references the environment."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "The rule must be enabled for the environment: select the environment, check the box next to the rule under 'Deployment protection rules', and click 'Save protection rules'",
+    "essential": true
+   },
+   {
+    "text": "Once enabled, it runs automatically whenever a workflow reaches a job that references that environment",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read the whole 'Enabling custom deployment protection rules for the environment' section (3 steps + note). Question reworded to the missed step; draft key points were the steps themselves."
+ },
+ "draft-sym-t-b2a620": {
+  "question": "In my CI job some steps are allowed to fail, but I want a final step to fail the job if any of them failed. How can I read the result of earlier steps?",
+  "evidence": [
+   {
+    "page": "stackoverflow/57850553",
+    "section": "Accepted answer (steps.<id>.outcome)",
+    "quote": "Using the `outcome` property of each step we can check the result of its execution."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Give the steps ids and `continue-on-error: true`, then in a final step use the steps context outcome property, e.g. `if: steps.hello.outcome != 'success' || steps.world.outcome != 'success'` with `run: exit 1` to fail the job",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the SO question and accepted answer (current answer uses steps.<id>.outcome; the original answer used custom outputs)."
+ },
+ "draft-sym-h-4de7fc": {
+  "question": "My Windows pods are stuck at 'Container Creating' or keep restarting. What should I check on the node?",
+  "key_points": [
+   {
+    "text": "Make sure the pause image is compatible with the node's Windows OS version",
+    "essential": true
+   },
+   {
+    "text": "With containerd the pause image is set in the plugins.plugins.cri.sandbox_image field of config.toml",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read windows.md 'Node-level troubleshooting' item 1: matches the draft."
+ },
+ "draft-sym-h-068a50": {
+  "question": "Deleting rows from a parent table in PostgreSQL takes ages even though the table is not huge. What could be causing the slowness?",
+  "evidence": [
+   {
+    "page": "stackoverflow/9407442",
+    "section": "Accepted answer (indexes on foreign keys)",
+    "quote": "will be horribly slow"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Missing indexes on the foreign key columns that reference it: DELETEs on the referenced primary keys are horribly slow without them, so create such indexes if you expect to DELETE from the referenced table",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the SO accepted answer (long tuning list); the foreign-key index paragraph is stated verbatim. The page is about speeding up tests, but the paragraph answers this symptom."
+ },
+ "draft-sym-h-0a8116": {
+  "question": "In my Kafka Streams app, a message that cannot be deserialized or makes my processing code throw jams the stream and no more messages are picked up. How should I handle bad messages?",
+  "evidence": [
+   {
+    "page": "stackoverflow/42666756",
+    "section": "Accepted answer (KIP-161 deserialization exception handler)",
+    "quote": "It allows you to register an callback via parameter `default.deserialization.exception.handler`."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Register a deserialization exception handler with the config default.deserialization.exception.handler (KIP-161, from Kafka 1.0): it is called on every deserialization error and can CONTINUE (drop the record and move on) instead of FAIL, which is the default",
+    "essential": true
+   },
+   {
+    "text": "Catching errors in your own code works (route failures to an error topic), but to catch deserialization errors yourself you must use ByteArraySerdes and deserialize in a map(); on the producer side default.production.exception.handler (KIP-210) can return CONTINUE",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read the SO question and the accepted answer with both updates; the draft key points came from the question, replaced with the answer's handler config."
+ },
+ "draft-sym-h-5c365a": {
+  "question": "Kafka Connect's status API shows my connector as RUNNING but its task as UNASSIGNED. Is something wrong?",
+  "key_points": [
+   {
+    "text": "Not necessarily: status updates are published to the status.storage.topic that all workers consume asynchronously, so there is typically a short delay before a state change shows in the status API, and connector and task states can differ for short periods",
+    "essential": true
+   },
+   {
+    "text": "A task that fails is not restarted automatically; restart it with the restart REST API",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read administration.md status section: the asynchronous-status sentence and 'states may differ for short periods' are verbatim; UNASSIGNED means not yet assigned to a worker."
+ },
+ "draft-sym-h-0e1fe7": {
+  "question": "Caches created by pull request branches keep piling up in my repository after the PRs are closed. How can I delete them automatically when a PR is closed?",
+  "key_points": [
+   {
+    "text": "Use a workflow triggered by pull_request with types: closed that has permissions actions: write, lists the branch's caches with `gh cache list --ref $BRANCH --limit 100` and deletes each with `gh cache delete`",
+    "essential": true
+   },
+   {
+    "text": "For pull requests from forks or other repositories trigger it with pull_request_target, mind the security considerations",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read manage-caches.md 'Force deleting cache entries' with the example workflow (closed trigger, actions: write, gh cache list/delete)."
+ },
+ "draft-sym-h-7f652a": {
+  "drop": true,
+  "why": "Question premise is wrong (cpu=8 parses as an integer); quote not in the page."
+ },
+ "draft-sym-h-f19c24": {
+  "drop": true,
+  "why": "Surplus: contrived symptom; holdout symptom cell is full."
+ },
+ "draft-ver-t-901c7b": {
+  "question": "Since which Kubernetes version is setting a Pod's hostname to its FQDN (setHostnameAsFQDN) stable?",
+  "evidence": [
+   {
+    "page": "kubernetes/concepts/workloads/pods/pod-hostname.md",
+    "section": "Hostname with pod's setHostnameAsFQDN fields",
+    "quote": "Feature state: v1.22 stable"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "It is stable since Kubernetes v1.22",
+    "essential": true
+   },
+   {
+    "text": "It needs setHostnameAsFQDN: true together with the subdomain field; an FQDN longer than 64 characters makes the Pod fail to start (it stays Pending)",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read pod-hostname.md section: 'Feature state: v1.22 stable' directly under the setHostnameAsFQDN heading, plus the 64-character note."
+ },
+ "draft-ver-t-83d47b": {
+  "question": "Which GitHub Enterprise Server versions can I use with Actions Runner Controller (ARC)?",
+  "key_points": [
+   {
+    "text": "ARC is only supported on GitHub Enterprise Server versions 3.9 and greater",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read support-for-arc.md; the sentence is verbatim."
+ },
+ "draft-ver-t-c6a26f": {
+  "question": "Which TCP port does PostgreSQL listen on by default, and which parameter changes it?",
+  "key_points": [
+   {
+    "text": "The port parameter sets the TCP port the server listens on; 5432 by default",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the 'port (integer)' entry in runtime-config-connection.html."
+ },
+ "draft-ver-t-123470": {
+  "question": "In Kafka 1.1.x, can I change the listener used for inter-broker communication with a dynamic broker config update?",
+  "key_points": [
+   {
+    "text": "No: in Kafka 1.1.x the listener used by the inter-broker listener may not be updated dynamically",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the dynamic broker configs paragraph in broker-configs.md; the sentence is verbatim and bounded to 1.1.x."
+ },
+ "draft-ver-t-64bd8b": {
+  "question": "My ~/.psqlrc changes how psql behaves when I restore a text dump. Which option makes psql run with its default settings?",
+  "key_points": [
+   {
+    "text": "Use psql's -X (--no-psqlrc) option so it runs with its default settings",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read backup-dump.html restore section; the sentence is verbatim."
+ },
+ "draft-ver-t-0de5a3": {
+  "question": "How do I enable Leader Migration for the controller managers when upgrading?",
+  "key_points": [
+   {
+    "text": "Set --enable-leader-migration on kube-controller-manager or cloud-controller-manager",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read controller-manager-leader-migration.md; the sentence is verbatim."
+ },
+ "draft-ver-t-tiered": {
+  "question": "Can I use Kafka tiered storage on a compacted topic?",
+  "evidence": [
+   {
+    "page": "kafka/operations/tiered-storage.md",
+    "section": "Limitations",
+    "quote": "No support for compacted topics"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "No: tiered storage has no support for compacted topics",
+    "essential": true
+   },
+   {
+    "text": "Other limitations: tiered storage must be disabled on all topics before it is disabled at the broker level; admin actions need clients from 3.0 onwards",
+    "essential": false
+   }
+  ],
+  "verify_note": "Hand-written by assistant from the Limitations list in tiered-storage.md (read in full)."
+ },
+ "draft-ver-t-6228a8": {
+  "question": "Which version of the OctopusDeploy/login action does the OIDC example workflow use?",
+  "key_points": [
+   {
+    "text": "The example uses OctopusDeploy/login at v1.0.2",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the example workflow in oidc-in-octopus-deploy.md; the pinned version is #v1.0.2. Trivia-level, kept as a version-lookup question."
+ },
+ "draft-ver-t-2e1e22": {
+  "drop": true,
+  "why": "Dry definitional question about internal behaviour."
+ },
+ "draft-ver-t-dc9e23": {
+  "drop": true,
+  "why": "Answer is just a value in example output."
+ },
+ "draft-ver-t-f9a6e0": {
+  "drop": true,
+  "why": "How-to list, not a version/fact question."
+ },
+ "draft-ver-h-f6a08f": {
+  "question": "Since which Kubernetes version is Pod Overhead stable?",
+  "key_points": [
+   {
+    "text": "Pod Overhead is stable since Kubernetes v1.24",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read pod-overhead.md: 'Feature state: v1.24 stable'."
+ },
+ "draft-ver-h-7d1cee": {
+  "question": "Is JIT compilation enabled by default in PostgreSQL, and which parameter controls it?",
+  "key_points": [
+   {
+    "text": "The jit parameter controls whether JIT compilation may be used; its default is on",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the jit entry in runtime-config-query.html; 'The default is on.'"
+ },
+ "draft-ver-h-d2b229": {
+  "question": "How do I enable the streams rebalance protocol on an existing Kafka 4.2 cluster?",
+  "key_points": [
+   {
+    "text": "Upgrade the streams.version feature with `bin/kafka-features.sh --bootstrap-server localhost:9092 upgrade --feature streams.version=1`",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read streams-rebalance-protocol.md; the command is verbatim."
+ },
+ "draft-ver-h-itp": {
+  "question": "Since which Kubernetes version is Service internal traffic policy stable?",
+  "key_points": [
+   {
+    "text": "Service Internal Traffic Policy is stable since Kubernetes v1.26",
+    "essential": true
+   },
+   {
+    "text": "It restricts internal traffic (from Pods in the cluster) to endpoints on the node the traffic came from, which can reduce costs and improve performance",
+    "essential": false
+   }
+  ],
+  "verify_note": "Hand-written by assistant; page opens with 'Feature state: v1.26 stable'."
+ },
+ "draft-ver-h-ad2778": {
+  "drop": true,
+  "why": "Trivia from an example manifest."
+ },
+ "draft-ver-h-72493e": {
+  "drop": true,
+  "why": "Command output trivia."
+ },
+ "draft-cro-t-sasl": {
+  "question": "My Kafka client pods need SASL credentials. How do I give the client its JAAS login configuration and keep the username and password out of the container image?",
+  "evidence": [
+   {
+    "page": "kafka/security/authentication-using-sasl.md",
+    "section": "JAAS configuration for Kafka clients",
+    "quote": "Clients may configure JAAS using the client configuration property sasl.jaas.config or using the static JAAS config file similar to brokers."
+   },
+   {
+    "page": "kubernetes/concepts/configuration/secret.md",
+    "section": "Using Secrets as files from a Pod",
+    "quote": "have Kubernetes make the value of that Secret be available as a file inside the filesystem of one or more of the Pod's containers"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Kafka: set the JAAS login configuration with the client property sasl.jaas.config (no file needed; it wins over the java.security.auth.login.config system property), or use a static JAAS file with a KafkaClient section passed with -Djava.security.auth.login.config",
+    "essential": true
+   },
+   {
+    "text": "Kubernetes: keep the credentials in a Secret and give them to the pod as environment variables (env[].valueFrom.secretKeyRef) or as files from a Secret volume instead of baking them into the image",
+    "essential": true
+   },
+   {
+    "text": "Secret values mounted as a volume are updated eventually, but not when mounted with subPath",
+    "essential": false
+   }
+  ],
+  "verify_note": "Hand-written by assistant. Read authentication-using-sasl.md 'JAAS configuration for Kafka clients' (both modes, precedence) and secret.md (env vars via secretKeyRef; files via volume; subPath note). One essential point per product."
+ },
+ "draft-cro-t-shutdown": {
+  "question": "How do I make Kafka broker pods shut down gracefully on Kubernetes, so that leadership moves away and the broker gets enough time to stop?",
+  "evidence": [
+   {
+    "page": "kafka/operations/basic-kafka-operations.md",
+    "section": "Graceful shutdown",
+    "quote": "It will migrate any partitions the server is the leader for to other replicas prior to shutting down."
+   },
+   {
+    "page": "kubernetes/concepts/workloads/pods/pod-lifecycle.md",
+    "section": "Termination of Pods",
+    "quote": "The default `terminationGracePeriodSeconds` setting is 30 seconds."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Kafka: set controlled.shutdown.enable=true so the broker migrates the partitions it leads to other replicas before shutting down (logs are synced to disk automatically unless it is hard-killed); it only succeeds if every partition has a live replica (replication factor above 1)",
+    "essential": true
+   },
+   {
+    "text": "Kubernetes: on termination the kubelet runs any preStop hook, then sends a TERM signal to process 1 in the container; the Pod has terminationGracePeriodSeconds (default 30 seconds) to finish, so raise it if the broker needs longer",
+    "essential": true
+   }
+  ],
+  "verify_note": "Hand-written by assistant. Read basic-kafka-operations 'Graceful shutdown' (two optimizations, controlled.shutdown.enable, replica requirement) and pod-lifecycle termination steps (preStop, TERM signal, default 30 s)."
+ },
+ "draft-cro-t-arc": {
+  "question": "My Actions Runner Controller runner pods stay Pending with the event 'FailedScheduling ... 0/42 nodes available: insufficient cpu', and my workflow jobs just wait. What happens to the jobs and what should I do about the pods?",
+  "evidence": [
+   {
+    "page": "github/concepts/runners/actions-runner-controller.md",
+    "section": "Autoscaling runner scale set: how a job is run",
+    "quote": "After 24 hours the GitHub Actions Service unassigns the job if no runner accepts it."
+   },
+   {
+    "page": "kubernetes/concepts/configuration/manage-resources-containers.md",
+    "section": "My Pods are pending with event message FailedScheduling",
+    "quote": "fails to be scheduled due to insufficient CPU resource on any node"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "ARC: the controller creates the runner pods (retrying up to 5 times if a pod's status is failed) and the job waits for a runner; after 24 hours the GitHub Actions service unassigns the job if no runner accepts it",
+    "essential": true
+   },
+   {
+    "text": "Kubernetes: FailedScheduling with insufficient cpu means no node can fit the pod; add nodes or terminate unneeded Pods, and check that the pod's CPU request is not larger than the nodes' capacity (compare with kubectl describe nodes)",
+    "essential": true
+   }
+  ],
+  "verify_note": "Hand-written by assistant. Read actions-runner-controller.md workflow steps (retries up to 5 times, 24-hour unassign) and manage-resources FailedScheduling remedies."
+ },
+ "draft-cro-t-psql": {
+  "question": "A Kubernetes Job runs psql against my PostgreSQL server from a script and must not prompt for a password or have it written into the image. How do I supply it?",
+  "evidence": [
+   {
+    "page": "stackoverflow/9736085",
+    "section": "Accepted answer (four ways to supply a password)",
+    "quote": "You have four choices to supply a password"
+   },
+   {
+    "page": "kubernetes/concepts/configuration/secret.md",
+    "section": "Uses for Secrets",
+    "quote": "Set environment variables for a container."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "PostgreSQL: supply the password non-interactively, at least one of: set the PGPASSWORD environment variable, or use a .pgpass file (other choices: trust authentication for that user, or a connection string)",
+    "essential": true
+   },
+   {
+    "text": "Kubernetes: store the password in a Secret and expose it to the container as an environment variable (secretKeyRef) or as a mounted file, instead of putting it in the image",
+    "essential": true
+   }
+  ],
+  "verify_note": "Hand-written by assistant. Read SO 9736085 accepted answer (four choices: PGPASSWORD, .pgpass, trust, connection string) and secret.md 'Uses for Secrets' / env var section."
+ },
+ "draft-cro-t-service": {
+  "question": "In my GitHub Actions workflow the postgres:11 service container is reported unhealthy ('Failed to initialize, db service is unhealthy'), and a later psql step stops to ask for a password. What do I need to set?",
+  "evidence": [
+   {
+    "page": "stackoverflow/60618118",
+    "section": "Accepted answer (POSTGRES_PASSWORD)",
+    "quote": "Postgres container requires that postgres user be setup with password in order to start it"
+   },
+   {
+    "page": "stackoverflow/9736085",
+    "section": "Accepted answer (four ways to supply a password)",
+    "quote": "You have four choices to supply a password"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Workflow service container: the postgres image will not start without a password, so set POSTGRES_PASSWORD in the service's env",
+    "essential": true
+   },
+   {
+    "text": "psql step: supply the password non-interactively, at least one of: the PGPASSWORD environment variable, or a .pgpass file",
+    "essential": true
+   }
+  ],
+  "verify_note": "Hand-written by assistant. Read SO 60618118 (service container unhealthy; answer: POSTGRES_PASSWORD env) and SO 9736085 (four ways to supply a password to psql). Both are ticket-style pages; the pair forms one workflow scenario."
+ },
+ "draft-cro-t-probe": {
+  "question": "How can I add a readiness probe for a Kafka Connect worker running in a Kubernetes pod?",
+  "evidence": [
+   {
+    "page": "kafka/kafka-connect/user-guide.md",
+    "section": "REST API listeners",
+    "quote": "By default, if no `listeners` are specified, the REST server runs on port 8083 using the HTTP protocol."
+   },
+   {
+    "page": "kubernetes/concepts/workloads/pods/probes.md",
+    "section": "Check mechanisms",
+    "quote": "Performs an HTTP `GET` request against the Pod's IP address on a specified port and path."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Kafka Connect: its REST server listens on port 8083 over HTTP unless the listeners setting says otherwise",
+    "essential": true
+   },
+   {
+    "text": "Kubernetes: use an httpGet readiness probe against the Pod's IP on that port and a REST path; the check succeeds if the response status code is at least 200 and below 400",
+    "essential": true
+   }
+  ],
+  "verify_note": "Hand-written by assistant. Read Connect user-guide REST listeners (default 8083, HTTP) and probes.md mechanisms (httpGet, 200-399 success). Path choice is left to the answerer (GET on the REST API)."
+ },
+ "draft-cro-h-shared": {
+  "question": "I run PostgreSQL in a pod with a memory limit. How big should shared_buffers be, and what happens if the container exceeds its memory limit?",
+  "evidence": [
+   {
+    "page": "postgres/runtime-config-resource.html",
+    "section": "19.4.1 Memory (shared_buffers)",
+    "quote": "a reasonable starting value for `shared_buffers` is 25% of the memory in your system"
+   },
+   {
+    "page": "kubernetes/concepts/configuration/manage-resources-containers.md",
+    "section": "My container is terminated",
+    "quote": "The `OOMKilled` reason shows that the container tried to use more memory than its limit."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "PostgreSQL: on a dedicated server with 1GB or more of RAM a reasonable starting value for shared_buffers is 25% of the memory (the default is typically 128MB, set at server start); more than about 40% of RAM is unlikely to work better",
+    "essential": true
+   },
+   {
+    "text": "Kubernetes: if the container tries to use more memory than its limit it is terminated with reason OOMKilled; check the application for a memory leak or set a higher memory limit (and possibly request)",
+    "essential": true
+   }
+  ],
+  "verify_note": "Hand-written by assistant. Read runtime-config-resource shared_buffers entry and manage-resources 'My container is terminated'. Percent applies to the memory available to the server, so the pod limit is the budget (the answerer must connect the two)."
+ },
+ "draft-cro-h-pdb": {
+  "question": "I have to drain a Kubernetes node that runs Kafka broker pods without making partitions unavailable. How do I protect the brokers?",
+  "evidence": [
+   {
+    "page": "kubernetes/concepts/workloads/pods/disruptions.md",
+    "section": "Pod disruption budgets",
+    "quote": "A PDB limits the number of Pods of a replicated application that are down simultaneously from voluntary disruptions."
+   },
+   {
+    "page": "kafka/design/design.md",
+    "section": "Replication (in-sync replicas)",
+    "quote": "is no less than the `min.insync.replicas` setting"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Kubernetes: create a PodDisruptionBudget for the brokers; kubectl drain evicts Pods through the Eviction API, which respects the PDB, so only the allowed number of broker pods is down at once",
+    "essential": true
+   },
+   {
+    "text": "Kafka: messages stay visible and writable only while the number of in-sync replicas is at least min.insync.replicas, so the PDB should allow no more brokers down than keeps the in-sync replicas at or above that setting",
+    "essential": true
+   }
+  ],
+  "verify_note": "Hand-written by assistant. Read disruptions.md 'Pod disruption budgets' (PDB, kubectl drain, Eviction API) and design.md (ISR must be no less than min.insync.replicas for committed messages to be visible)."
+ },
+ "draft-cro-h-logs": {
+  "question": "PostgreSQL runs in a pod. How do I find out which of my queries are slow?",
+  "evidence": [
+   {
+    "page": "postgres/runtime-config-logging.html",
+    "section": "log_min_duration_statement",
+    "quote": "if you set it to `250ms` then all SQL statements that run 250ms or longer will be logged"
+   },
+   {
+    "page": "kubernetes/tasks/debug/debug-application/debug-running-pod.md",
+    "section": "Examining pod logs",
+    "quote": "First, look at the logs of the affected container"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "PostgreSQL: set log_min_duration_statement (for example 250ms) so every statement that runs at least that long is logged; the default is -1, which disables it",
+    "essential": true
+   },
+   {
+    "text": "Kubernetes: read the server log with kubectl logs <pod> -c <container> (log_destination defaults to stderr, which the container runtime captures); --previous shows a crashed container's log",
+    "essential": true
+   }
+  ],
+  "verify_note": "Hand-written by assistant. Read runtime-config-logging (log_min_duration_statement, log_destination default stderr) and debug-running-pod 'Examining pod logs'. Connecting stderr to kubectl logs is the answerer's step."
+ },
+ "draft-cro-h-temp": {
+  "question": "My PostgreSQL pod gets evicted for using too much local disk when large sorts and hashes spill to temporary files. How can I bound that?",
+  "evidence": [
+   {
+    "page": "postgres/runtime-config-resource.html",
+    "section": "19.4.1 Memory (temp_file_limit)",
+    "quote": "Specifies the maximum amount of disk space that a process can use for temporary files"
+   },
+   {
+    "page": "kubernetes/concepts/storage/ephemeral-storage.md",
+    "section": "Local ephemeral storage",
+    "quote": "A user needs to specify limits for the ephemeral-storage resource in the Pod spec."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "PostgreSQL: set temp_file_limit, the maximum disk space a process can use for temporary files such as sort and hash files; a transaction exceeding it is cancelled (-1, the default, means no limit)",
+    "essential": true
+   },
+   {
+    "text": "Kubernetes: set limits for the ephemeral-storage resource in the Pod spec (an admin's namespace ResourceQuota for ephemeral-storage is only enforced when Pods specify the limit)",
+    "essential": true
+   }
+  ],
+  "verify_note": "Hand-written by assistant. Read runtime-config-resource temp_file_limit and ephemeral-storage Note (quota only enforced when the Pod spec has limits)."
+ },
+ "draft-err-t-79dab9": {
+  "question": "In PostgreSQL, `select org_id, count(accounts), ((date_at) - 1) as dateat from sourcetable where date_at <= now() - 130 group by org_id, dateat` fails with 'ERROR: operator does not exist: timestamp without time zone - integer'. How do I subtract a day and filter the last 130 days?",
+  "evidence": [
+   {
+    "page": "stackoverflow/46079791",
+    "section": "Accepted answer (use INTERVAL)",
+    "quote": "Use the `INTERVAL` type to it."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Subtract an interval, not an integer: `date_at - INTERVAL '1 DAY'` and `date_at <= now() - INTERVAL '130 DAYS'`",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the SO question (error text) and accepted answer (INTERVAL type, full corrected query); draft key points matched."
+ },
+ "draft-err-t-aa1590": {
+  "question": "My GitHub Actions workflow runs lerna publish and fails with \"lerna ERR! ENOREMOTEBRANCH Branch 'master' doesn't exist in remote 'origin'\". What do I need to change in the workflow?",
+  "evidence": [
+   {
+    "page": "stackoverflow/57597367",
+    "section": "Accepted answer (set remote with a token, re-checkout and pull)",
+    "quote": "re-checking and pulling with `git checkout \"${GITHUB_REF:11}\" && git pull`"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Re-checkout and pull the branch in the workflow with `git checkout \"${GITHUB_REF:11}\" && git pull` so lerna finds the branch",
+    "essential": true
+   },
+   {
+    "text": "Point the origin remote at a URL with a personal access token (`git remote set-url origin https://$GITHUB_ACTOR:$GITHUB_PAT@github.com/<owner>/<repo>`, token from repository secrets) so lerna can push tags and commits",
+    "essential": false
+   },
+   {
+    "text": "Run `npm whoami` after setting up auth, so a broken authentication is caught before lerna publish pushes tags",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read the SO question and the updated accepted answer (list of key features); the draft key points were a subset. Which feature fixes the branch error is the answerer's reading: re-checkout and pull is the direct one."
+ },
+ "draft-err-t-256eb5": {
+  "question": "My Kafka Streams application stops with an exception from FailOnInvalidTimestamp because a record has a negative timestamp. How can I keep it running?",
+  "evidence": [
+   {
+    "page": "kafka/streams/developer-guide/config-streams.md",
+    "section": "Timestamp extractor",
+    "quote": "If you have data with invalid timestamps and want to process it, then there are two alternative extractors available."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "Use another timestamp extractor, at least one of: LogAndSkipOnInvalidTimestamp (logs a warning and drops the record so Streams can make progress) or UsePartitionTimeOnInvalidTimestamp (uses the previous valid timestamp of the same partition as an estimate, and throws if none exists)",
+    "essential": true
+   },
+   {
+    "text": "WallclockTimestampExtractor returns the current system time instead of extracting a timestamp",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read config-streams.md timestamp-extractor quote block: both alternative extractors and the wall-clock one described."
+ },
+ "draft-err-h-240a28": {
+  "question": "Evicting a pod through the Eviction API returns '429 Too Many Requests'. What does that mean and what can I do?",
+  "evidence": [
+   {
+    "page": "kubernetes/concepts/scheduling-eviction/api-eviction.md",
+    "section": "How API-initiated eviction works",
+    "quote": "the eviction is not currently allowed because of the configured pod-disruption-budget."
+   }
+  ],
+  "key_points": [
+   {
+    "text": "The eviction is not currently allowed because of the configured PodDisruptionBudget; you may be able to attempt the eviction again later",
+    "essential": true
+   },
+   {
+    "text": "The same response can also come from API rate limiting",
+    "essential": false
+   }
+  ],
+  "verify_note": "Read api-eviction.md response list (200, 429, 500): sentence verbatim."
+ },
+ "draft-err-h-09e306": {
+  "question": "My GitHub Actions job that deploys over SSH fails with 'Permission denied (publickey,gssapi-keyex,gssapi-with-mic)'. How do I set up the key and known hosts?",
+  "evidence": [
+   {
+    "page": "stackoverflow/60477061",
+    "section": "Accepted answer (passphrase-protected keys)",
+    "quote": "Apparently keys were protected with passphrase"
+   }
+  ],
+  "key_points": [
+   {
+    "text": "The keys were protected with a passphrase: generate a new key pair without one (`ssh-keygen -t rsa -b 4096 -N \"\"`) and add the public key to the server's authorized_keys (ssh-copy-id)",
+    "essential": true
+   },
+   {
+    "text": "Store the private key and the server's known_hosts entry (from ssh-keyscan) as GitHub secrets and write them to files in the workflow step (chmod 600 on the key), then connect with ssh -i",
+    "essential": true
+   }
+  ],
+  "verify_note": "Read the SO question (workflow with key and known_hosts from secrets) and accepted answer (steps 1-5 plus workflow)."
+ }
+}
