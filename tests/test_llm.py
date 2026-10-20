@@ -57,3 +57,39 @@ def test_no_key_raises(monkeypatch):
     c.local = fake(TimeoutError("slow"))
     with pytest.raises(RuntimeError, match="GROQ_API_KEY"):
         c.chat(MSG)
+
+
+def test_prefer_groq_goes_first_and_local_is_the_failsafe(monkeypatch, caplog):
+    c = make("local answer", "groq answer", monkeypatch)
+    assert c.chat(MSG, prefer="groq") == ("groq answer", "groq")
+    c = make("local answer", ConnectionError("down"), monkeypatch)
+    with caplog.at_level(logging.WARNING, logger="supportrag.llm"):
+        assert c.chat(MSG, prefer="groq") == ("local answer", "local")
+    assert "FALLBACK groq -> local" in caplog.text
+
+
+def test_prefer_groq_without_key_falls_back_to_local(monkeypatch):
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+    c = LLMClient(CFG)
+    c.local = fake("local answer")
+    assert c.chat(MSG, prefer="groq") == ("local answer", "local")
+
+
+def test_config_prefer_is_the_default_order(monkeypatch):
+    c = make("local answer", "groq answer", monkeypatch)
+    c.cfg = {**CFG, "prefer": "groq"}
+    assert c.chat(MSG)[1] == "groq"
+
+
+def test_groq_gets_its_own_token_and_reasoning_settings(monkeypatch):
+    seen = {}
+
+    def create(**kw):
+        seen.update(kw)
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content="ok"))])
+
+    c = make("x", "y", monkeypatch)
+    c.cfg = {**CFG, "groq": {**CFG["groq"], "max_tokens": 1500, "reasoning_effort": "low"}}
+    c.groq = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=create)))
+    assert c.chat(MSG, prefer="groq") == ("ok", "groq")
+    assert seen["max_tokens"] == 1500 and seen["reasoning_effort"] == "low"

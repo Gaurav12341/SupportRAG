@@ -21,8 +21,8 @@ def text_hash(text):
     return hashlib.sha256(text.encode("utf8")).hexdigest()[:16]
 
 
-def read_chunks(cfg):
-    path = ROOT / cfg["paths"]["processed"] / "chunks.jsonl"
+def read_chunks(cfg, name="chunks.jsonl"):
+    path = ROOT / cfg["paths"]["processed"] / name
     return [json.loads(line) for line in path.read_text(encoding="utf8").splitlines() if line.strip()]
 
 
@@ -36,11 +36,18 @@ def existing_hashes(qc, collection):
             return out
 
 
-def run(recreate=False, prune=False):
+def run(recreate=False, prune=False, chunks_file="chunks.jsonl", collection=None, embedding=None, device=None):
+    """`chunks_file`, `collection`, `embedding` and `device` override the defaults, for chunking / embedding experiments."""
     cfg = load_config()
+    if collection:
+        cfg["qdrant"]["collection"] = collection
+    if embedding:
+        cfg["models"]["embedding"] = embedding
+    if device:
+        cfg["models"]["embedding_device"] = device
     collection, model = cfg["qdrant"]["collection"], cfg["models"]["embedding"]
     qc = client(cfg)
-    chunks = read_chunks(cfg)
+    chunks = read_chunks(cfg, chunks_file)
     stats = {"chunks": len(chunks)}
 
     if recreate and qc.collection_exists(collection):

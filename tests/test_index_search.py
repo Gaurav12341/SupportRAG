@@ -23,7 +23,7 @@ def env(monkeypatch):
     cfg["qdrant"]["collection"] = "test_docs"
     qc = QdrantClient(":memory:")
     monkeypatch.setattr(index, "client", lambda cfg: qc)
-    monkeypatch.setattr(index, "read_chunks", lambda cfg: list(CHUNKS))
+    monkeypatch.setattr(index, "read_chunks", lambda cfg, name="chunks.jsonl": list(CHUNKS))
     monkeypatch.setattr(index, "load_config", lambda: cfg)
     monkeypatch.setattr(search_mod, "load_config", lambda: cfg)
     return cfg, qc
@@ -45,7 +45,7 @@ def test_changed_chunk_is_replaced_not_added(env, monkeypatch):
     cfg, qc = env
     index.run()
     changed = [dict(CHUNKS[0], text="Totally different text about pods.")] + CHUNKS[1:]
-    monkeypatch.setattr(index, "read_chunks", lambda cfg: changed)
+    monkeypatch.setattr(index, "read_chunks", lambda cfg, name="chunks.jsonl": changed)
     stats = index.run()
     assert stats["embedded_now"] == 1 and stats["points_in_collection"] == 3
 

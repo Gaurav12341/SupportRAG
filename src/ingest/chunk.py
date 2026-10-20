@@ -5,6 +5,7 @@ longer than the model can read. Chunk boundaries ignore headings and sentences o
 smarter splitting comes later.
 """
 import re
+from bisect import bisect_left
 
 from transformers import AutoTokenizer
 
@@ -137,3 +138,75 @@ def chunk_markdown(text, tokenizer, size, min_tokens=100):
         cur_tok += n
     flush()
     return [c for c in out if c["text"]]
+
+
+# ---------- recursive chunks (config chunking.strategy: recursive) ----------
+
+SEPARATORS = ["\n# ", "\n## ", "\n### ", "\n#### ", "\n\n", "\n", ". ", " "]  # coarse to fine
+_KEEP_WITH_NEXT = {"\n# ", "\n## ", "\n### ", "\n#### "}  # the newline ends the previous piece, the heading starts the next
+
+
+def chunk_recursive(text, tokenizer, size, overlap=0):
+    """Split at the coarsest separator that makes pieces fit: headings, then blank lines, lines, sentences, words.
+    Neighbouring pieces are packed together up to `size` tokens. Every chunk is an exact slice of `text` (so it can be
+    found in the page again), and a chunk starts `overlap` tokens early, at a piece boundary, so a sentence is not
+    cut off from the one before it. Unlike chunk_markdown it does not know about code fences or tables."""
+    enc = tokenizer(text, add_special_tokens=False, return_offsets_mapping=True, truncation=False, verbose=False)
+    starts = [o[0] for o in enc["offset_mapping"]]
+    n = lambda a, b: bisect_left(starts, b) - bisect_left(starts, a)  # tokens in text[a:b]
+    spans, cuts = [], set()
+
+    def cut_points(a, b, sep):
+        out, i = [], text.find(sep, a, b)
+        while i != -1:
+            c = i + 1 if sep in _KEEP_WITH_NEXT or sep == "\n\n" or sep == "\n" else i + len(sep)
+            if a < c < b:
+                out.append(c)
+            i = text.find(sep, i + 1, b)
+        return sorted(set(out))
+
+    def split(a, b, level):
+        if not text[a:b].strip():
+            return
+        if n(a, b) <= size:
+            spans.append((a, b))
+            return
+        if level == len(SEPARATORS):  # nothing left to split on (e.g. one huge token run): hard windows
+            lo = bisect_left(starts, a)
+            for k in range(lo, bisect_left(starts, b), size):
+                s = starts[k]
+                e = starts[k + size] if k + size < len(starts) and starts[k + size] < b else b
+                spans.append((s, e))
+            return
+        points = cut_points(a, b, SEPARATORS[level])
+        if not points:
+            return split(a, b, level + 1)
+        cuts.update(points)
+        bounds = [a] + points + [b]
+        cur = None  # start of the span being packed
+        for x, y in zip(bounds, bounds[1:]):
+            if n(x, y) > size:  # this piece alone is too big: flush, then split it finer
+                if cur is not None:
+                    spans.append((cur, x))
+                    cur = None
+                split(x, y, level + 1)
+            elif cur is None:
+                cur = x
+            elif n(cur, y) > size:
+                spans.append((cur, x))
+                cur = x
+        if cur is not None:
+            spans.append((cur, b))
+
+    split(0, len(text), 0)
+    spans.sort()
+    ordered_cuts = sorted(cuts)
+    out = []
+    for i, (a, b) in enumerate(spans):
+        if i and overlap:
+            back = [c for c in ordered_cuts if c < a and n(c, a) <= overlap and n(c, b) <= size and c >= spans[i - 1][0]]
+            a = back[0] if back else a
+        piece = text[a:b].strip()
+        if piece:
+            out.append({"text": piece, "n_tokens": n(a, b)})
+    return out

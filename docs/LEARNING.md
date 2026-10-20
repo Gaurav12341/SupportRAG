@@ -98,3 +98,45 @@ For each stage built: 1. What is it? 2. How does it work here? 3. Why do we need
 3. **Why:** it turns "search seems fine" into a number we can compare before and after each change (BM25, RRF, rerank).
 4. **Measure:** the baseline table in the README; the metric maths is unit-tested with hand-computed cases.
 5. **Wrong:** a small set makes numbers jumpy, and when Recall@5 equals Recall@10 it can no longer tell variants apart. Fix: judge by MRR and the weak rows (cross-product), add questions later, and use the holdout only once.
+
+## Stage 12: Build the context
+
+1. **What:** choose which text the model gets to read: the best chunks, grown to the section they sit in, without repeats.
+2. **Here:** `src/context.py` takes the top 5 hybrid hits, finds each chunk's section in the page (heading to next heading), merges overlapping sections, keeps the strongest first and stops at about 8000 characters. Labels S1, S2... are attached.
+3. **Why:** a 500-token window often cuts a procedure in half; a whole section keeps the steps together. Repeats waste the small context of a 3B model.
+4. **Measure:** unit tests for section finding, merging, the size cap and the access drop. Answer quality is measured end to end (see Stage 14).
+5. **Wrong:** a section can be huge or a page can have no headings, so the section gets cut or falls back to the chunk; too much context also confuses a small model. Fix: the size caps in `config.yaml`.
+
+## Stage 13: Generate the answer
+
+1. **What:** the LLM writes numbered steps, and each step names the excerpt it came from.
+2. **Here:** `src/answer.py` sends the excerpts (wrapped as data) and the question to the local Qwen2.5-3B; the reply must match a JSON schema `{steps: [{step, sources}]}`. Unusable output goes to Groq and is logged.
+3. **Why:** citations let a person check each step; the schema forces the model to give them (free text skipped them too often).
+4. **Measure:** how many steps have a valid citation, how many are supported (Stage 14), and how often Groq was needed (0 of 30 questions in the last run).
+5. **Wrong:** a small model still invents generic advice, may cite the wrong excerpt, or obey text inside an excerpt. Fix: the verifier, the "excerpts are data" rule, and neutralising `</doc` in excerpts.
+
+## Stage 14: Verify and output safety
+
+1. **What:** after the model answers, check the answer before the user sees it: are the citations real, does the cited text back each step, is anything secret or dangerous in it.
+2. **Here:** `src/verify.py` checks every cited id is in the context, then an NLI model scores "cited text entails step" (best of ~1200-character windows), or the step counts as supported if it is mostly copied from the cited text (NLI misses word-for-word code and list items); unsupported steps are dropped, and too few left means "No documented fix found." `src/safety.py` withholds answers with secrets/personal data, adds WARNING lines to `kubectl delete`, `DROP TABLE` and Kafka topic deletes, and drops citations to chunks the caller may not read.
+3. **Why:** a support answer that sounds right but is invented is worse than "not found"; a dangerous command pasted without a warning can do real harm; and a citation must never point to a document the user cannot open.
+4. **Measure:** `python -m eval.answer`: unsupported steps, refusals of the unanswerable questions, and answerable questions wrongly refused, with the verifier off and on (README, Answer quality).
+5. **Wrong:** NLI is weak on instructions and the threshold is a trade-off (too high refuses real answers, too low lets invented steps through); the "unsupported" metric uses the same model that filters. Fix: tune the threshold on the tuning split only, add the independent command-word check, and label a sample of steps by hand later.
+
+
+## Stage 3 and 5 revisited: chunking and embedding experiments
+
+1. **What:** we compared other ways to cut pages (smaller windows, recursive splitting, heading-aware) and a bigger embedding model (bge-m3), to see if weak retrieval was why answers were poor.
+2. **Here:** each variant gets its own Qdrant collection (`exp_*`) and is scored by `eval.run` at page level and at passage level (is the labelled evidence quote inside the retrieved chunk, and inside the context the answer step builds).
+3. **Why:** page-level scores said retrieval was fine (0.90) while about 40% of the answer evidence never reached the model; only a passage-level check shows that.
+4. **Measure:** passage recall@5/10, passage MRR and answer-in-context in `eval/results/small_grid_hybrid.md` and `embedding_compare.md`. Chunks of 250 and 500 tokens, recursive and heading-aware were compared; fixed 500 stayed best. bge-m3 helped a little (answer-in-context 0.635 -> 0.712).
+5. **Wrong:** a small test set (52 evidence items) cannot separate gains under about 0.05; bigger chunks hold evidence more easily so size must be reported; and a bug in our own context builder (dropping a neighbouring chunk's text) hid evidence that retrieval had found. Fix: look at individual misses, add a regression test, and re-run the numbers after the fix.
+
+
+## Stage 7 (query part): rewrite, route, HyDE
+
+1. **What:** before searching, an LLM turns the user's wording into a better search: cleaner queries, the right product, one query per product for cross-product questions, and an imagined answer to search with (HyDE).
+2. **Here:** `src/query.py` makes the plan (Groq or local Qwen, cached); `search_plan()` runs the original question plus the plan's searches and merges them with RRF. The original question is always kept, so a bad plan cannot remove good results.
+3. **Why:** people describe symptoms in words the docs never use ("tables take more disk space" vs "VACUUM, dead tuples"), and a question about Kafka on Kubernetes needs a search in each product.
+4. **Measure:** passage recall, passage MRR and answer-in-context per plan part, plus how often the routing names exactly the right products (Groq 26 of 26, local 3B 88.5%).
+5. **Wrong:** the plan can drift from the question (the local 3B did), HyDE can invent facts that pull in wrong passages, and every plan costs an LLM call (0.7 s Groq, 4.6 s local). Here none of it beat plain search on the strict metric, and the metric itself under-counts (a different chunk of the right page can answer the question), so the next fix is a better judge, not a better rewrite.

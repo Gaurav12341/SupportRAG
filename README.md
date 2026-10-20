@@ -10,7 +10,8 @@ public docs. Free and local only (4 GB GPU). Pipeline details: `docs/DATAFLOW.md
 
 ## How to run
 
-Stages 1-6 (ingest, embed, store) and a basic dense search are built; the rest is not.
+Built: stages 1-6 (ingest, embed, store), 8-11 (search), 12-14 (answer with citations, verifier, output safety) and the
+evals. Question rewriting / product routing / HyDE (7) is built but off (no proven gain). Not built yet: login and input safety (7), UI and API, agentic retry (16).
 
 ```
 python -m venv .venv
@@ -27,7 +28,12 @@ Build the corpus (data sources and licenses: `docs/DATA_SOURCES.md`):
 docker compose up -d                            # Qdrant on :6333
 .venv\Scripts\python -m src.index              # embed + store in Qdrant; safe to re-run
 .venv\Scripts\python -m src.search "pod stuck in CrashLoopBackOff" --product kubernetes
-.venv\Scripts\python -m pytest
+.venv\Scripts\python -m src.answer "pod stuck in CrashLoopBackOff" --role member --licenses kubernetes
+.venv\Scripts\python -m eval.answer --name answer_v7    # verifier off vs on, tuning split
+.venv\Scripts\python -m src.ingest --strategy recursive --size 250 --out chunks_x.jsonl   # chunking experiment, leaves chunks.jsonl alone
+.venv\Scripts\python -m src.index --chunks chunks_x.jsonl --collection exp_x --embedding BAAI/bge-m3 --device cuda --recreate
+.venv\Scripts\python -m eval.run --name x --mode hybrid --collection exp_x --embedding BAAI/bge-m3   # page + passage metrics
+.venv\Scripts\python -m pytest                          # about 10 minutes (loads the models)
 ```
 
 Copy `.env.example` to `.env` and set `GROQ_API_KEY` (failsafe only).
@@ -90,7 +96,117 @@ Reading it (n is small: one question moves Recall by 4-20 points, so treat diffe
   40 questions on the real index).
 
 Split: tune. Unanswerable questions skipped (no relevant page): 4. The 10 holdout questions have not been scored.
-Answer-quality metrics (citations, refusals): none yet.
+
+### Chunking and embedding experiments (passage level)
+
+Question: is the answer stage starved because chunking, embedding or retrieval is weak? The page-level scores above cannot tell,
+so `eval/run.py` now also scores **passages**: each question's labelled evidence quote must be inside a retrieved chunk
+("Passage" columns), and inside the context the answer step would actually build from the top 5 chunks ("Answer in context").
+26 answerable tuning questions, 52 evidence items, so one item is 0.019 and differences under about 0.05 are noise.
+All indexes: Qdrant collections `exp_*`, built on the GPU in fp16 (so "Median ms" is not comparable with the table above).
+Tables are `eval/results/small_grid_hybrid.md` and `embedding_compare.md`, made by `python -m eval.variants`.
+
+Chunking, bge-small, hybrid retrieval (`size 500/250` = tokens; `headings` = the existing heading-aware chunker):
+
+| Variant | Chunks | Avg chars | Page R@10 | Page MRR | Passage R@5 | Passage R@10 | Passage MRR | Answer in context | Median ms |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| fixed 500 | 2602 | 1872 | 0.904 | 0.825 | 0.712 | 0.750 | 0.619 | 0.635 | 69 |
+| fixed 250 | 5007 | 965 | 0.904 | 0.884 | 0.635 | 0.712 | 0.476 | 0.673 | 85 |
+| recursive 500 | 3467 | 1510 | 0.904 | 0.799 | 0.635 | 0.712 | 0.538 | 0.635 | 77 |
+| recursive 250 | 6667 | 722 | 0.846 | 0.751 | 0.500 | 0.577 | 0.348 | 0.577 | 91 |
+| headings 500 | 3816 | 1384 | 0.885 | 0.770 | 0.519 | 0.673 | 0.370 | 0.635 | 82 |
+| headings 250 | 6778 | 713 | 0.846 | 0.725 | 0.442 | 0.558 | 0.298 | 0.596 | 94 |
+
+Embedding model and reranker, on the same fixed-500 chunks (bge-m3 = `BAAI/bge-m3`, 1024 dimensions, run on GPU for indexing):
+
+| Variant | Chunks | Avg chars | Page R@10 | Page MRR | Passage R@5 | Passage R@10 | Passage MRR | Answer in context | Median ms |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| bge-small dense | 2602 | 1808 | 0.904 | 0.763 | 0.692 | 0.712 | 0.538 | 0.615 | 32 |
+| bge-m3 dense | 2602 | 1794 | 0.904 | 0.887 | 0.692 | 0.769 | 0.615 | 0.615 | 111 |
+| bge-small hybrid | 2602 | 1872 | 0.904 | 0.825 | 0.712 | 0.750 | 0.619 | 0.635 | 69 |
+| bge-m3 hybrid | 2602 | 1870 | 0.904 | 0.897 | 0.712 | 0.769 | 0.647 | 0.712 | 129 |
+| bge-small hybrid+rerank | 2602 | 1939 | 0.904 | 0.822 | 0.731 | 0.788 | 0.467 | 0.654 | 1844 |
+| bge-m3 hybrid+rerank | 2602 | 1917 | 0.904 | 0.824 | 0.731 | 0.808 | 0.472 | 0.654 | 1904 |
+| fixed 250 + rerank | 5007 | 980 | 0.923 | 0.873 | 0.481 | 0.692 | 0.433 | 0.596 | 916 |
+| headings 500 + rerank | 3816 | 1411 | 0.904 | 0.855 | 0.481 | 0.654 | 0.343 | 0.635 | 1793 |
+
+What this shows:
+- **No other chunking beat fixed 500 tokens** on passage recall. Recursive splitting is no better than fixed windows, and heading-aware
+  chunks are no better either; 250-token chunks lose passage recall (more, smaller chunks crowd the top 10) although fixed 250 put
+  more evidence into the context (0.673 vs 0.635, 2 items, within noise). The suspicion that 500 tokens is too small is not supported:
+  bge-small reads at most 512 tokens, and 500 was the best of the sizes tried.
+- **bge-m3 is better, modestly:** page MRR 0.825 -> 0.897, answer-in-context 0.635 -> 0.712 (4 items), passage recall@10 0.750 -> 0.769.
+  It costs a 40-minute index build on this GPU (about 1 chunk/s, bge-small 13 chunks/s), a 17x larger model and 1024-dim vectors.
+  The reranker lifts passage recall@10 but lowers passage MRR and does not add context evidence, so it stays off.
+- **A bug in my own context builder was costing evidence** (found by looking at questions whose evidence was at rank 2): a neighbouring chunk
+  was merged into the previous one without adding its text. Fixed, with a regression test. Before the fix, fixed-500 hybrid had 0.577 of the
+  evidence in context; after it, 0.635.
+- `text-embedding-3-small` was **not tested**: it is a paid cloud API (CLAUDE.md: free and local only, ask before anything paid).
+- Not run: bge-m3 with the other five chunkings (about 40 minutes each; only worth it if you want the full grid).
+
+### Query understanding (stage 7): rewrite, route, HyDE
+
+One LLM call turns the question into a search plan (`src/query.py`): the products it concerns, 1-3 rewritten queries (one per product for
+cross-product questions) and a hypothetical answer (HyDE). `search_plan()` searches with the plan and merges with RRF; the original question is
+always one of the lists. `rewrite` = also search the rewritten queries, `route` = restrict to the routed product, `hyde` = also a meaning search with the
+hypothetical answer. Plans are written by Groq (`openai/gpt-oss-120b`) or the local Qwen2.5-3B, cached on disk. Setup: bge-small, fixed 500, hybrid,
+tuning split (26 answerable questions, 52 evidence items; one item = 0.019). `python -m eval.run --plan rewrite,route,hyde --plan-llm groq`;
+table: `eval/results/query_plan_hybrid.md`.
+
+| Variant | Page R@10 | Page MRR | Passage R@5 | Passage R@10 | Passage MRR | Answer in context | Product routing | Plan s |
+|---|--:|--:|--:|--:|--:|--:|--:|--:|
+| plain search (baseline) | 0.904 | 0.825 | 0.712 | 0.750 | 0.619 | 0.635 | n/a | n/a |
+| Groq: rewrite | 0.885 | 0.864 | 0.673 | 0.712 | 0.652 | 0.635 | 1.000 | 0.68 |
+| Groq: route | 0.904 | 0.825 | 0.712 | 0.750 | 0.612 | 0.635 | 1.000 | 0.68 |
+| Groq: rewrite + route | 0.885 | 0.864 | 0.654 | 0.692 | 0.614 | 0.615 | 1.000 | 0.68 |
+| Groq: hyde | 0.942 | 0.857 | 0.692 | 0.827 | 0.546 | 0.654 | 1.000 | 0.68 |
+| Groq: rewrite + route + hyde | 0.904 | 0.864 | 0.654 | 0.788 | 0.629 | 0.615 | 1.000 | 0.68 |
+| local Qwen 3B: rewrite | 0.904 | 0.729 | 0.615 | 0.769 | 0.499 | 0.577 | 0.885 | 4.56 |
+| local Qwen 3B: route | 0.923 | 0.796 | 0.712 | 0.750 | 0.583 | 0.635 | 0.885 | 4.56 |
+| local Qwen 3B: rewrite + route + hyde | 0.923 | 0.684 | 0.654 | 0.750 | 0.459 | 0.577 | 0.885 | 4.56 |
+| local Qwen 3B: hyde | 0.923 | 0.766 | 0.712 | 0.750 | 0.540 | 0.558 | 0.885 | 4.56 |
+
+- **No variant clearly helps.** "Answer in context" (the number that matters) stays between 0.56 and 0.65 against 0.635 for plain search.
+  Groq HyDE has the best passage recall@10 (0.827 vs 0.750, 4 items) but a lower passage MRR (0.546 vs 0.619); rewrite helps page MRR (0.825 -> 0.864)
+  but not passages. Combining all three is not better than the parts. Cross-product questions stay at 0.2-0.3 with routing and per-product sub-queries.
+- **Routing itself works:** Groq named exactly the right products for 26 of 26 questions, the local 3B for 88.5% (it never named a wrong product, it missed
+  one product on 3 questions). The local 3B plans are also worse as queries (e.g. it turned a disk-bloat question into `explain analyze select ...`),
+  and take 4.6 s against 0.7 s for Groq.
+- **The strict evidence label hides how well retrieval really does.** 5 questions never get the labelled passage into the context in any variant (3 more only partly); three of them were inspected:
+  for `sym-02` (disk space after deletes) the top chunks are `routine-vacuuming` on recovering disk space with VACUUM FULL, for `sym-03` the right `populate` page, and for `x-05` the top chunk is the
+  right ephemeral-storage page; both answer the question, but the labelled sentence is a different one on the same page. So 0.64 "answer in context" is
+  a floor, not the true retrieval accuracy (page recall@10 is 0.90). Only a correctness judge can tell; that is the next step.
+- The plan code stays in (`query.use: []` in `config.yaml` means plain search); nothing here justifies turning it on yet.
+### Answer quality: verifier off vs on
+
+`python -m eval.answer --name answer_v8_small --collection exp_fixed500_small --embedding BAAI/bge-small-en-v1.5` (copied from
+`eval/results/answer_v8_small_tune.md` and `.json`; the default config: bge-small, fixed 500, hybrid, fixed context builder).
+Tuning split: 26 answerable and 4 unanswerable questions, role admin, local Qwen2.5-3B (Groq fallback used 0 times), 5 chunks expanded to
+parent sections. Both columns come from the **same** generated answers; only the verifier differs. The 2 unanswerable holdout questions are
+not included (holdout is for the final run).
+
+| | Verifier off | Verifier on |
+|---|--:|--:|
+| Steps shown (answerable questions) | 73 | 24 |
+| Unsupported steps shown | 46 | 0 |
+| Steps with no valid citation | 0 | 0 |
+| Steps with a command word not in the docs | 1 | 0 |
+| Unanswerable questions refused | 0 of 4 | 4 of 4 |
+| Answerable questions refused | 0 of 26 | 15 of 26 |
+| Answers blocked (secrets / personal data) | 0 | 0 |
+
+How to read it:
+- **"Unsupported" means the cited text does not entail the step (NLI score under 0.3 and under 70% copied from it, or no valid citation).**
+  That is the verifier's own yardstick, so 0 in the "on" column is true by construction, not an independent proof. The independent check
+  is the command-word row (words in inline code that appear nowhere in the retrieved docs). Nobody has labelled steps by hand yet.
+- Without the verifier the 3B model answered **all 4** unanswerable questions with invented steps. With it, all 4 were refused.
+- The price: **15 of 26 answerable questions** are refused too. With bge-m3 instead (`answer_v8_m3_tune.md`) it is 14 of 26: better retrieval
+  did not fix this. Split by whether the labelled evidence was in the context (bge-m3 run): in 17 questions it was fully there and 7 of them
+  were still refused; in 3 it was partly there (2 refused); in 6 it was missing (5 refused, which is the right call). So retrieval is no longer the
+  main limit: the 3B model adds steps the docs do not state, and the strict verifier drops them. (That split is from a one-off script,
+  not saved.) Across eight runs of near-identical code the refusal count was 13 to 15, so differences of 1 or 2 are noise.
+- Threshold 0.3 was chosen on this same tuning split, so the numbers are somewhat optimistic. 4 unanswerable questions is a very small sample.
+- The danger-command warning and the secrets/personal-data block did not trigger on any generated answer; they are checked by unit tests only.
 
 ## Who can see what (simulated access)
 

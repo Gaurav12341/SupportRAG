@@ -13,7 +13,7 @@ from functools import lru_cache
 from rank_bm25 import BM25Okapi
 
 from src.access import Principal
-from src.embed import embed_query
+from src.embed import embed_docs, embed_query
 from src.llm import load_config
 from src.store import check_model, client
 
@@ -98,14 +98,15 @@ def rerank(question, hits, cfg):
 
 # ---------- the search ----------
 
-def search(question, k=None, product=None, principal=None, mode=None, cfg=None, qc=None):
+def search(question, k=None, product=None, principal=None, mode=None, cfg=None, qc=None, dense_text=None):
     """Top-k chunks (score + payload) the principal may read (default: public). Raises EmbeddingModelMismatch if
     the index was built with a different embedding model than config.yaml names, ValueError for an unknown mode.
 
     mode "dense":  meaning search only.
     mode "hybrid": meaning + BM25 keyword search, merged with RRF.
     mode "rerank": hybrid, then the top `k_rerank_in` candidates re-scored by the cross-encoder.
-    k defaults to `k_context` (what the answer step gets) for rerank mode and `k_dense` otherwise."""
+    k defaults to `k_context` (what the answer step gets) for rerank mode and `k_dense` otherwise.
+    `dense_text`: embed this as a passage (HyDE: a hypothetical answer) instead of embedding the question as a query."""
     cfg = cfg or load_config()
     qc = qc or _default_client(cfg["qdrant"]["url"])
     check_model(qc, cfg)
@@ -117,7 +118,7 @@ def search(question, k=None, product=None, principal=None, mode=None, cfg=None, 
     k = k or (r["k_context"] if mode == "rerank" else r["k_dense"])
     collection = cfg["qdrant"]["collection"]
 
-    res = qc.query_points(collection, query=embed_query(question, cfg).tolist(),
+    res = qc.query_points(collection, query=(embed_docs([dense_text], cfg)[0] if dense_text else embed_query(question, cfg)).tolist(),
                           query_filter=principal.qdrant_filter(cfg, product), limit=max(r["k_dense"], k), with_payload=True)
     dense = [{"score": p.score, **p.payload} for p in res.points]
     if mode == "dense":
@@ -128,6 +129,34 @@ def search(question, k=None, product=None, principal=None, mode=None, cfg=None, 
     if mode == "hybrid":
         return merged[:k]
     return rerank(question, merged[:r["k_rerank_in"]], cfg)[:k]
+
+
+def search_plan(question, plan, k=None, product=None, principal=None, mode=None, cfg=None, qc=None, use=("rewrite", "route", "hyde")):
+    """Search with a query plan (src/query.py) and merge everything with RRF. The original question is always one of
+    the lists, so a poor plan can only add candidates. `use` picks the parts of the plan:
+      rewrite  also search each rewritten query
+      route    restrict a search to the product the plan names for it (with "rewrite": per query; without: the original
+               question once per routed product). A product the caller passed explicitly always wins.
+      hyde     also run a meaning search with the hypothetical answer
+    Access rules apply inside every search, exactly as in search()."""
+    cfg = cfg or load_config()
+    qc = qc or _default_client(cfg["qdrant"]["url"])
+    r = cfg["retrieval"]
+    mode = mode or r["mode"]
+    k = k or (r["k_context"] if mode == "rerank" else r["k_dense"])
+    one = lambda text, prod, **kw: search(text, r["k_dense"], prod, principal, "dense" if kw.get("dense_text") else "hybrid", cfg, qc, **kw)
+    lists = [one(question, product)]
+    if "rewrite" in use:
+        for prod, text in plan.queries:
+            lists.append(one(text, product or (prod if "route" in use else None)))
+    elif "route" in use and not product:
+        lists += [one(question, prod) for prod in plan.products]
+    if "hyde" in use and plan.hyde:
+        lists.append(one(question, product, dense_text=plan.hyde))
+    merged = rrf(lists, r["rrf_k"])
+    if mode == "rerank":
+        return rerank(question, merged[:r["k_rerank_in"]], cfg)[:k]
+    return merged[:k]
 
 
 def show(hits):

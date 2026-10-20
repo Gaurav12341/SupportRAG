@@ -13,6 +13,9 @@ llm:
     base_url: https://api.groq.com/openai/v1
     model: openai/gpt-oss-120b
     timeout_s: 30
+    max_tokens: 1500        # gpt-oss thinks first; the thinking tokens count against this
+    reasoning_effort: low
+  prefer: local    # which provider goes first by default (the other is the failsafe); a call can override it
   temperature: 0.1
   max_tokens: 700
   fallback_log: logs/fallbacks.log
@@ -44,6 +47,12 @@ retrieval:       # placeholder
   k_rerank_in: 30  # candidates sent to the cross-encoder
   k_context: 5     # chunks kept after reranking
 
+query:          # stage 7: question -> search plan (src/query.py, search_plan in src/search.py)
+  llm: local               # which LLM writes the plan first; the other is the failsafe
+  max_queries: 3
+  cache: data/cache/query_plans.json
+  use: []                  # parts of the plan the pipeline uses: rewrite | route | hyde. [] = plain search (nothing proven to help yet)
+
 # SIMULATED access: the docs are public, so levels are assigned by configs/access_rules.yaml. Roles and the
 # license rule are in src/access.py: public = base_levels for every product; member = base_levels for every product
 # plus licensed_levels for the products they hold a license for; admin = admin_levels.
@@ -54,7 +63,23 @@ access:
 
 thresholds:      # placeholder
   min_rerank_score: 0.0
-  min_nli_entailment: 0.5
+  min_nli_entailment: 0.3       # a step is supported if NLI entailment against its cited text is at least this; 0.3 picked on the tune split (docs/DECISIONS.md)
+  min_copied_trigrams: 0.7      # or supported if this share of the step's word triples is copied from the cited text
+  min_supported_fraction: 0.5   # refuse if fewer than this share of the steps are supported; 0.4 was tried and did not help (docs/DECISIONS.md)
+
+context:         # stage 12; sizes in characters (about 4 per token), so LM Studio's context is not overrun
+  max_section_chars: 2800       # a parent section longer than this falls back to the retrieved chunk itself
+  max_context_chars: 8000       # total text sent to the model
+
+answer:
+  refuse_text: "No documented fix found."
+
+safety:          # stage 14, output side. Warn when a step contains one of these commands (regex, case-insensitive)
+  dangerous_commands:
+    - {pattern: '\bkubectl\s+delete\b', warning: "kubectl delete removes cluster objects. Check the namespace and name first (--dry-run=client shows what would go)."}
+    - {pattern: '\bdrop\s+(table|database|schema)\b', warning: "DROP permanently deletes data. Back up first and check you are connected to the right database."}
+    - {pattern: '\btruncate\s+(table\s+)?\w', warning: "TRUNCATE deletes every row at once. Back up first."}
+    - {pattern: 'kafka-topics[^\n]*--delete\b|--delete\b[^\n]*kafka-topics', warning: "Deleting a Kafka topic destroys its messages. Check the topic name and that no consumer still needs it."}
 
 paths:
   raw_docs: data/raw

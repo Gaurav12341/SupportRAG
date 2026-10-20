@@ -38,7 +38,7 @@ def env(monkeypatch):
     cfg["qdrant"]["collection"] = "test_search"
     qc = QdrantClient(":memory:")
     monkeypatch.setattr(index, "client", lambda cfg: qc)
-    monkeypatch.setattr(index, "read_chunks", lambda cfg: list(CHUNKS))
+    monkeypatch.setattr(index, "read_chunks", lambda cfg, name="chunks.jsonl": list(CHUNKS))
     monkeypatch.setattr(index, "load_config", lambda: cfg)
     index.run()
     return cfg, qc

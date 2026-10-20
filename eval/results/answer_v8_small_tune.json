@@ -1,0 +1,2886 @@
+{
+  "summary": {
+    "off": {
+      "answerable_questions": 26,
+      "answerable_refused": 0,
+      "steps_shown": 73,
+      "steps_unsupported": 46,
+      "steps_no_valid_citation": 0,
+      "steps_ungrounded_command_words": 1,
+      "steps_with_danger_warning": 1,
+      "unanswerable_questions": 4,
+      "unanswerable_refused": 0,
+      "answers_blocked_secrets": 0
+    },
+    "on": {
+      "answerable_questions": 26,
+      "answerable_refused": 15,
+      "steps_shown": 24,
+      "steps_unsupported": 0,
+      "steps_no_valid_citation": 0,
+      "steps_ungrounded_command_words": 0,
+      "steps_with_danger_warning": 0,
+      "unanswerable_questions": 4,
+      "unanswerable_refused": 4,
+      "answers_blocked_secrets": 0
+    },
+    "split": "tune",
+    "role": "admin",
+    "collection": "exp_fixed500_small",
+    "embedding": "BAAI/bge-small-en-v1.5",
+    "min_nli_entailment": 0.3,
+    "min_supported_fraction": 0.5,
+    "providers": {
+      "local": 30
+    },
+    "median_generate_s": 10.649999999999999
+  },
+  "per_question": [
+    {
+      "id": "err-01",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 8,
+      "seconds": 43.2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 8,
+        "steps": [
+          {
+            "text": "cd /etc/postgresql-9.1/",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "cp pg_hba.conf pg_hba.conf-backup",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "local all all trust",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "sudo /etc/init.d/postgresql restart",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "psql -U postgres",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "ALTER USER postgres with password 'my_secure_password';",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "cp pg_hba.conf-backup pg_hba.conf",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "sudo /etc/init.d/postgresql restart",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          }
+        ]
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 8,
+        "steps": [
+          {
+            "text": "cd /etc/postgresql-9.1/",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.3034655749797821,
+            "copied": 0.0,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "cp pg_hba.conf pg_hba.conf-backup",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.612230122089386,
+            "copied": 1.0,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "local all all trust",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.4901491105556488,
+            "copied": 1.0,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "sudo /etc/init.d/postgresql restart",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.5093035697937012,
+            "copied": 1.0,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "psql -U postgres",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.46661826968193054,
+            "copied": 1.0,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "ALTER USER postgres with password 'my_secure_password';",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.6590083837509155,
+            "copied": 0.25,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "cp pg_hba.conf-backup pg_hba.conf",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.5149426460266113,
+            "copied": 1.0,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "sudo /etc/init.d/postgresql restart",
+            "cited": [
+              "stackoverflow/10845998#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.5093035697937012,
+            "copied": 1.0,
+            "warnings": [],
+            "ungrounded_words": []
+          }
+        ]
+      },
+      "scored_steps": [
+        {
+          "text": "cd /etc/postgresql-9.1/",
+          "cited": [
+            "stackoverflow/10845998#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.303,
+          "copied": 0.0,
+          "supported": true
+        },
+        {
+          "text": "cp pg_hba.conf pg_hba.conf-backup",
+          "cited": [
+            "stackoverflow/10845998#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.612,
+          "copied": 1.0,
+          "supported": true
+        },
+        {
+          "text": "local all all trust",
+          "cited": [
+            "stackoverflow/10845998#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.49,
+          "copied": 1.0,
+          "supported": true
+        },
+        {
+          "text": "sudo /etc/init.d/postgresql restart",
+          "cited": [
+            "stackoverflow/10845998#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.509,
+          "copied": 1.0,
+          "supported": true
+        },
+        {
+          "text": "psql -U postgres",
+          "cited": [
+            "stackoverflow/10845998#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.467,
+          "copied": 1.0,
+          "supported": true
+        },
+        {
+          "text": "ALTER USER postgres with password 'my_secure_password';",
+          "cited": [
+            "stackoverflow/10845998#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.659,
+          "copied": 0.25,
+          "supported": true
+        },
+        {
+          "text": "cp pg_hba.conf-backup pg_hba.conf",
+          "cited": [
+            "stackoverflow/10845998#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.515,
+          "copied": 1.0,
+          "supported": true
+        },
+        {
+          "text": "sudo /etc/init.d/postgresql restart",
+          "cited": [
+            "stackoverflow/10845998#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.509,
+          "copied": 1.0,
+          "supported": true
+        }
+      ]
+    },
+    {
+      "id": "err-03",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 2,
+      "seconds": 8.9,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "steps": [
+          {
+            "text": "Start a repeatable read transaction on the primary server and run a dummy query, then sit idle",
+            "cited": [
+              "stackoverflow/14592436#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "On the standby, set max_standby_archive_delay to a higher value or even infinite if long-running queries are needed",
+            "cited": [
+              "postgres/hot-standby.html#4"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Start a repeatable read transaction on the primary server and run a dummy query, then sit idle",
+          "cited": [
+            "stackoverflow/14592436#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.008,
+          "copied": 0.267,
+          "supported": false
+        },
+        {
+          "text": "On the standby, set max_standby_archive_delay to a higher value or even infinite if long-running queries are needed",
+          "cited": [
+            "postgres/hot-standby.html#4"
+          ],
+          "bad_cites": [],
+          "entailment": 0.058,
+          "copied": 0.133,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "err-04",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 3,
+      "seconds": 11.2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "steps": [
+          {
+            "text": "Run `kubectl describe pod <pod-name>` to view the details of the Pod including container status.",
+            "cited": [
+              "kubernetes/concepts/configuration/manage-resources-containers.md#16"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Check if there is a 'OOMKilled' reason and an exit code 137 in the output. If present, it indicates that the container tried to use more memory than its limit and was killed due to Out of Memory (OOM) conditions.",
+            "cited": [
+              "kubernetes/concepts/configuration/manage-resources-containers.md#16"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Review the limits set for the container's memory in the Pod specification. Ensure the memory limit is appropriate for your application's needs.",
+            "cited": [
+              "kubernetes/concepts/configuration/manage-resources-containers.md#16"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Run `kubectl describe pod <pod-name>` to view the details of the Pod including container status.",
+          "cited": [
+            "kubernetes/concepts/configuration/manage-resources-containers.md#16"
+          ],
+          "bad_cites": [],
+          "entailment": 0.211,
+          "copied": 0.077,
+          "supported": false
+        },
+        {
+          "text": "Check if there is a 'OOMKilled' reason and an exit code 137 in the output. If present, it indicates that the container tried to use more memory than its limit and was killed due to Out of Memory (OOM) conditions.",
+          "cited": [
+            "kubernetes/concepts/configuration/manage-resources-containers.md#16"
+          ],
+          "bad_cites": [],
+          "entailment": 0.003,
+          "copied": 0.263,
+          "supported": false
+        },
+        {
+          "text": "Review the limits set for the container's memory in the Pod specification. Ensure the memory limit is appropriate for your application's needs.",
+          "cited": [
+            "kubernetes/concepts/configuration/manage-resources-containers.md#16"
+          ],
+          "bad_cites": [],
+          "entailment": 0.6,
+          "copied": 0.045,
+          "supported": true
+        }
+      ]
+    },
+    {
+      "id": "err-05",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 2,
+      "seconds": 8.6,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "steps": [
+          {
+            "text": "Scale the Deployment to have fewer replicas, for example, scale it down to one replica.",
+            "cited": [
+              "kubernetes/tasks/debug/debug-application/debug-running-pod.md#4"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Use kubectl get events --namespace=<your-namespace> to check if the issue is resolved and no more FailedScheduling events are generated.",
+            "cited": [
+              "kubernetes/tasks/debug/debug-application/debug-running-pod.md#4"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Scale the Deployment to have fewer replicas, for example, scale it down to one replica.",
+          "cited": [
+            "kubernetes/tasks/debug/debug-application/debug-running-pod.md#4"
+          ],
+          "bad_cites": [],
+          "entailment": 0.003,
+          "copied": 0.0,
+          "supported": false
+        },
+        {
+          "text": "Use kubectl get events --namespace=<your-namespace> to check if the issue is resolved and no more FailedScheduling events are generated.",
+          "cited": [
+            "kubernetes/tasks/debug/debug-application/debug-running-pod.md#4"
+          ],
+          "bad_cites": [],
+          "entailment": 0.002,
+          "copied": 0.111,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "err-07",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 1,
+      "seconds": 10.3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "Run `gcloud container clusters get-credentials \"CLUSTER NAME\"` to auto-generate the kubeconfig",
+            "cited": [
+              "stackoverflow/36650642#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          }
+        ]
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "Run `gcloud container clusters get-credentials \"CLUSTER NAME\"` to auto-generate the kubeconfig",
+            "cited": [
+              "stackoverflow/36650642#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.8672741651535034,
+            "copied": 0.5555555555555556,
+            "warnings": [],
+            "ungrounded_words": []
+          }
+        ]
+      },
+      "scored_steps": [
+        {
+          "text": "Run `gcloud container clusters get-credentials \"CLUSTER NAME\"` to auto-generate the kubeconfig",
+          "cited": [
+            "stackoverflow/36650642#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.867,
+          "copied": 0.556,
+          "supported": true
+        }
+      ]
+    },
+    {
+      "id": "err-08",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 2,
+      "seconds": 11.1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "steps": [
+          {
+            "text": "Add code to dump topics during producer initialization as suggested in S1.",
+            "cited": [
+              "stackoverflow/63714401#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Check if any missing dependencies are causing issues, similar to what was mentioned in S1.",
+            "cited": [
+              "stackoverflow/63714401#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          }
+        ]
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "Check if any missing dependencies are causing issues, similar to what was mentioned in S1.",
+            "cited": [
+              "stackoverflow/63714401#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.5093413591384888,
+            "copied": 0.0,
+            "warnings": [],
+            "ungrounded_words": []
+          }
+        ]
+      },
+      "scored_steps": [
+        {
+          "text": "Add code to dump topics during producer initialization as suggested in S1.",
+          "cited": [
+            "stackoverflow/63714401#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.248,
+          "copied": 0.0,
+          "supported": false
+        },
+        {
+          "text": "Check if any missing dependencies are causing issues, similar to what was mentioned in S1.",
+          "cited": [
+            "stackoverflow/63714401#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.509,
+          "copied": 0.0,
+          "supported": true
+        }
+      ]
+    },
+    {
+      "id": "err-09",
+      "type": "error_message",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 2,
+      "seconds": 8.8,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "steps": [
+          {
+            "text": "Check if vm.max_map_count is set appropriately by running the command: ulimit -n",
+            "cited": [
+              "kafka/operations/hardware-and-os.md#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "If vm.max_map_count is not sufficient, increase it to a higher value such as 262144 or more, using the command: ulimit -n new_value",
+            "cited": [
+              "kafka/operations/hardware-and-os.md#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Check if vm.max_map_count is set appropriately by running the command: ulimit -n",
+          "cited": [
+            "kafka/operations/hardware-and-os.md#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.001,
+          "copied": 0.0,
+          "supported": false
+        },
+        {
+          "text": "If vm.max_map_count is not sufficient, increase it to a higher value such as 262144 or more, using the command: ulimit -n new_value",
+          "cited": [
+            "kafka/operations/hardware-and-os.md#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.001,
+          "copied": 0.0,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "sym-01",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 4,
+      "seconds": 11.4,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "steps": [
+          {
+            "text": "Use `pg_stat_replication` to check the replication status and identify the cause of the replica lag growth.",
+            "cited": [
+              "postgres/warm-standby.html#7"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Compare `pg_current_wal_lsn` on the primary with `pg_last_wal_receive_lsn` on the standby. Large differences might indicate network delay or that the standby is under heavy load.",
+            "cited": [
+              "postgres/warm-standby.html#7"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "Check if there are large differences between `sent_lsn` and `pg_last_wal_receive_lsn` in `pg_stat_replication`. This can help identify issues with the primary server being under heavy load.",
+            "cited": [
+              "postgres/warm-standby.html#7"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "Use `ps` command to retrieve a list of WAL sender processes via `pg_stat_replication` view. Large differences between `sent_lsn` and `view's sent_lsn` might indicate network delay or that the standby is under heavy load.",
+            "cited": [
+              "postgres/warm-standby.html#7"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          }
+        ]
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "steps": [
+          {
+            "text": "Compare `pg_current_wal_lsn` on the primary with `pg_last_wal_receive_lsn` on the standby. Large differences might indicate network delay or that the standby is under heavy load.",
+            "cited": [
+              "postgres/warm-standby.html#7"
+            ],
+            "bad_cites": [],
+            "entailment": 0.4345689117908478,
+            "copied": 0.6363636363636364,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "Check if there are large differences between `sent_lsn` and `pg_last_wal_receive_lsn` in `pg_stat_replication`. This can help identify issues with the primary server being under heavy load.",
+            "cited": [
+              "postgres/warm-standby.html#7"
+            ],
+            "bad_cites": [],
+            "entailment": 0.9681851863861084,
+            "copied": 0.25,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "Use `ps` command to retrieve a list of WAL sender processes via `pg_stat_replication` view. Large differences between `sent_lsn` and `view's sent_lsn` might indicate network delay or that the standby is under heavy load.",
+            "cited": [
+              "postgres/warm-standby.html#7"
+            ],
+            "bad_cites": [],
+            "entailment": 0.9913950562477112,
+            "copied": 0.6875,
+            "warnings": [],
+            "ungrounded_words": []
+          }
+        ]
+      },
+      "scored_steps": [
+        {
+          "text": "Use `pg_stat_replication` to check the replication status and identify the cause of the replica lag growth.",
+          "cited": [
+            "postgres/warm-standby.html#7"
+          ],
+          "bad_cites": [],
+          "entailment": 0.175,
+          "copied": 0.0,
+          "supported": false
+        },
+        {
+          "text": "Compare `pg_current_wal_lsn` on the primary with `pg_last_wal_receive_lsn` on the standby. Large differences might indicate network delay or that the standby is under heavy load.",
+          "cited": [
+            "postgres/warm-standby.html#7"
+          ],
+          "bad_cites": [],
+          "entailment": 0.435,
+          "copied": 0.636,
+          "supported": true
+        },
+        {
+          "text": "Check if there are large differences between `sent_lsn` and `pg_last_wal_receive_lsn` in `pg_stat_replication`. This can help identify issues with the primary server being under heavy load.",
+          "cited": [
+            "postgres/warm-standby.html#7"
+          ],
+          "bad_cites": [],
+          "entailment": 0.968,
+          "copied": 0.25,
+          "supported": true
+        },
+        {
+          "text": "Use `ps` command to retrieve a list of WAL sender processes via `pg_stat_replication` view. Large differences between `sent_lsn` and `view's sent_lsn` might indicate network delay or that the standby is under heavy load.",
+          "cited": [
+            "postgres/warm-standby.html#7"
+          ],
+          "bad_cites": [],
+          "entailment": 0.991,
+          "copied": 0.688,
+          "supported": true
+        }
+      ]
+    },
+    {
+      "id": "sym-02",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 3,
+      "seconds": 9.9,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "steps": [
+          {
+            "text": "Check for any `DELETE FROM blah;` statements in your queries, as they generate WAL traffic and can cause the table to grow.",
+            "cited": [
+              "stackoverflow/9407442#4"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Consider using `TRUNCATE TABLE blah;` instead of `DELETE FROM blah;`. It is faster when you're dumping all rows in a table and can be used in one `TRUNCATE` call if possible.",
+            "cited": [
+              "stackoverflow/9407442#4"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [
+              "TRUNCATE deletes every row at once. Back up first."
+            ],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "If the issue persists, check for any unlogged tables or temporary tables that might still occupy space. Ensure they are being cleaned up properly.",
+            "cited": [
+              "stackoverflow/9407442#4"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Check for any `DELETE FROM blah;` statements in your queries, as they generate WAL traffic and can cause the table to grow.",
+          "cited": [
+            "stackoverflow/9407442#4"
+          ],
+          "bad_cites": [],
+          "entailment": 0.001,
+          "copied": 0.1,
+          "supported": false
+        },
+        {
+          "text": "Consider using `TRUNCATE TABLE blah;` instead of `DELETE FROM blah;`. It is faster when you're dumping all rows in a table and can be used in one `TRUNCATE` call if possible.",
+          "cited": [
+            "stackoverflow/9407442#4"
+          ],
+          "bad_cites": [],
+          "entailment": 0.991,
+          "copied": 0.419,
+          "supported": true
+        },
+        {
+          "text": "If the issue persists, check for any unlogged tables or temporary tables that might still occupy space. Ensure they are being cleaned up properly.",
+          "cited": [
+            "stackoverflow/9407442#4"
+          ],
+          "bad_cites": [],
+          "entailment": 0.001,
+          "copied": 0.0,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "sym-03",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 3,
+      "seconds": 10.2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "steps": [
+          {
+            "text": "Check if the issue is related to loading data using COPY or prepared statements, as these methods might cause performance degradation due to WAL (Write-Ahead Logging) writes.",
+            "cited": [
+              "postgres/populate.html#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Verify that indexes and foreign key constraints are properly managed during the bulk load operation. Dropping and re-creating them can help improve performance.",
+            "cited": [
+              "postgres/populate.html#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Consider increasing maintenance_work_mem or max_wal_size configuration variables to speed up index creation and data loading processes, but this should be done temporarily as it may affect other operations.",
+            "cited": [
+              "postgres/populate.html#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Check if the issue is related to loading data using COPY or prepared statements, as these methods might cause performance degradation due to WAL (Write-Ahead Logging) writes.",
+          "cited": [
+            "postgres/populate.html#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.004,
+          "copied": 0.04,
+          "supported": false
+        },
+        {
+          "text": "Verify that indexes and foreign key constraints are properly managed during the bulk load operation. Dropping and re-creating them can help improve performance.",
+          "cited": [
+            "postgres/populate.html#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.012,
+          "copied": 0.048,
+          "supported": false
+        },
+        {
+          "text": "Consider increasing maintenance_work_mem or max_wal_size configuration variables to speed up index creation and data loading processes, but this should be done temporarily as it may affect other operations.",
+          "cited": [
+            "postgres/populate.html#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.002,
+          "copied": 0.038,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "sym-05",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 2,
+      "seconds": 8.7,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "steps": [
+          {
+            "text": "Check if there are any ValidatingWebhookConfiguration or MutatingWebhookConfiguration that target UPDATE operations for pods resources.",
+            "cited": [
+              "kubernetes/tasks/debug/debug-application/debug-pods.md#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "If the webhook is provided by a third-party, make sure you are using the latest version and disable the webhook for UPDATE operations. If it's your own webhook, ensure it never changes immutable fields on UPDATE operations or applies validation policies only to new changes.",
+            "cited": [
+              "kubernetes/tasks/debug/debug-application/debug-pods.md#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Check if there are any ValidatingWebhookConfiguration or MutatingWebhookConfiguration that target UPDATE operations for pods resources.",
+          "cited": [
+            "kubernetes/tasks/debug/debug-application/debug-pods.md#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.006,
+          "copied": 0.692,
+          "supported": false
+        },
+        {
+          "text": "If the webhook is provided by a third-party, make sure you are using the latest version and disable the webhook for UPDATE operations. If it's your own webhook, ensure it never changes immutable fields on UPDATE operations or applies validation policies only to new changes.",
+          "cited": [
+            "kubernetes/tasks/debug/debug-application/debug-pods.md#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.006,
+          "copied": 0.5,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "sym-06",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 4,
+      "seconds": 11.6,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "steps": [
+          {
+            "text": "Understand the eviction signals and thresholds, focusing on memory and disk usage.",
+            "cited": [
+              "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Monitor node-level resources like memory and disk space using kubelet's monitoring intervals. Adjust these settings if necessary to better manage resource consumption.",
+            "cited": [
+              "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Configure eviction thresholds for memory and disk usage, ensuring they are set appropriately based on your cluster's needs and the criticality of each resource.",
+            "cited": [
+              "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "For static pods running on a node under pressure, consider setting their priority to avoid being evicted. This can be done using the `priority` field in the pod manifest.",
+            "cited": [
+              "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md#9"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Understand the eviction signals and thresholds, focusing on memory and disk usage.",
+          "cited": [
+            "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.016,
+          "copied": 0.2,
+          "supported": false
+        },
+        {
+          "text": "Monitor node-level resources like memory and disk space using kubelet's monitoring intervals. Adjust these settings if necessary to better manage resource consumption.",
+          "cited": [
+            "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.007,
+          "copied": 0.048,
+          "supported": false
+        },
+        {
+          "text": "Configure eviction thresholds for memory and disk usage, ensuring they are set appropriately based on your cluster's needs and the criticality of each resource.",
+          "cited": [
+            "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.01,
+          "copied": 0.087,
+          "supported": false
+        },
+        {
+          "text": "For static pods running on a node under pressure, consider setting their priority to avoid being evicted. This can be done using the `priority` field in the pod manifest.",
+          "cited": [
+            "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md#9"
+          ],
+          "bad_cites": [],
+          "entailment": 0.011,
+          "copied": 0.037,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "sym-07",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 4,
+      "seconds": 10.7,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "steps": [
+          {
+            "text": "Check kubeconfig",
+            "cited": [
+              "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "Verify kubectl version and connectivity with your cluster",
+            "cited": [
+              "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "Ensure $KUBECONFIG environment variable is set correctly or use --kubeconfig parameter to specify the directory of a kubeconfig file",
+            "cited": [
+              "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "Check VPN connectivity if using a Virtual Private Network (VPN) for accessing your Kubernetes cluster",
+            "cited": [
+              "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "steps": [
+          {
+            "text": "Check kubeconfig",
+            "cited": [
+              "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md#1"
+            ],
+            "bad_cites": [],
+            "entailment": 0.9170696139335632,
+            "copied": 0.0,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "Verify kubectl version and connectivity with your cluster",
+            "cited": [
+              "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md#1"
+            ],
+            "bad_cites": [],
+            "entailment": 0.9112876653671265,
+            "copied": 0.16666666666666666,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "Ensure $KUBECONFIG environment variable is set correctly or use --kubeconfig parameter to specify the directory of a kubeconfig file",
+            "cited": [
+              "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md#1"
+            ],
+            "bad_cites": [],
+            "entailment": 0.6218002438545227,
+            "copied": 0.47058823529411764,
+            "warnings": [],
+            "ungrounded_words": []
+          }
+        ]
+      },
+      "scored_steps": [
+        {
+          "text": "Check kubeconfig",
+          "cited": [
+            "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.917,
+          "copied": 0.0,
+          "supported": true
+        },
+        {
+          "text": "Verify kubectl version and connectivity with your cluster",
+          "cited": [
+            "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.911,
+          "copied": 0.167,
+          "supported": true
+        },
+        {
+          "text": "Ensure $KUBECONFIG environment variable is set correctly or use --kubeconfig parameter to specify the directory of a kubeconfig file",
+          "cited": [
+            "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.622,
+          "copied": 0.471,
+          "supported": true
+        },
+        {
+          "text": "Check VPN connectivity if using a Virtual Private Network (VPN) for accessing your Kubernetes cluster",
+          "cited": [
+            "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.021,
+          "copied": 0.538,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "sym-08",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 4,
+      "seconds": 10.3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "steps": [
+          {
+            "text": "Check if the consumer group coordinator is moving or not, as this can cause the consumer to need to rediscover the coordinator.",
+            "cited": [
+              "kafka/implementation/distribution.md#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Verify that the offsets topic is being compacted periodically and that all replicas are receiving the offsets in a timely manner. If there's a delay, consider increasing the replication factor for the offsets topic or adjusting the replica fetch timeout configuration.",
+            "cited": [
+              "kafka/implementation/distribution.md#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Ensure that the consumer has configured its offset commit to be done automatically rather than manually. This can help avoid manual intervention and potential human error in committing offsets.",
+            "cited": [
+              "kafka/implementation/distribution.md#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Review the batch processing logic for any inefficiencies or bottlenecks that might cause a long delay, leading to failed offset commits. Optimize the processing pipeline if necessary.",
+            "cited": [
+              "kafka/design/design.md#9",
+              "stackoverflow/58894281#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Check if the consumer group coordinator is moving or not, as this can cause the consumer to need to rediscover the coordinator.",
+          "cited": [
+            "kafka/implementation/distribution.md#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.037,
+          "copied": 0.15,
+          "supported": false
+        },
+        {
+          "text": "Verify that the offsets topic is being compacted periodically and that all replicas are receiving the offsets in a timely manner. If there's a delay, consider increasing the replication factor for the offsets topic or adjusting the replica fetch timeout configuration.",
+          "cited": [
+            "kafka/implementation/distribution.md#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.003,
+          "copied": 0.051,
+          "supported": false
+        },
+        {
+          "text": "Ensure that the consumer has configured its offset commit to be done automatically rather than manually. This can help avoid manual intervention and potential human error in committing offsets.",
+          "cited": [
+            "kafka/implementation/distribution.md#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.009,
+          "copied": 0.037,
+          "supported": false
+        },
+        {
+          "text": "Review the batch processing logic for any inefficiencies or bottlenecks that might cause a long delay, leading to failed offset commits. Optimize the processing pipeline if necessary.",
+          "cited": [
+            "kafka/design/design.md#9",
+            "stackoverflow/58894281#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.021,
+          "copied": 0.0,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "sym-10",
+      "type": "symptom",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 1,
+      "seconds": 9.8,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "Ensure the `.github` folder is on the same branch as the one you want to trigger the workflow from, and that any other branches you want to trigger the workflow from are also included.",
+            "cited": [
+              "stackoverflow/61989951#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          }
+        ]
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "Ensure the `.github` folder is on the same branch as the one you want to trigger the workflow from, and that any other branches you want to trigger the workflow from are also included.",
+            "cited": [
+              "stackoverflow/61989951#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.6472843885421753,
+            "copied": 0.2222222222222222,
+            "warnings": [],
+            "ungrounded_words": []
+          }
+        ]
+      },
+      "scored_steps": [
+        {
+          "text": "Ensure the `.github` folder is on the same branch as the one you want to trigger the workflow from, and that any other branches you want to trigger the workflow from are also included.",
+          "cited": [
+            "stackoverflow/61989951#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.647,
+          "copied": 0.222,
+          "supported": true
+        }
+      ]
+    },
+    {
+      "id": "ver-01",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 3,
+      "seconds": 13.7,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "steps": [
+          {
+            "text": "For the most recent LTS release (Java 25 at the time of writing), we generally recommend running Apache Kafka with this version for performance, efficiency and support reasons.",
+            "cited": [
+              "kafka/operations/java-version.md#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "Apache Kafka 4.0 only supports KRaft mode - ZooKeeper mode has been removed. As such, broker upgrades to 4.0.0 (and higher) require KRaft mode and the software and metadata versions must be at least 3.3.x.",
+            "cited": [
+              "kafka/getting-started/upgrade.md#15"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "For clusters in KRaft mode with versions older than 3.3.x, we recommend upgrading to 3.9.x before upgrading to 4.0.x. Clusters in ZooKeeper mode have to be migrated to KRaft mode before they can be upgraded to 4.0.x.",
+            "cited": [
+              "kafka/getting-started/upgrade.md#15"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          }
+        ]
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "steps": [
+          {
+            "text": "For the most recent LTS release (Java 25 at the time of writing), we generally recommend running Apache Kafka with this version for performance, efficiency and support reasons.",
+            "cited": [
+              "kafka/operations/java-version.md#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.06268670409917831,
+            "copied": 0.7307692307692307,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "Apache Kafka 4.0 only supports KRaft mode - ZooKeeper mode has been removed. As such, broker upgrades to 4.0.0 (and higher) require KRaft mode and the software and metadata versions must be at least 3.3.x.",
+            "cited": [
+              "kafka/getting-started/upgrade.md#15"
+            ],
+            "bad_cites": [],
+            "entailment": 0.908031165599823,
+            "copied": 0.9696969696969697,
+            "warnings": [],
+            "ungrounded_words": []
+          },
+          {
+            "text": "For clusters in KRaft mode with versions older than 3.3.x, we recommend upgrading to 3.9.x before upgrading to 4.0.x. Clusters in ZooKeeper mode have to be migrated to KRaft mode before they can be upgraded to 4.0.x.",
+            "cited": [
+              "kafka/getting-started/upgrade.md#15"
+            ],
+            "bad_cites": [],
+            "entailment": 0.8321326971054077,
+            "copied": 1.0,
+            "warnings": [],
+            "ungrounded_words": []
+          }
+        ]
+      },
+      "scored_steps": [
+        {
+          "text": "For the most recent LTS release (Java 25 at the time of writing), we generally recommend running Apache Kafka with this version for performance, efficiency and support reasons.",
+          "cited": [
+            "kafka/operations/java-version.md#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.063,
+          "copied": 0.731,
+          "supported": true
+        },
+        {
+          "text": "Apache Kafka 4.0 only supports KRaft mode - ZooKeeper mode has been removed. As such, broker upgrades to 4.0.0 (and higher) require KRaft mode and the software and metadata versions must be at least 3.3.x.",
+          "cited": [
+            "kafka/getting-started/upgrade.md#15"
+          ],
+          "bad_cites": [],
+          "entailment": 0.908,
+          "copied": 0.97,
+          "supported": true
+        },
+        {
+          "text": "For clusters in KRaft mode with versions older than 3.3.x, we recommend upgrading to 3.9.x before upgrading to 4.0.x. Clusters in ZooKeeper mode have to be migrated to KRaft mode before they can be upgraded to 4.0.x.",
+          "cited": [
+            "kafka/getting-started/upgrade.md#15"
+          ],
+          "bad_cites": [],
+          "entailment": 0.832,
+          "copied": 1.0,
+          "supported": true
+        }
+      ]
+    },
+    {
+      "id": "ver-02",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 1,
+      "seconds": 8.7,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "The kafka-streams-scala library is deprecated as of Kafka 4.3 and will be removed in Kafka 5.0.",
+            "cited": [
+              "kafka/streams/developer-guide/scala-migration.md#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          }
+        ]
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "The kafka-streams-scala library is deprecated as of Kafka 4.3 and will be removed in Kafka 5.0.",
+            "cited": [
+              "kafka/streams/developer-guide/scala-migration.md#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.003400364425033331,
+            "copied": 1.0,
+            "warnings": [],
+            "ungrounded_words": []
+          }
+        ]
+      },
+      "scored_steps": [
+        {
+          "text": "The kafka-streams-scala library is deprecated as of Kafka 4.3 and will be removed in Kafka 5.0.",
+          "cited": [
+            "kafka/streams/developer-guide/scala-migration.md#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.003,
+          "copied": 1.0,
+          "supported": true
+        }
+      ]
+    },
+    {
+      "id": "ver-04",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 1,
+      "seconds": 10.6,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "### `runs.using` for JavaScript actions\n**Required** The runtime used to execute the code specified in `main`. \n* Use `node20` for Node.js v20.\n* Use `node24` for Node.js v24.",
+            "cited": [
+              "github/reference/workflows-and-actions/metadata-syntax.md#3"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          }
+        ]
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "### `runs.using` for JavaScript actions\n**Required** The runtime used to execute the code specified in `main`. \n* Use `node20` for Node.js v20.\n* Use `node24` for Node.js v24.",
+            "cited": [
+              "github/reference/workflows-and-actions/metadata-syntax.md#3"
+            ],
+            "bad_cites": [],
+            "entailment": 0.009553908370435238,
+            "copied": 1.0,
+            "warnings": [],
+            "ungrounded_words": []
+          }
+        ]
+      },
+      "scored_steps": [
+        {
+          "text": "### `runs.using` for JavaScript actions\n**Required** The runtime used to execute the code specified in `main`. \n* Use `node20` for Node.js v20.\n* Use `node24` for Node.js v24.",
+          "cited": [
+            "github/reference/workflows-and-actions/metadata-syntax.md#3"
+          ],
+          "bad_cites": [],
+          "entailment": 0.01,
+          "copied": 1.0,
+          "supported": true
+        }
+      ]
+    },
+    {
+      "id": "ver-06",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 2,
+      "seconds": 10.3,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "steps": [
+          {
+            "text": "Check the text of doc S1, which states 'Support for MD5-encrypted passwords is deprecated and will be removed in a future release of PostgreSQL. Refer to Section 20.5 for details about migrating to another password type.'",
+            "cited": [
+              "postgres/auth-password.html#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Conclude that MD5 password authentication is not recommended.",
+            "cited": [
+              "postgres/auth-password.html#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          }
+        ]
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "Conclude that MD5 password authentication is not recommended.",
+            "cited": [
+              "postgres/auth-password.html#1"
+            ],
+            "bad_cites": [],
+            "entailment": 0.38636019825935364,
+            "copied": 0.0,
+            "warnings": [],
+            "ungrounded_words": []
+          }
+        ]
+      },
+      "scored_steps": [
+        {
+          "text": "Check the text of doc S1, which states 'Support for MD5-encrypted passwords is deprecated and will be removed in a future release of PostgreSQL. Refer to Section 20.5 for details about migrating to another password type.'",
+          "cited": [
+            "postgres/auth-password.html#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.002,
+          "copied": 0.647,
+          "supported": false
+        },
+        {
+          "text": "Conclude that MD5 password authentication is not recommended.",
+          "cited": [
+            "postgres/auth-password.html#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.386,
+          "copied": 0.0,
+          "supported": true
+        }
+      ]
+    },
+    {
+      "id": "ver-07",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 2,
+      "seconds": 9.4,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "steps": [
+          {
+            "text": "Yes, according to the compatibility policy stated in S1, Kafka has a 'bidirectional' client compatibility policy. This means that new clients can talk to old servers and vice versa.",
+            "cited": [
+              "kafka/design/protocol.md#3"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Specifically, it is mentioned that 'new clients can talk to old servers, and old clients can talk to new servers.'",
+            "cited": [
+              "kafka/design/protocol.md#3"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Yes, according to the compatibility policy stated in S1, Kafka has a 'bidirectional' client compatibility policy. This means that new clients can talk to old servers and vice versa.",
+          "cited": [
+            "kafka/design/protocol.md#3"
+          ],
+          "bad_cites": [],
+          "entailment": 0.005,
+          "copied": 0.407,
+          "supported": false
+        },
+        {
+          "text": "Specifically, it is mentioned that 'new clients can talk to old servers, and old clients can talk to new servers.'",
+          "cited": [
+            "kafka/design/protocol.md#3"
+          ],
+          "bad_cites": [],
+          "entailment": 0.08,
+          "copied": 0.688,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "ver-08",
+      "type": "version",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 1,
+      "seconds": 6.9,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "The internal provisioner of Ceph RBD is deprecated since v1.28 as noted in doc S1.",
+            "cited": [
+              "kubernetes/concepts/storage/storage-classes.md#7"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "The internal provisioner of Ceph RBD is deprecated since v1.28 as noted in doc S1.",
+          "cited": [
+            "kubernetes/concepts/storage/storage-classes.md#7"
+          ],
+          "bad_cites": [],
+          "entailment": 0.137,
+          "copied": 0.308,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "x-01",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 5,
+      "seconds": 13.2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 5,
+        "steps": [
+          {
+            "text": "Ensure you have a persistent volume (PV) or a Persistent Volume Claim (PVC) to store your PostgreSQL data, so that it persists across pod restarts.",
+            "cited": [
+              "postgres/runtime-config-wal.html#13",
+              "postgres/continuous-archiving.html#5"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Set the `archive_timeout` parameter in your `postgresql.conf` file to control how quickly WAL segments are archived. This should be set based on your recovery needs and system performance.",
+            "cited": [
+              "postgres/runtime-config-wal.html#13"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Configure your PostgreSQL server for continuous archiving by setting appropriate parameters such as `recovery_prefetch`, `wal_decode_buffer_size`, and `archive_time` in the `postgresql.conf` file. Ensure these settings are optimized for your specific use case to balance between recovery speed and resource usage.",
+            "cited": [
+              "postgres/runtime-config-wal.html#13",
+              "postgres/continuous-archiving.html#5"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Create a script or command that archives WAL segments using your preferred method (e.g., `pg_wal archiver`, custom archive function). This should be set up as the `restore_command` in your PostgreSQL configuration to ensure continuous archiving.",
+            "cited": [
+              "postgres/runtime-config-wal.html#13",
+              "postgres/continuous-archiving.html#5"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [
+              "archiver"
+            ],
+            "unsupported": true
+          },
+          {
+            "text": "Monitor the archiving process and adjust settings if necessary to prevent data loss due to archiving delays. Ensure that any error conditions are reported appropriately for quick resolution.",
+            "cited": [
+              "postgres/runtime-config-wal.html#13",
+              "postgres/continuous-archiving.html#5"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Ensure you have a persistent volume (PV) or a Persistent Volume Claim (PVC) to store your PostgreSQL data, so that it persists across pod restarts.",
+          "cited": [
+            "postgres/runtime-config-wal.html#13",
+            "postgres/continuous-archiving.html#5"
+          ],
+          "bad_cites": [],
+          "entailment": 0.002,
+          "copied": 0.0,
+          "supported": false
+        },
+        {
+          "text": "Set the `archive_timeout` parameter in your `postgresql.conf` file to control how quickly WAL segments are archived. This should be set based on your recovery needs and system performance.",
+          "cited": [
+            "postgres/runtime-config-wal.html#13"
+          ],
+          "bad_cites": [],
+          "entailment": 0.001,
+          "copied": 0.0,
+          "supported": false
+        },
+        {
+          "text": "Configure your PostgreSQL server for continuous archiving by setting appropriate parameters such as `recovery_prefetch`, `wal_decode_buffer_size`, and `archive_time` in the `postgresql.conf` file. Ensure these settings are optimized for your specific use case to balance between recovery speed and resource usage.",
+          "cited": [
+            "postgres/runtime-config-wal.html#13",
+            "postgres/continuous-archiving.html#5"
+          ],
+          "bad_cites": [],
+          "entailment": 0.001,
+          "copied": 0.027,
+          "supported": false
+        },
+        {
+          "text": "Create a script or command that archives WAL segments using your preferred method (e.g., `pg_wal archiver`, custom archive function). This should be set up as the `restore_command` in your PostgreSQL configuration to ensure continuous archiving.",
+          "cited": [
+            "postgres/runtime-config-wal.html#13",
+            "postgres/continuous-archiving.html#5"
+          ],
+          "bad_cites": [],
+          "entailment": 0.012,
+          "copied": 0.029,
+          "supported": false
+        },
+        {
+          "text": "Monitor the archiving process and adjust settings if necessary to prevent data loss due to archiving delays. Ensure that any error conditions are reported appropriately for quick resolution.",
+          "cited": [
+            "postgres/runtime-config-wal.html#13",
+            "postgres/continuous-archiving.html#5"
+          ],
+          "bad_cites": [],
+          "entailment": 0.003,
+          "copied": 0.154,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "x-02",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 3,
+      "seconds": 12.1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "steps": [
+          {
+            "text": "Check if your Kafka broker container is hitting a resource limit, specifically the memory limit, by running `kubectl describe pod` on the Pod of interest.",
+            "cited": [
+              "kubernetes/concepts/configuration/manage-resources-containers.md#16"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "If you find that the application code for your Kafka broker is behaving as expected and not causing a memory leak, consider setting a higher memory limit (and possibly request) for that container. You can do this by modifying the container's configuration in the Pod definition.",
+            "cited": [
+              "kubernetes/concepts/configuration/manage-resources-containers.md#16"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "To get hands-on experience with assigning Memory resources to containers and Pods, you can create a YAML file specifying a high memory request and limit for your Kafka broker pod. Then apply this configuration using `kubectl apply -f <your-file.yaml> --namespace=<your-namespace>`.",
+            "cited": [
+              "kubernetes/tasks/configure-pod-container/assign-memory-resource.md#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Check if your Kafka broker container is hitting a resource limit, specifically the memory limit, by running `kubectl describe pod` on the Pod of interest.",
+          "cited": [
+            "kubernetes/concepts/configuration/manage-resources-containers.md#16"
+          ],
+          "bad_cites": [],
+          "entailment": 0.021,
+          "copied": 0.348,
+          "supported": false
+        },
+        {
+          "text": "If you find that the application code for your Kafka broker is behaving as expected and not causing a memory leak, consider setting a higher memory limit (and possibly request) for that container. You can do this by modifying the container's configuration in the Pod definition.",
+          "cited": [
+            "kubernetes/concepts/configuration/manage-resources-containers.md#16"
+          ],
+          "bad_cites": [],
+          "entailment": 0.008,
+          "copied": 0.378,
+          "supported": false
+        },
+        {
+          "text": "To get hands-on experience with assigning Memory resources to containers and Pods, you can create a YAML file specifying a high memory request and limit for your Kafka broker pod. Then apply this configuration using `kubectl apply -f <your-file.yaml> --namespace=<your-namespace>`.",
+          "cited": [
+            "kubernetes/tasks/configure-pod-container/assign-memory-resource.md#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.054,
+          "copied": 0.05,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "x-04",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 2,
+      "seconds": 12.1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "steps": [
+          {
+            "text": "In your Debezium configuration, ensure that the `plugin.name` property is explicitly set to `pgoutput`. This can be done by adding or modifying the following line in your connector properties file:",
+            "cited": [
+              "stackoverflow/59978213#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "Additionally, check if Postgres 11.5 supports logical replication and has the rds.logical_replication parameter enabled. Ensure that max_wal_senders and max_replication_slots are set appropriately for your environment.",
+            "cited": [
+              "stackoverflow/59978213#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "In your Debezium configuration, ensure that the `plugin.name` property is explicitly set to `pgoutput`. This can be done by adding or modifying the following line in your connector properties file:",
+            "cited": [
+              "stackoverflow/59978213#0"
+            ],
+            "bad_cites": [],
+            "entailment": 0.9740123152732849,
+            "copied": 0.034482758620689655,
+            "warnings": [],
+            "ungrounded_words": []
+          }
+        ]
+      },
+      "scored_steps": [
+        {
+          "text": "In your Debezium configuration, ensure that the `plugin.name` property is explicitly set to `pgoutput`. This can be done by adding or modifying the following line in your connector properties file:",
+          "cited": [
+            "stackoverflow/59978213#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.974,
+          "copied": 0.034,
+          "supported": true
+        },
+        {
+          "text": "Additionally, check if Postgres 11.5 supports logical replication and has the rds.logical_replication parameter enabled. Ensure that max_wal_senders and max_replication_slots are set appropriately for your environment.",
+          "cited": [
+            "stackoverflow/59978213#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.013,
+          "copied": 0.0,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "x-05",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 4,
+      "seconds": 11.1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "steps": [
+          {
+            "text": "Ensure that the kubelet is configured to measure Pod storage use, specifically local ephemeral storage.",
+            "cited": [
+              "kubernetes/concepts/storage/ephemeral-storage.md#4"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Set a size limit for the `emptyDir` volumes used by your Kafka pod. This can be done in the Kubernetes deployment or statefulset definition.",
+            "cited": [
+              "kubernetes/concepts/configuration/manage-resources-containers.md#8"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "If you are using project quotas, ensure that they are enabled and configured to monitor storage use on the filesystem backing the `emptyDir` volumes.",
+            "cited": [
+              "kubernetes/concepts/storage/ephemeral-storage.md#4"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Monitor the disk usage of your Kafka pod after setting the size limit. If it still exceeds the local ephemeral storage limit, consider adjusting the priority or using a different QoS class for your pod to avoid eviction.",
+            "cited": [
+              "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md#9",
+              "kubernetes/concepts/configuration/manage-resources-containers.md#8"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Ensure that the kubelet is configured to measure Pod storage use, specifically local ephemeral storage.",
+          "cited": [
+            "kubernetes/concepts/storage/ephemeral-storage.md#4"
+          ],
+          "bad_cites": [],
+          "entailment": 0.153,
+          "copied": 0.308,
+          "supported": false
+        },
+        {
+          "text": "Set a size limit for the `emptyDir` volumes used by your Kafka pod. This can be done in the Kubernetes deployment or statefulset definition.",
+          "cited": [
+            "kubernetes/concepts/configuration/manage-resources-containers.md#8"
+          ],
+          "bad_cites": [],
+          "entailment": 0.01,
+          "copied": 0.0,
+          "supported": false
+        },
+        {
+          "text": "If you are using project quotas, ensure that they are enabled and configured to monitor storage use on the filesystem backing the `emptyDir` volumes.",
+          "cited": [
+            "kubernetes/concepts/storage/ephemeral-storage.md#4"
+          ],
+          "bad_cites": [],
+          "entailment": 0.022,
+          "copied": 0.227,
+          "supported": false
+        },
+        {
+          "text": "Monitor the disk usage of your Kafka pod after setting the size limit. If it still exceeds the local ephemeral storage limit, consider adjusting the priority or using a different QoS class for your pod to avoid eviction.",
+          "cited": [
+            "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md#9",
+            "kubernetes/concepts/configuration/manage-resources-containers.md#8"
+          ],
+          "bad_cites": [],
+          "entailment": 0.023,
+          "copied": 0.0,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "x-06",
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "local",
+      "drafted_steps": 4,
+      "seconds": 11.1,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "steps": [
+          {
+            "text": "Yes, your GitHub Actions workflow can authenticate to your Kubernetes cluster using short-lived tokens generated via the TokenRequest API. These tokens are ideal for service authentication and have a short lifespan to minimize the impact if compromised.",
+            "cited": [
+              "kubernetes/concepts/security/hardening-guide/authentication-mechanisms.md#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          },
+          {
+            "text": "To achieve this, you would need to configure the TokenRequest API in your Kubernetes cluster settings. This involves setting up an external authentication provider such as OpenID Connect (OIDC) or using Webhook token authentication. The short-lived nature of these tokens makes them suitable for service authentication and reduces the risk associated with long-term credentials.",
+            "cited": [
+              "kubernetes/concepts/security/hardening-guide/authentication-mechanisms.md#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "For example, you can use an external identity provider like GitHub Actions to authenticate your Kubernetes cluster workloads. This setup allows your workflow to authenticate without needing a stored kubeconfig file, making it more secure and flexible.",
+            "cited": [
+              "kubernetes/concepts/security/hardening-guide/authentication-mechanisms.md#2",
+              "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-jfrog.md#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Ensure that the authentication service is isolated from general workloads in the cluster to maintain security. Additionally, configure short-lived tokens for both API server authentication and service authentication to further enhance security.",
+            "cited": [
+              "kubernetes/concepts/security/hardening-guide/authentication-mechanisms.md#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Yes, your GitHub Actions workflow can authenticate to your Kubernetes cluster using short-lived tokens generated via the TokenRequest API. These tokens are ideal for service authentication and have a short lifespan to minimize the impact if compromised.",
+          "cited": [
+            "kubernetes/concepts/security/hardening-guide/authentication-mechanisms.md#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.68,
+          "copied": 0.114,
+          "supported": true
+        },
+        {
+          "text": "To achieve this, you would need to configure the TokenRequest API in your Kubernetes cluster settings. This involves setting up an external authentication provider such as OpenID Connect (OIDC) or using Webhook token authentication. The short-lived nature of these tokens makes them suitable for service authentication and reduces the risk associated with long-term credentials.",
+          "cited": [
+            "kubernetes/concepts/security/hardening-guide/authentication-mechanisms.md#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.012,
+          "copied": 0.058,
+          "supported": false
+        },
+        {
+          "text": "For example, you can use an external identity provider like GitHub Actions to authenticate your Kubernetes cluster workloads. This setup allows your workflow to authenticate without needing a stored kubeconfig file, making it more secure and flexible.",
+          "cited": [
+            "kubernetes/concepts/security/hardening-guide/authentication-mechanisms.md#2",
+            "github/how-tos/secure-your-work/security-harden-deployments/oidc-in-jfrog.md#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.039,
+          "copied": 0.057,
+          "supported": false
+        },
+        {
+          "text": "Ensure that the authentication service is isolated from general workloads in the cluster to maintain security. Additionally, configure short-lived tokens for both API server authentication and service authentication to further enhance security.",
+          "cited": [
+            "kubernetes/concepts/security/hardening-guide/authentication-mechanisms.md#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.002,
+          "copied": 0.2,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "none-02",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "drafted_steps": 1,
+      "seconds": 12.0,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "steps": [
+          {
+            "text": "## Question\nHow do I configure PgBouncer transaction pooling in front of PostgreSQL?\n\n## Accepted answer\nTo configure PgBouncer for transaction pooling, you need to set the `pgbouncer.ini` configuration file. Specifically, you should enable the `pool_mode` parameter and set it to either `transaction` or `session`. Additionally, you may want to adjust other parameters such as `default_pool_size`, `max_client_conn`, and `reservations_timeout`.\n\nTo apply these settings, restart PgBouncer after making changes. You can also use the command line options for configuration:\n\n```bash\npgbouncer -u postgres -d pgbouncer.ini --pool_mode transaction\n```\n\nThis will start PgBouncer with the specified pool mode and other parameters.",
+            "cited": [
+              "stackoverflow/18389124#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [
+              "pgbouncer.ini",
+              "pool_mode",
+              "session",
+              "default_pool_size",
+              "max_client_conn",
+              "reservations_timeout"
+            ],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "## Question\nHow do I configure PgBouncer transaction pooling in front of PostgreSQL?\n\n## Accepted answer\nTo configure PgBouncer for transaction pooling, you need to set the `pgbouncer.ini` configuration file. Specifically, you should enable the `pool_mode` parameter and set it to either `transaction` or `session`. Additionally, you may want to adjust other parameters such as `default_pool_size`, `max_client_conn`, and `reservations_timeout`.\n\nTo apply these settings, restart PgBouncer after making changes. You can also use the command line options for configuration:\n\n```bash\npgbouncer -u postgres -d pgbouncer.ini --pool_mode transaction\n```\n\nThis will start PgBouncer with the specified pool mode and other parameters.",
+          "cited": [
+            "stackoverflow/18389124#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.001,
+          "copied": 0.01,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "none-03",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "drafted_steps": 3,
+      "seconds": 11.8,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "steps": [
+          {
+            "text": "Check if the issue is related to the security settings of your repository and check if 'Read and write permissions' are enabled for all action workflows.",
+            "cited": [
+              "stackoverflow/72851548#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "If the problem persists, try updating the actions in your workflow to the latest version by opening pull requests. This can help resolve any reported vulnerabilities.",
+            "cited": [
+              "github/reference/security/secure-use.md#12"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Ensure that the gradlew file has executable permissions on your Git repository. If not, add the permission fix step to your flow before execution as shown below: \n\n```- name: Change wrapper permissions\n  run: chmod +x ./gradlew\n```",
+            "cited": [
+              "stackoverflow/58282791#0"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": false
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Check if the issue is related to the security settings of your repository and check if 'Read and write permissions' are enabled for all action workflows.",
+          "cited": [
+            "stackoverflow/72851548#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.001,
+          "copied": 0.292,
+          "supported": false
+        },
+        {
+          "text": "If the problem persists, try updating the actions in your workflow to the latest version by opening pull requests. This can help resolve any reported vulnerabilities.",
+          "cited": [
+            "github/reference/security/secure-use.md#12"
+          ],
+          "bad_cites": [],
+          "entailment": 0.088,
+          "copied": 0.167,
+          "supported": false
+        },
+        {
+          "text": "Ensure that the gradlew file has executable permissions on your Git repository. If not, add the permission fix step to your flow before execution as shown below: \n\n```- name: Change wrapper permissions\n  run: chmod +x ./gradlew\n```",
+          "cited": [
+            "stackoverflow/58282791#0"
+          ],
+          "bad_cites": [],
+          "entailment": 0.923,
+          "copied": 0.353,
+          "supported": true
+        }
+      ]
+    },
+    {
+      "id": "none-04",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "drafted_steps": 3,
+      "seconds": 10.2,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "steps": [
+          {
+            "text": "Run `terraform state rm <resource_name>` to remove the resource from the state file.",
+            "cited": [
+              "stackoverflow/52668938#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [
+              "terraform"
+            ],
+            "unsupported": true
+          },
+          {
+            "text": "Delete the state file by running `rm .terraform/state.tfstate`.",
+            "cited": [
+              "stackoverflow/52668938#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [
+              ".terraform/state.tfstate"
+            ],
+            "unsupported": true
+          },
+          {
+            "text": "Re-run your Terraform commands to recreate the resources.",
+            "cited": [
+              "stackoverflow/52668938#1"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Run `terraform state rm <resource_name>` to remove the resource from the state file.",
+          "cited": [
+            "stackoverflow/52668938#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.068,
+          "copied": 0.0,
+          "supported": false
+        },
+        {
+          "text": "Delete the state file by running `rm .terraform/state.tfstate`.",
+          "cited": [
+            "stackoverflow/52668938#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.016,
+          "copied": 0.0,
+          "supported": false
+        },
+        {
+          "text": "Re-run your Terraform commands to recreate the resources.",
+          "cited": [
+            "stackoverflow/52668938#1"
+          ],
+          "bad_cites": [],
+          "entailment": 0.009,
+          "copied": 0.0,
+          "supported": false
+        }
+      ]
+    },
+    {
+      "id": "none-05",
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "local",
+      "drafted_steps": 4,
+      "seconds": 13.9,
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "steps": [
+          {
+            "text": "Set the `default_toast_compression` parameter to a supported method such as `pglz` or `lz4`. This can be done in the `postgresql.conf` file or on the server command line.",
+            "cited": [
+              "postgres/runtime-config-client.html#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Ensure that your PostgreSQL version supports the compression method you have chosen. For example, if using `lz4`, make sure to compile PostgreSQL with `--with-lz4`. If using `pglz`, ensure it is enabled in your configuration.",
+            "cited": [
+              "postgres/runtime-config-client.html#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [],
+            "unsupported": true
+          },
+          {
+            "text": "Create a hypertable and specify the compression method when creating or altering the table. Use the `CREATE TABLE` command with the `WITH (compression = 'method')` clause, where `method` is either `pglz` or `lz4`. For example: `CREATE TABLE my_table WITH (compression = 'pglz');`.",
+            "cited": [
+              "postgres/runtime-config-client.html#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [
+              "my_table"
+            ],
+            "unsupported": true
+          },
+          {
+            "text": "Verify that the hypertable has been created with the correct compression method. You can check this by querying the system catalog tables, such as `information_schema.tables`, or using a client tool like psql to inspect the table definition.",
+            "cited": [
+              "postgres/runtime-config-client.html#2"
+            ],
+            "bad_cites": [],
+            "entailment": null,
+            "copied": null,
+            "warnings": [],
+            "ungrounded_words": [
+              "information_schema.tables"
+            ],
+            "unsupported": true
+          }
+        ]
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "steps": []
+      },
+      "scored_steps": [
+        {
+          "text": "Set the `default_toast_compression` parameter to a supported method such as `pglz` or `lz4`. This can be done in the `postgresql.conf` file or on the server command line.",
+          "cited": [
+            "postgres/runtime-config-client.html#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.002,
+          "copied": 0.038,
+          "supported": false
+        },
+        {
+          "text": "Ensure that your PostgreSQL version supports the compression method you have chosen. For example, if using `lz4`, make sure to compile PostgreSQL with `--with-lz4`. If using `pglz`, ensure it is enabled in your configuration.",
+          "cited": [
+            "postgres/runtime-config-client.html#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.025,
+          "copied": 0.0,
+          "supported": false
+        },
+        {
+          "text": "Create a hypertable and specify the compression method when creating or altering the table. Use the `CREATE TABLE` command with the `WITH (compression = 'method')` clause, where `method` is either `pglz` or `lz4`. For example: `CREATE TABLE my_table WITH (compression = 'pglz');`.",
+          "cited": [
+            "postgres/runtime-config-client.html#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.165,
+          "copied": 0.0,
+          "supported": false
+        },
+        {
+          "text": "Verify that the hypertable has been created with the correct compression method. You can check this by querying the system catalog tables, such as `information_schema.tables`, or using a client tool like psql to inspect the table definition.",
+          "cited": [
+            "postgres/runtime-config-client.html#2"
+          ],
+          "bad_cites": [],
+          "entailment": 0.004,
+          "copied": 0.0,
+          "supported": false
+        }
+      ]
+    }
+  ]
+}

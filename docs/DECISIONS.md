@@ -234,3 +234,131 @@ outside users, admin = super user who grants licenses, members = users licensed 
 - **Not built:** login (stage 7; will supply the `user_id`), HTTP endpoints for the admin dashboard (UI comes later),
   rate limits, license expiry/seats. In a real deployment the access level of a chunk should come from the source
   system's own metadata; the path rules are a stand-in.
+
+## Answer stage: context, generation, verifier, output safety (stages 12-14)
+
+- **Context (stage 12).** *Chose:* take the top `k_context` (5) hybrid hits, expand each to its parent section (nearest
+  heading above the chunk to the next heading of the same or higher level, found in `pages.jsonl`), merge sections of the
+  same page that overlap, keep search order (strongest first), stop at 8000 characters. A section longer than 2800
+  characters falls back to the chunk plus its heading, because LM Studio's context is small (3B model, 4 GB GPU).
+  Sizes are in characters (about 4 per token), not tokens: simpler, and enough for a budget. *Why parent sections:*
+  fixed 500-token windows cut procedures in half. *Considered:* neighbour chunks, whole pages (up to 170k characters).
+  *Limit:* `#` lines inside code fences are not treated as headings; a page with no headings (some Stack Overflow
+  answers) becomes one section, so it is cut by the 2800 cap.
+- **Short labels, real ids shown.** The model cites `S1..S5`; answers and the eval show the real chunk ids. A 3B model
+  copies long ids like `kubernetes/tasks/debug/_index.md#0` badly. A literal chunk id is also accepted if it is in the context.
+- **JSON schema output, not free text.** *Chose:* `response_format=json_schema` with `{steps: [{step, sources[]}]}` (LM
+  Studio and Groq both accept it). *Why:* with a plain "end each step with [S1]" prompt the 3B model often skipped
+  citations. I tried the label at the end, the label at the start, and an example; each changed behaviour, none was
+  reliable, and the example got copied into an answer. With the schema every step has a source. An empty list is the
+  model saying "no fix". A reply that is not that JSON counts as unusable, so the client falls back to Groq.
+- **Verifier.** Two checks per step: (1) every cited id must be one of the chunks in the context (anything else was
+  invented, or may be a chunk the caller cannot read), (2) `cross-encoder/nli-deberta-v3-small` (CPU) scores whether the
+  cited text entails the step; the cited sections are cut into ~1200-character windows and the best window counts.
+  Unsupported steps are dropped; if none are left, or fewer than `min_supported_fraction` (0.5) are supported, the answer
+  is "No documented fix found." *Considered:* an LLM judge (slower, and Groq is only the failsafe); keeping unsupported
+  steps with a flag (the point is not to guess).
+- **NLI threshold 0.3 (was a 0.5 placeholder).** Picked on the **tune** split only. Step scores are bimodal (first run:
+  51 of 87 below 0.1, 21 above 0.5). At 0.5, 18 of 26 answerable questions were refused; from 0.1 to 0.4 the count only
+  moved 12 -> 15, so 0.3 sits on the plateau. I checked the 41 steps scoring below 0.1 against all excerpts (a one-off script, not saved, so not a README number): 35 are
+  supported by none (generic advice the model made up, such as "check your VPN"), only 6 are real facts cited to the wrong
+  excerpt. So the low scores are mostly correct rejections, not NLI being too strict. The 0.5 run is kept as
+  `answer_v1_tune.*`. *Limit:* NLI handles imperative steps ("Restart the server") less well than statements;
+  steps copied word for word from the docs scored 0.43-0.84 in a spot check. Nobody has labelled steps by hand, so the
+  threshold is not validated against a human.
+- **Output safety.** Secrets / personal data: the answer is **withheld** (not redacted) if the ingest masker finds
+  anything in it; the docs are already masked, so a hit means the model produced it. Dangerous commands (`kubectl delete`,
+  `DROP TABLE|DATABASE|SCHEMA`, `TRUNCATE`, `kafka-topics ... --delete`) get a WARNING line under the step; the patterns
+  live in `config.yaml`. Citations: only context chunks that `Principal.allows()` are cited, checked again at the end even
+  though search already filters (defence in depth); a step left with no readable citation counts as unsupported.
+  In the tune run no generated step contained a dangerous command or a secret, so these two are covered by unit tests
+  only, not by eval numbers.
+- **Prompt injection.** Excerpts are wrapped in `<doc>` tags, the system prompt says they are data and to ignore
+  instructions inside them, and a `</doc` inside an excerpt is neutralised so it cannot close the tag. Unit-tested; **not**
+  tested against a real attack corpus.
+- **How the eval compares off and on.** Each question is generated once; the same draft is finalized with the verifier off
+  and on, so only the verifier differs. "Unsupported steps" uses the verifier's own NLI score, so it is 0 with the verifier
+  on **by construction**; the informative parts are the OFF column, the refusals, and the independent check ("steps with a
+  command word not in the docs", which does not use NLI). A human step-level judgement would be better.
+- **Holdout not used.** You asked about "the 6 unanswerable questions"; only 4 are in the tune split, 2 are holdout. The
+  holdout is for one final run and the pipeline still has open parts (stages 7 and 16), so these numbers cover the 4 tune
+  questions. *Open question for you:* run the holdout now, or at the very end?
+
+## Over-refusals: what was tried (answer stage)
+
+Goal: fewer answerable questions refused by the verifier (14 of 26 in `answer_v2`). Findings first, then what was kept.
+
+- **Why the 14 were refused (checked by hand against the labelled evidence quotes, tune split).** In 3 the right page was
+  not retrieved at all (refusing is correct). In about 5 the page was retrieved but the exact passage was not in the top 10 (**partly wrong, see the next section: a bug in my context builder explained some of these**)
+  chunks (`sym-02`, `sym-03`, `x-01`, `x-05`, `x-06`): a **retrieval** problem hidden by the page-level retrieval eval, not fixable
+  here. In the rest the passage was in the context but the 3B model paraphrased or added advice. So at most about 5 to 6 of the
+  14 can be recovered by the answer stage.
+- **Kept: copy check in the verifier.** NLI scored word-for-word steps (code lines, version sentences, list items) at 0.00-0.06,
+  so the verifier rejected steps copied straight from the docs. A step is now also supported if at least 70% of its word triples
+  appear in the cited text (`min_copied_trigrams`). On the tune data, steps from the 4 unanswerable questions reach at most 0.29,
+  verbatim copies 0.73-1.00. *Limit:* 0.7 was chosen by looking at that tune data; it proves the step was copied, not that it is
+  relevant to the question.
+- **Tried, reverted: "stay close to the excerpts' wording" prompt.** Unsupported steps in the off column went 51/81 -> 44/85 in
+  one run, then 58/97 and 55/91 in two more with the same prompt. Not a reliable gain, so the original prompt is back.
+- **Tried, reverted: `min_supported_fraction` 0.5 -> 0.4.** Would rescue 2 questions in the stored scores but puts
+  `none-03` (1 of 3 steps supported, a true but irrelevant doc sentence) on the edge, and a live run did not refuse fewer.
+- **Run-to-run noise is about +-2 questions.** Answerable refusals in five runs of near-identical code: 14, 13, 13, 15, 15 (then 14
+  on the final config). The model is sampled at temperature 0.1, so one question flipping is not a result. Any change smaller
+  than that needs more questions or repeated runs to judge.
+- **Not done (would help most):** (1) retrieval that returns the exact passage, not only the right page (e.g. smaller chunks, or
+  the reranker, re-tested with a passage-level metric); (2) a relevance check, so a supported-but-irrelevant sentence cannot
+  rescue an answer, which would allow a lower fraction; (3) a stronger local model if the GPU allows.
+
+## Chunking, embedding and retrieval experiments (passage level)
+
+Question from you: is the answer stage starved because chunking, embedding or retrieval is weak? Method: added **passage-level** metrics
+to `eval/run.py` (the labelled evidence quote must be inside a retrieved chunk, and inside the context the answer step builds from the top 5).
+A chunk counts if it is from the right page and holds at least half of the quote's word triples, so a quote cut by a chunk boundary still counts.
+Chunking-independent, but bigger chunks hold evidence more easily, so average chunk size is reported next to it. 52 evidence items on the tuning
+split: one item = 0.019, differences under about 0.05 are noise. Holdout untouched.
+
+- **Chose: keep fixed 500-token chunks.** Tried fixed 250, recursive 500/250 (new `chunk_recursive`: headings, blank lines, lines, sentences,
+  words; every chunk an exact page slice) and heading-aware 500/250 with bge-small and hybrid retrieval. None beat fixed 500 on passage recall@10
+  (0.750); 250-token variants lose recall because more, smaller chunks crowd the top 10. Recursive was not better than plain fixed windows.
+  *Not tried:* small-to-big (search small chunks, return the parent section), contextual prefixes, a different `k`.
+- **Embedding: bge-m3 is better but modestly; not made the default (your call).** Same fixed-500 chunks: page MRR 0.825 -> 0.897, answer-in-context
+  0.635 -> 0.712, passage recall@10 0.750 -> 0.769. Costs: 40-minute index build here, a 568M-parameter model, 1024-dim vectors, and at question
+  time it must run on CPU because LM Studio's model needs the 4 GB GPU. End to end it did not change the answers (15 vs 14 of 26 refused,
+  noise). CLAUDE.md names bge-small, so switching is a decision for you. *Considered:* `bge-base-en-v1.5` (not run).
+- **`text-embedding-3-small`: not used.** Paid and cloud-hosted (CLAUDE.md: free and local only, ask before anything paid).
+- **Reranker: stays off.** At passage level it raises recall@10 (0.750 -> 0.788) but lowers passage MRR (0.619 -> 0.467) and adds no answer-in-context.
+- **Bug found and fixed in my context builder (stage 12).** Neighbouring chunks overlap by 50 tokens by design. The builder merged an overlapping hit
+  into the previous item but only recorded its id, not its text, so a passage ranked 2nd could vanish from the context. Now overlapping or touching
+  spans on the same page are joined into one item (or, if the join would exceed twice `max_section_chars`, the later hit is kept with the already-shown
+  part cut off). Regression test in `tests/test_answer.py`. Effect: answer-in-context for the baseline 0.577 -> 0.635. The earlier answer-quality
+  numbers (`answer_v1`..`v7`) were measured with the bug and are kept only as history; the README uses `answer_v8_*`.
+- **Where the answer quality is lost now (bge-m3 run, tuning split).** Evidence fully in the context for 17 of 26 questions, yet 7 of those were still
+  refused; evidence missing for 6 (5 refused, correct). So generation faithfulness (3B model plus a strict verifier), not retrieval, is the main limit.
+  Cheapest next steps: a stronger generator (Groq as primary needs your OK), or a step-level human label set to check the NLI threshold.
+- **GPU:** the venv's torch was the CPU build (pinned in `pyproject.toml` so the GPU stays free for LM Studio). For indexing I installed
+  `torch==2.14.1+cu126` into `.venv` only with `uv pip install --no-deps`; `pyproject.toml` and `uv.lock` are unchanged, so `uv sync` would put the CPU build back.
+  Config key `models.embedding_device` (fp16 on cuda) is new; default stays `models.device: cpu`. The GTX 1650 Ti indexed bge-small at 13 chunks/s and bge-m3
+  at about 1 chunk/s. Both cannot run with the LLM loaded at once.
+- **Experiment hygiene.** `python -m src.ingest --out FILE` writes only that chunks file. (My first attempt overwrote `chunks.jsonl`; I regenerated it and
+  checked it is identical to what Qdrant holds, hash for hash.) Collections `exp_*` (six bge-small, one bge-m3) are left in Qdrant for re-use; I deleted only
+  my own half-built `exp_fixed250_m3`. Chunk files `data/processed/chunks_*.jsonl` are the variants.
+
+## Query understanding (stage 7): built, measured, left off
+
+- **What:** `src/query.py` (one structured-output LLM call: products, 1-3 queries, hypothetical answer; cached on disk by question + provider + model + prompt)
+  and `search_plan()` in `src/search.py` (original question + rewritten queries + product-routed searches + HyDE dense list, merged with RRF). The original
+  question is always searched, so a bad plan only adds candidates. A product the caller chose explicitly is never widened by the plan. Access rules apply
+  inside every search; a test runs all plan modes as public and as a one-product member and checks nothing unreadable comes back.
+- **The question is data:** it goes in the user message only, never in the system prompt (tested).
+- **Chose: do not enable it** (`query.use: []`). Measured against plain search on the tuning split: answer-in-context 0.56-0.65 vs 0.635, no consistent gain
+  (see README, Query understanding). *Why keep the code:* routing is accurate with Groq (26 of 26), HyDE raised passage recall@10 by 4 items, and it is the
+  basis for the retry loop (stage 16). *Considered:* enabling HyDE only (best recall, worse MRR, +1 item in context: not convincing).
+- **LLM client now has a provider order** (`llm.prefer`, per-call `prefer=`), as you allowed Groq for the generator and the query rewriter. Default stays
+  `local` first; the other provider is still the failsafe and every fallback is logged. Groq's `gpt-oss-120b` is a reasoning model: its hidden thinking tokens
+  count against `max_tokens`, so a 200-token cap failed with `json_validate_failed`; Groq calls now use `llm.groq.max_tokens: 1500` and `reasoning_effort: low`,
+  and retry up to 3 times on rate limits. (This also makes the Groq fallback for answers more reliable than before.) CLAUDE.md still says local is the default;
+  I did not edit it, update it if you want Groq first.
+- **Finding that changes the plan:** the passage-level label is one sentence, so "answer in context" counts a miss when a different chunk of the same page answers
+  the question (inspected for `sym-02` and `x-05`). The real retrieval accuracy is somewhere between 0.64 (strict) and 0.90 (page recall@10). Further retrieval
+  work is being optimised against a pessimistic proxy until there is a correctness judge (question + retrieved context + reference evidence -> is the answer
+  derivable?), and a bigger question set. That is the next step.

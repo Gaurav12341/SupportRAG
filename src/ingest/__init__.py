@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from .chunk import chunk_markdown, chunk_text, load_tokenizer
+from .chunk import chunk_markdown, chunk_recursive, chunk_text, load_tokenizer
 from .clean import MASK_TYPES, clean_pages
 from .metadata import add_metadata, load_access_rules
 from .parse import parse_all
@@ -12,7 +12,10 @@ from .parse import parse_all
 ROOT = Path(__file__).resolve().parent.parent.parent
 
 
-def run():
+def run(strategy=None, size=None, overlap=None, out=None):
+    """Stages 1-4. `strategy`, `size`, `overlap` override config.yaml's chunking settings. With `out` (a file name in the
+    processed folder) only that chunks file is written, so a chunking experiment never overwrites chunks.jsonl,
+    pages.jsonl or the ingest report."""
     cfg = yaml.safe_load((ROOT / "config.yaml").read_text(encoding="utf8"))
     sources = yaml.safe_load((ROOT / "configs" / "sources.yaml").read_text(encoding="utf8"))
     out_dir = ROOT / cfg["paths"]["processed"]
@@ -35,10 +38,13 @@ def run():
     # 3 + 4. chunk, then attach metadata
     rules = load_access_rules()
     tok = load_tokenizer(cfg["models"]["embedding"])
-    size, overlap = cfg["chunking"]["size_tokens"], cfg["chunking"]["overlap_tokens"]
-    strategy = cfg["chunking"].get("strategy", "fixed")
+    size = size or cfg["chunking"]["size_tokens"]
+    overlap = cfg["chunking"]["overlap_tokens"] if overlap is None else overlap
+    strategy = strategy or cfg["chunking"].get("strategy", "fixed")
     if strategy == "headings":
-        split = lambda text: chunk_markdown(text, tok, size, cfg["chunking"]["min_tokens"])  # noqa: E731
+        split = lambda text: chunk_markdown(text, tok, size, min(cfg["chunking"]["min_tokens"], size // 5))  # noqa: E731
+    elif strategy == "recursive":
+        split = lambda text: chunk_recursive(text, tok, size, overlap)  # noqa: E731
     else:
         split = lambda text: chunk_text(text, tok, size, overlap)  # noqa: E731
     chunks = []
@@ -54,13 +60,15 @@ def run():
         stats["chunks_by_doc_type"][c["doc_type"]] = stats["chunks_by_doc_type"].get(c["doc_type"], 0) + 1
     stats["chunk_settings"] = {"strategy": strategy, "size_tokens": size, "overlap_tokens": overlap}
 
-    with open(out_dir / "pages.jsonl", "w", encoding="utf8") as f:
-        for p in pages:
-            f.write(json.dumps({k: v for k, v in p.items()}, ensure_ascii=False) + "\n")
-    with open(out_dir / "chunks.jsonl", "w", encoding="utf8") as f:
+    if not out:
+        with open(out_dir / "pages.jsonl", "w", encoding="utf8") as f:
+            for p in pages:
+                f.write(json.dumps({k: v for k, v in p.items()}, ensure_ascii=False) + "\n")
+    with open(out_dir / (out or "chunks.jsonl"), "w", encoding="utf8") as f:
         for c in chunks:
             f.write(json.dumps(c, ensure_ascii=False) + "\n")
-    (out_dir / "ingest_report.json").write_text(json.dumps(stats, indent=2), encoding="utf8")
+    if not out:
+        (out_dir / "ingest_report.json").write_text(json.dumps(stats, indent=2), encoding="utf8")
     return stats
 
 
