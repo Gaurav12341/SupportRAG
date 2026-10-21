@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 QUESTIONS = ROOT / "eval" / "questions.jsonl"
 CHUNKS = ROOT / "data" / "processed" / "chunks.jsonl"
 
-TYPE_COUNTS = {"error_message": 24, "symptom": 24, "version": 20, "cross_product": 16, "unanswerable": 20}
+TYPE_COUNTS = {"error_message": 24, "symptom": 24, "version": 20, "cross_product": 16, "unanswerable": 24}
 # The original 10 holdout questions were not touched in Phase 1 (docs/IMPROVEMENT_PLAN.md): their key points and assistant
 # check are added right before the final holdout run (Phase 5). The list is explicit, so nothing else can lack them.
 OLD_HOLDOUT = {"err-02", "err-06", "err-10", "sym-04", "sym-09", "ver-03", "ver-05", "x-03", "none-01", "none-06"}
@@ -34,10 +34,10 @@ def corpus():
 
 
 def test_counts_and_split(questions):
-    assert len(questions) == 104
+    assert len(questions) == 108
     assert dict(Counter(q["type"] for q in questions)) == TYPE_COUNTS
-    assert dict(Counter(q["split"] for q in questions)) == {"tune": 70, "holdout": 34}
-    assert len({q["id"] for q in questions}) == 104
+    assert dict(Counter(q["split"] for q in questions)) == {"tune": 70, "holdout": 38}
+    assert len({q["id"] for q in questions}) == 108
 
 
 def test_every_type_appears_in_holdout(questions):
@@ -58,23 +58,17 @@ def test_shape(questions):
             assert len(q["products"]) >= 2 and len(q["relevant"]) >= 2
 
 
-def test_everything_is_verified_by_the_assistant_except_the_untouched_old_holdout(questions):
+def test_everything_is_verified_by_the_assistant(questions):
     """Decision D4: the assistant verified the questions and key points (and says so in verify_note)."""
     for q in questions:
         assert q["verified"] is True
-        if q["id"] in OLD_HOLDOUT:
-            assert "verified_by" not in q and "key_points" not in q  # untouched until Phase 5
-        else:
-            assert q["verified_by"] == "assistant" and len(q["verify_note"]) > 20, q["id"]
+        assert q["verified_by"] == "assistant" and len(q["verify_note"]) > 20, q["id"]  # the old holdout questions got theirs before Phase 5
 
 
 def test_key_points(questions):
-    """Every answerable question except the untouched old holdout ones has 1-4 short key points, at least one essential."""
+    """Every answerable question has 1-4 short key points, at least one essential."""
     for q in questions:
         if q["expected"] != "answer":
-            assert "key_points" not in q
-            continue
-        if q["id"] in OLD_HOLDOUT:
             assert "key_points" not in q
             continue
         kps = q["key_points"]

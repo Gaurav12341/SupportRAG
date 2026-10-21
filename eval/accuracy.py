@@ -32,7 +32,7 @@ from eval.judge import PROMPT_VERSION, answer_text, grade
 from eval.run import holds
 from eval.stats import pct, with_ci, wilson
 from src.access import Principal
-from src.answer import Draft, answer_cfg, finalize, generate
+from src.answer import Draft, answer_cfg, finalize, generate, needs_retry, retry
 from src.context import build_context
 from src.llm import LLMClient, QuotaExhausted, load_config
 
@@ -76,8 +76,12 @@ def run_question(q, who, cfg, llm, salt):
     items = build_context(hits, who, cfg)
     draft, refused, provider = (generate(q["question"], items, cfg, llm, cache="answer", salt=salt, stop_on_quota=True) if items
                                 else (Draft("not_found", "none", "", "", []), True, ""))
+    retried = False
+    if items and needs_retry(draft, cfg):  # stage 16; the first pass above stays cached, so only the second pass costs tokens
+        items, hits, draft, refused, provider, retried = retry(q["question"], items, hits, draft, refused, provider, who, None, cfg, llm,
+                                                              cache="answer", salt=salt, stop_on_quota=True)
     ctx_pages = {it["source_path"] for it in items}
-    row = {"id": q["id"], "type": q["type"], "answerable": q["expected"] == "answer", "provider": provider or "none",
+    row = {"id": q["id"], "retried": retried, "type": q["type"], "answerable": q["expected"] == "answer", "provider": provider or "none",
            "context_pages": sorted(ctx_pages), "pages_ok": pages_covered(q, ctx_pages) if q["relevant"] else None,
            "evidence_in_context": (sum(any(holds(it["source_path"], it["text"], e) for it in items) for e in q["evidence"])
                                    / len(q["evidence"])) if q["evidence"] else None,
@@ -117,6 +121,10 @@ def summarize(rows: list) -> dict:
     out["coverage"] = {c: {"n": sum(r.get("coverage") == c for r in rows),
                            "draft_correct": sum(r.get("coverage") == c and r["off"]["judge"]["correct"] for r in rows)}
                        for c in ("full", "partial", "none")}
+    ret = [r for r in rows if r.get("retried")]  # old result files have no such key
+    out["retried"] = {"n": len(ret), "correct": sum(r["on"]["judge"]["correct"] for r in ret), "answerable": sum(r["answerable"] for r in ret),
+                      "unanswerable": sum(not r["answerable"] for r in ret),
+                      "unanswerable_refused": sum(not r["answerable"] and r["on"]["refused"] for r in ret)}
     out["failures"] = dict(Counter(r["category"] for r in rows if r["category"] != "correct"))
     out["generation_error_model_refused"] = sum(r["category"] == "generation_error" and r["off"]["refused"] for r in rows)
     out["wrong_claim_shown"] = sum(bool(r["on"]["judge"]["wrong_or_dangerous_claims"]) and not r["on"]["refused"] for r in rows)
@@ -153,6 +161,10 @@ def markdown(s: dict, meta: dict, tok: dict) -> str:
         lines += ["", "The writer's own `coverage` flag against the draft (verifier off; unanswerable questions count as correct when refused):", "",
                   "| Writer says | Questions | Draft correct |", "|---|--:|--:|"]
         lines += [f"| {c} | {v['n']} | {v['draft_correct']} |" for c, v in s["coverage"].items()]
+    if s["retried"]["n"]:
+        t = s["retried"]
+        lines += ["", f"**Retry (stage 16)** ran for {t['n']} questions ({t['answerable']} answerable, {t['unanswerable']} unanswerable): "
+                      f"{t['correct']} of them correct afterwards (unanswerable ones still refused: {t['unanswerable_refused']} of {t['unanswerable']})."]
     nf = sum(s["failures"].values())
     lines += ["", f"**Failure breakdown** ({nf} questions not correct, verifier on):", "", "| Category | Questions |", "|---|--:|"]
     lines += [f"| {c} | {s['failures'].get(c, 0)} |" for c in CATEGORIES]
@@ -166,7 +178,7 @@ def markdown(s: dict, meta: dict, tok: dict) -> str:
                   f"max_context_chars {meta['max_context_chars']}, max_section_chars {meta['max_section_chars']}. Answer LLM {meta['answer_llm']} "
                   f"(reasoning_effort {meta['reasoning_effort']}). Answer providers: {meta['providers']}. "
                   f"Verifier: {meta['verifier']}{' (' + meta['verifier_model'] + ')' if meta['verifier'] == 'llm' else ''}, used for: {meta['verified_by']}. Judge {meta['judge']} (prompt {PROMPT_VERSION}). "
-                  f"Answer salt: {meta['salt'] or '(none)'}.", ""]
+                  f"Retry: {'on' if meta['retry'] else 'off'}. Answer salt: {meta['salt'] or '(none)'}.", ""]
     return "\n".join(lines)
 
 
@@ -181,6 +193,7 @@ def main():
     ap.add_argument("--embedding", default=None)
     ap.add_argument("--embedding-device", default=None)
     ap.add_argument("--limit", type=int, default=0, help="only the first N questions (smoke test)")
+    ap.add_argument("--no-retry", action="store_true", help="switch the stage-16 retry off (A/B against a run with it on)")
     ap.add_argument("--wait", action="store_true", help="when a Groq daily quota is used up, sleep and retry instead of stopping (checks every 10 minutes)")
     ap.add_argument("--salt", default="", help="changes the answer cache key, to repeat a run for real (measures run-to-run spread)")
     a = ap.parse_args()
@@ -194,6 +207,8 @@ def main():
         cfg["models"]["embedding"] = a.embedding
     if a.embedding_device:
         cfg["models"]["embedding_device"] = a.embedding_device
+    if a.no_retry:
+        cfg["retry"] = {**cfg["retry"], "enabled": False}
     who = Principal(a.role, frozenset(x for x in a.licenses.split(",") if x))
     split = "holdout" if a.final else "tune"
     qs = load_questions(cfg, split, a.dev)
@@ -226,7 +241,7 @@ def main():
             "embedding": cfg["models"]["embedding"], "k_context": cfg["retrieval"]["k_context"], "max_context_chars": cfg["context"]["max_context_chars"],
             "max_section_chars": cfg["context"]["max_section_chars"], "answer_llm": cfg["answer"]["llm"], "reasoning_effort": cfg["answer"]["reasoning_effort"],
             "providers": dict(Counter(r["provider"] for r in rows)), "judge": cfg["eval"]["judge"]["model"], "salt": a.salt,
-            "verifier": cfg["verify"]["method"], "verifier_model": cfg["verify"]["llm"]["model"],
+            "retry": cfg["retry"]["enabled"], "verifier": cfg["verify"]["method"], "verifier_model": cfg["verify"]["llm"]["model"],
             "verified_by": dict(Counter(r["on"]["verified_by"] for r in rows)), "prefer": cfg["llm"]["prefer"], "prefer_answer": cfg["answer"]["llm"], "tokens_spent_in_this_run": llm.usage_by_model()}
     out = Path(cfg["paths"]["eval_results"])
     out.mkdir(parents=True, exist_ok=True)

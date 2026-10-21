@@ -87,6 +87,25 @@ def test_understand_survives_both_llms_failing_and_does_not_cache_it(cfg, monkey
     assert len(good.calls) == 1  # the failure was not cached
 
 
+def test_understand_model_gets_its_own_cache_entry_and_is_passed_on(cfg, monkeypatch):
+    monkeypatch.setattr(Q, "ROOT", __import__("pathlib").Path("/"))
+    seen = []
+    llm = SimpleNamespace(chat=lambda m, validate=None, prefer=None, **kw: (seen.append(kw), (reply(), "groq"))[1])
+    Q.understand("same question", cfg, llm, prefer="groq")
+    Q.understand("same question", cfg, llm, prefer="groq", model="openai/gpt-oss-20b", stop_on_quota=True)
+    Q.understand("same question", cfg, llm, prefer="groq", model="openai/gpt-oss-20b", stop_on_quota=True)  # cached
+    assert [{k: v for k, v in kw.items() if k != "response_format"} for kw in seen] == [{}, {"model": "openai/gpt-oss-20b", "stop_on_quota": True}]
+
+
+def test_understand_stops_on_a_used_up_quota_only_when_asked(cfg, monkeypatch):
+    from src.llm import QuotaExhausted
+    monkeypatch.setattr(Q, "ROOT", __import__("pathlib").Path("/"))
+    out = SimpleNamespace(chat=lambda *a, **k: (_ for _ in ()).throw(QuotaExhausted("day")))
+    assert Q.understand("pod stuck", cfg, out).queries == []  # normal use: search with the question alone
+    with pytest.raises(QuotaExhausted):
+        Q.understand("pod stuck", cfg, out, stop_on_quota=True)  # an eval must stop instead
+
+
 # ---------- search_plan ----------
 
 @pytest.fixture

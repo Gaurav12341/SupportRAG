@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from src.access import PRODUCTS
-from src.llm import LLMClient, load_config
+from src.llm import LLMClient, QuotaExhausted, load_config
 
 ROOT = Path(__file__).resolve().parent.parent
 PROMPT_VERSION = "v1"
@@ -64,21 +64,22 @@ def parse_plan(question, text, max_queries=3):
         return None
 
 
-def _key(question, cfg, prefer):
+def _key(question, cfg, prefer, model=None):
     llm = cfg["llm"]
-    model = llm["groq"]["model"] if prefer == "groq" else llm["local"]["model"]
+    model = (model if prefer == "groq" else None) or (llm["groq"]["model"] if prefer == "groq" else llm["local"]["model"])
     return hashlib.sha1(f"{PROMPT_VERSION}|{prefer}|{model}|{question}".encode("utf8")).hexdigest()
 
 
-def understand(question, cfg=None, llm=None, prefer=None, use_cache=True):
-    """Build the search plan for `question`. `prefer`: which LLM goes first (default: query.llm in config.yaml).
-    If both LLMs fail the plan is empty (the original question is still searched), never an error."""
+def understand(question, cfg=None, llm=None, prefer=None, use_cache=True, model=None, stop_on_quota=False):
+    """Build the search plan for `question`. `prefer`: which LLM goes first (default: query.llm in config.yaml); `model`: the
+    Groq model to use instead of llm.groq.model (its own token bucket). If both LLMs fail the plan is empty (the original question
+    is still searched), never an error, except that `stop_on_quota` raises a used-up Groq daily limit (an eval must not go on with a weaker plan)."""
     import time
     cfg = cfg or load_config()
     prefer = prefer or cfg["query"]["llm"]
     path = ROOT / cfg["query"]["cache"]
     cache = json.loads(path.read_text(encoding="utf8")) if use_cache and path.exists() else {}
-    key = _key(question, cfg, prefer)
+    key = _key(question, cfg, prefer, model)
     if key in cache:
         c = cache[key]
         return Plan(question, c["products"], [tuple(q) for q in c["queries"]], c["hyde"], c["provider"], c.get("seconds", 0.0))
@@ -89,9 +90,14 @@ def understand(question, cfg=None, llm=None, prefer=None, use_cache=True):
         text, provider = llm.chat(
             [{"role": "system", "content": SYSTEM}, {"role": "user", "content": f"Question:\n{question}"}],
             validate=lambda t: parse_plan(question, t, max_q) is not None, prefer=prefer,
-            response_format={"type": "json_schema", "json_schema": SCHEMA})
+            response_format={"type": "json_schema", "json_schema": SCHEMA}, **({"model": model} if model else {}),
+            **({"stop_on_quota": True} if stop_on_quota else {}))
         plan = parse_plan(question, text, max_q)
         plan.provider = provider
+    except QuotaExhausted:
+        if stop_on_quota:
+            raise
+        plan = Plan(question)
     except Exception:  # both LLMs down: search with the question alone
         plan = Plan(question)
     plan.seconds = round(time.perf_counter() - t0, 2)

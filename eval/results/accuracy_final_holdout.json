@@ -1,0 +1,3600 @@
+{
+  "meta": {
+    "split": "holdout",
+    "dev": false,
+    "role": "admin",
+    "collection": "support_docs",
+    "embedding": "BAAI/bge-small-en-v1.5",
+    "k_context": 10,
+    "max_context_chars": 12000,
+    "max_section_chars": 2000,
+    "answer_llm": "groq",
+    "reasoning_effort": "low",
+    "providers": {
+      "groq": 38
+    },
+    "judge": "qwen/qwen3.8-27b",
+    "salt": "",
+    "retry": false,
+    "verifier": "llm",
+    "verifier_model": "openai/gpt-oss-20b",
+    "verified_by": {
+      "llm": 25,
+      "": 13
+    },
+    "prefer": "local",
+    "prefer_answer": "groq",
+    "tokens_spent_in_this_run": {
+      "groq/openai/gpt-oss-120b": {
+        "calls": 38,
+        "cached_calls": 0,
+        "prompt_tokens": 124395,
+        "completion_tokens": 8515,
+        "total_tokens": 132910,
+        "fresh_total_tokens": 132910
+      },
+      "groq/qwen/qwen3.8-27b": {
+        "calls": 50,
+        "cached_calls": 24,
+        "prompt_tokens": 32317,
+        "completion_tokens": 4678,
+        "total_tokens": 36995,
+        "fresh_total_tokens": 19458
+      },
+      "groq/openai/gpt-oss-20b": {
+        "calls": 25,
+        "cached_calls": 0,
+        "prompt_tokens": 39200,
+        "completion_tokens": 3775,
+        "total_tokens": 42975,
+        "fresh_total_tokens": 42975
+      }
+    }
+  },
+  "summary": {
+    "n": 38,
+    "answerable": 26,
+    "unanswerable": 12,
+    "on": {
+      "correct": 30,
+      "accuracy": 0.7894736842105263,
+      "ci95": [
+        0.6365391162355784,
+        0.8892533964790407
+      ],
+      "answerable_correct": 18,
+      "answerable_partially_correct": 3,
+      "answerable_incorrect": 4,
+      "answerable_refused": 1,
+      "unanswerable_refused": 12
+    },
+    "off": {
+      "correct": 30,
+      "accuracy": 0.7894736842105263,
+      "ci95": [
+        0.6365391162355784,
+        0.8892533964790407
+      ],
+      "answerable_correct": 18,
+      "answerable_partially_correct": 3,
+      "answerable_incorrect": 4,
+      "answerable_refused": 1,
+      "unanswerable_refused": 12
+    },
+    "by_type": {
+      "error_message": {
+        "n": 8,
+        "correct": 7,
+        "correct_verifier_off": 7
+      },
+      "symptom": {
+        "n": 7,
+        "correct": 5,
+        "correct_verifier_off": 5
+      },
+      "version": {
+        "n": 6,
+        "correct": 6,
+        "correct_verifier_off": 6
+      },
+      "cross_product": {
+        "n": 5,
+        "correct": 0,
+        "correct_verifier_off": 0
+      },
+      "unanswerable": {
+        "n": 12,
+        "correct": 12,
+        "correct_verifier_off": 12
+      }
+    },
+    "coverage": {
+      "full": {
+        "n": 21,
+        "draft_correct": 18
+      },
+      "partial": {
+        "n": 4,
+        "draft_correct": 0
+      },
+      "none": {
+        "n": 13,
+        "draft_correct": 12
+      }
+    },
+    "retried": {
+      "n": 0,
+      "correct": 0,
+      "answerable": 0,
+      "unanswerable": 0,
+      "unanswerable_refused": 0
+    },
+    "failures": {
+      "generation_error": 3,
+      "unsafe_or_wrong_claim": 2,
+      "retrieval_miss": 3
+    },
+    "generation_error_model_refused": 0,
+    "wrong_claim_shown": 2,
+    "evidence_in_context_all": 19
+  },
+  "tokens": {
+    "groq/openai/gpt-oss-120b": {
+      "calls": 38,
+      "cached_calls": 0,
+      "prompt_tokens": 124395,
+      "completion_tokens": 8515,
+      "total_tokens": 132910,
+      "fresh_total_tokens": 132910
+    },
+    "groq/qwen/qwen3.8-27b": {
+      "calls": 50,
+      "cached_calls": 24,
+      "prompt_tokens": 32317,
+      "completion_tokens": 4678,
+      "total_tokens": 36995,
+      "fresh_total_tokens": 19458
+    },
+    "groq/openai/gpt-oss-20b": {
+      "calls": 25,
+      "cached_calls": 0,
+      "prompt_tokens": 39200,
+      "completion_tokens": 3775,
+      "total_tokens": 42975,
+      "fresh_total_tokens": 42975
+    }
+  },
+  "per_question": [
+    {
+      "id": "err-02",
+      "retried": false,
+      "type": "error_message",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/applevel-consistency.html",
+        "postgres/mvcc-serialization-failure-handling.html",
+        "postgres/transaction-iso.html"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 3,
+      "kind": "explanation",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "The error occurs because a repeatable‑read transaction tried to modify a row that was changed by another transaction after the repeatable‑read transaction started, causing a serialization failure; the application should abort and retry the whole transaction.\n1. When a repeatable read transaction attempts to update or lock a row that another concurrent transaction has already committed, PostgreSQL aborts the transaction with `ERROR: could not serialize access due to concurrent update` (S1).\n2. Upon receiving this error, the application must abort the current transaction and retry the entire transaction from the beginning, so the new view includes the committed change (S1).\n3. Retrying the whole transaction is the recommended handling for serialization‑failure errors, and the retry should include all logic that decides which SQL to run (S4).",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the cause (concurrent update at Repeatable Read) and the required action (abort and retry the whole transaction), matching all essential key points.",
+          "points_stated": [
+            true,
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "The error occurs because a repeatable‑read transaction tried to modify a row that was changed by another transaction after the repeatable‑read transaction started, causing a serialization failure; the application should abort and retry the whole transaction.\n1. When a repeatable read transaction attempts to update or lock a row that another concurrent transaction has already committed, PostgreSQL aborts the transaction with `ERROR: could not serialize access due to concurrent update` (S1).\n2. Upon receiving this error, the application must abort the current transaction and retry the entire transaction from the beginning, so the new view includes the committed change (S1).\n3. Retrying the whole transaction is the recommended handling for serialization‑failure errors, and the retry should include all logic that decides which SQL to run (S4).",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the cause (concurrent update at Repeatable Read) and the required action (abort and retry the whole transaction), matching all essential key points.",
+          "points_stated": [
+            true,
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "When a repeatable read transaction attempts to update or lock a row that another concurrent transaction has already committed, PostgreSQL aborts the transaction with `ERROR: could not serialize access due to concurrent update` (S1).",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Upon receiving this error, the application must abort the current transaction and retry the entire transaction from the beginning, so the new view includes the committed change (S1).",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Retrying the whole transaction is the recommended handling for serialization‑failure errors, and the retry should include all logic that decides which SQL to run (S4).",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3028,
+          "completion_tokens": 308,
+          "total_tokens": 3336,
+          "fresh_total_tokens": 3336
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1428,
+          "completion_tokens": 148,
+          "total_tokens": 1576,
+          "fresh_total_tokens": 788
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1668,
+          "completion_tokens": 158,
+          "total_tokens": 1826,
+          "fresh_total_tokens": 1826
+        }
+      },
+      "seconds": 5.1
+    },
+    {
+      "id": "err-06",
+      "retried": false,
+      "type": "error_message",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/tasks/administer-cluster/certificates.md",
+        "kubernetes/tasks/debug/debug-cluster/troubleshoot-kubectl.md",
+        "stackoverflow/46234295",
+        "stackoverflow/49260135",
+        "stackoverflow/50791303",
+        "stackoverflow/62473932"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 0.5,
+      "drafted_steps": 3,
+      "kind": "fix",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "Stop the kubectl proxy that was exposing an untrusted certificate to resolve the x509 unknown authority error.\n1. Identify if a kubectl proxy is running on the master node (e.g., `kubectl proxy --address 0.0.0.0 --accept-hosts '.*'`).\n2. Stop the running kubectl proxy process.\n3. After stopping the proxy, retry the kubectl command (e.g., `kubectl get nodes`) and the connection should succeed.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies and resolves the specific cause (kubectl proxy) mentioned in the key points and documentation quotes.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "Stop the kubectl proxy that was exposing an untrusted certificate to resolve the x509 unknown authority error.\n1. Identify if a kubectl proxy is running on the master node (e.g., `kubectl proxy --address 0.0.0.0 --accept-hosts '.*'`).\n2. Stop the running kubectl proxy process.\n3. After stopping the proxy, retry the kubectl command (e.g., `kubectl get nodes`) and the connection should succeed.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies and resolves the specific cause (kubectl proxy) mentioned in the key points and documentation quotes.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Identify if a kubectl proxy is running on the master node (e.g., `kubectl proxy --address 0.0.0.0 --accept-hosts '.*'`).",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Stop the running kubectl proxy process.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "After stopping the proxy, retry the kubectl command (e.g., `kubectl get nodes`) and the connection should succeed.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3252,
+          "completion_tokens": 201,
+          "total_tokens": 3453,
+          "fresh_total_tokens": 3453
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1236,
+          "completion_tokens": 118,
+          "total_tokens": 1354,
+          "fresh_total_tokens": 677
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1061,
+          "completion_tokens": 242,
+          "total_tokens": 1303,
+          "fresh_total_tokens": 1303
+        }
+      },
+      "seconds": 12.4
+    },
+    {
+      "id": "err-10",
+      "retried": false,
+      "type": "error_message",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "github/how-tos/manage-workflow-runs/disable-and-enable-workflows.md",
+        "github/how-tos/secure-your-work/lock-workflow-dependencies.md",
+        "stackoverflow/58858429",
+        "stackoverflow/75514653",
+        "stackoverflow/75733616"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "kind": "fix",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "The workflow permission setting is incorrect; it must allow read/write and GitHub Actions to create and approve pull requests.\n1. In your GitHub repository settings, go to **Settings → Actions → General**, locate the **Workflow permissions** section, select **Read and write permissions**, and enable the checkbox **Allow GitHub Actions to create and approve pull requests**.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the required setting path and the specific 'Read and write permissions' option, as well as the optional checkbox, matching all key points.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "The workflow permission setting is incorrect; it must allow read/write and GitHub Actions to create and approve pull requests.\n1. In your GitHub repository settings, go to **Settings → Actions → General**, locate the **Workflow permissions** section, select **Read and write permissions**, and enable the checkbox **Allow GitHub Actions to create and approve pull requests**.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the required setting path and the specific 'Read and write permissions' option, as well as the optional checkbox, matching all key points.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "In your GitHub repository settings, go to **Settings → Actions → General**, locate the **Workflow permissions** section, select **Read and write permissions**, and enable the checkbox **Allow GitHub Actions to create and approve pull requests**.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3336,
+          "completion_tokens": 172,
+          "total_tokens": 3508,
+          "fresh_total_tokens": 3508
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1076,
+          "completion_tokens": 140,
+          "total_tokens": 1216,
+          "fresh_total_tokens": 608
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 945,
+          "completion_tokens": 79,
+          "total_tokens": 1024,
+          "fresh_total_tokens": 1024
+        }
+      },
+      "seconds": 41.0
+    },
+    {
+      "id": "sym-04",
+      "retried": false,
+      "type": "symptom",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/tasks/debug/debug-application/debug-pods.md",
+        "kubernetes/tasks/debug/debug-application/debug-service.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 6,
+      "kind": "fix",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 6,
+        "answer": "To debug a Service with no endpoints and traffic not reaching pods, verify the Service selector and EndpointSlices, then check pod ports and kube‑proxy.\n1. Verify the Service has EndpointSlices: run `kubectl get endpointslices -l kubernetes.io/service-name=${SERVICE_NAME}` and ensure the ENDPOINTS column lists pod IPs.\n2. If endpoints are missing, list Pods that match the Service selector with `kubectl get pods --selector=<key>=<value>,...` (e.g., `kubectl get pods --selector=name=nginx,type=frontend`) and confirm the selector matches the Pods' labels.\n3. Check that the Service's `targetPort` matches the Pods' `containerPort` (or named port) so the Service can route traffic to the Pods.\n4. Confirm the Service definition is correct: verify numeric vs. string ports, named ports exist on Pods, and the protocol matches the Pods' containers.\n5. If EndpointSlices are present but traffic still fails, verify kube‑proxy is running and correctly proxying: check kube‑proxy logs for lines like `Setting endpoints for <namespace>/<service>:...` and restart kube‑proxy with higher verbosity if needed.\n6. If a Pod cannot reach the Service IP (hairpin traffic), ensure the Kubelet `hairpin-mode` is set to `hairpin-veth` or `promiscuous-bridge` (check with `ps auxw | grep kubelet`).",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the two essential debugging steps (checking pod labels against the selector and verifying port matches) and provides additional valid troubleshooting advice without making any wrong or dangerous claims.",
+          "points_stated": [
+            true,
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 6,
+        "answer": "To debug a Service with no endpoints and traffic not reaching pods, verify the Service selector and EndpointSlices, then check pod ports and kube‑proxy.\n1. Verify the Service has EndpointSlices: run `kubectl get endpointslices -l kubernetes.io/service-name=${SERVICE_NAME}` and ensure the ENDPOINTS column lists pod IPs.\n2. If endpoints are missing, list Pods that match the Service selector with `kubectl get pods --selector=<key>=<value>,...` (e.g., `kubectl get pods --selector=name=nginx,type=frontend`) and confirm the selector matches the Pods' labels.\n3. Check that the Service's `targetPort` matches the Pods' `containerPort` (or named port) so the Service can route traffic to the Pods.\n4. Confirm the Service definition is correct: verify numeric vs. string ports, named ports exist on Pods, and the protocol matches the Pods' containers.\n5. If EndpointSlices are present but traffic still fails, verify kube‑proxy is running and correctly proxying: check kube‑proxy logs for lines like `Setting endpoints for <namespace>/<service>:...` and restart kube‑proxy with higher verbosity if needed.\n6. If a Pod cannot reach the Service IP (hairpin traffic), ensure the Kubelet `hairpin-mode` is set to `hairpin-veth` or `promiscuous-bridge` (check with `ps auxw | grep kubelet`).",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the two essential debugging steps (checking pod labels against the selector and verifying port matches) and provides additional valid troubleshooting advice without making any wrong or dangerous claims.",
+          "points_stated": [
+            true,
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Verify the Service has EndpointSlices: run `kubectl get endpointslices -l kubernetes.io/service-name=${SERVICE_NAME}` and ensure the ENDPOINTS column lists pod IPs.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "If endpoints are missing, list Pods that match the Service selector with `kubectl get pods --selector=<key>=<value>,...` (e.g., `kubectl get pods --selector=name=nginx,type=frontend`) and confirm the selector matches the Pods' labels.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Check that the Service's `targetPort` matches the Pods' `containerPort` (or named port) so the Service can route traffic to the Pods.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Confirm the Service definition is correct: verify numeric vs. string ports, named ports exist on Pods, and the protocol matches the Pods' containers.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "If EndpointSlices are present but traffic still fails, verify kube‑proxy is running and correctly proxying: check kube‑proxy logs for lines like `Setting endpoints for <namespace>/<service>:...` and restart kube‑proxy with higher verbosity if needed.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "If a Pod cannot reach the Service IP (hairpin traffic), ensure the Kubelet `hairpin-mode` is set to `hairpin-veth` or `promiscuous-bridge` (check with `ps auxw | grep kubelet`).",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3414,
+          "completion_tokens": 499,
+          "total_tokens": 3913,
+          "fresh_total_tokens": 3913
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1612,
+          "completion_tokens": 152,
+          "total_tokens": 1764,
+          "fresh_total_tokens": 882
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 2784,
+          "completion_tokens": 296,
+          "total_tokens": 3080,
+          "fresh_total_tokens": 3080
+        }
+      },
+      "seconds": 67.9
+    },
+    {
+      "id": "sym-09",
+      "retried": false,
+      "type": "symptom",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "stackoverflow/32302444",
+        "stackoverflow/38485771",
+        "stackoverflow/43103167",
+        "stackoverflow/53571823",
+        "stackoverflow/59592518",
+        "stackoverflow/65241105"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "kind": "fix",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "Configure the broker to advertise a reachable address so external clients can connect.\n1. In the broker’s server properties set `advertised.listeners` (or the equivalent env var such as `KAFKA_ADVERTISED_HOST_NAME`) to the host IP and port that external clients should use, e.g. `advertised.listeners=PLAINTEXT://<host‑ip>:9092`.\n2. Ensure the advertised host name can be resolved by the client (add it to `/etc/hosts` or use a DNS entry) so the client can reach the broker.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies setting `advertised.listeners` to the reachable IP/port as the solution, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "Configure the broker to advertise a reachable address so external clients can connect.\n1. In the broker’s server properties set `advertised.listeners` (or the equivalent env var such as `KAFKA_ADVERTISED_HOST_NAME`) to the host IP and port that external clients should use, e.g. `advertised.listeners=PLAINTEXT://<host‑ip>:9092`.\n2. Ensure the advertised host name can be resolved by the client (add it to `/etc/hosts` or use a DNS entry) so the client can reach the broker.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies setting `advertised.listeners` to the reachable IP/port as the solution, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "In the broker’s server properties set `advertised.listeners` (or the equivalent env var such as `KAFKA_ADVERTISED_HOST_NAME`) to the host IP and port that external clients should use, e.g. `advertised.listeners=PLAINTEXT://<host‑ip>:9092`.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Ensure the advertised host name can be resolved by the client (add it to `/etc/hosts` or use a DNS entry) so the client can reach the broker.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3635,
+          "completion_tokens": 271,
+          "total_tokens": 3906,
+          "fresh_total_tokens": 3906
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1138,
+          "completion_tokens": 124,
+          "total_tokens": 1262,
+          "fresh_total_tokens": 631
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1622,
+          "completion_tokens": 90,
+          "total_tokens": 1712,
+          "fresh_total_tokens": 1712
+        }
+      },
+      "seconds": 18.6
+    },
+    {
+      "id": "ver-03",
+      "retried": false,
+      "type": "version",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/runtime-config-resource.html",
+        "postgres/runtime-config-wal.html",
+        "stackoverflow/15520361",
+        "stackoverflow/787722"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "kind": "fact",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "The default asynchronous I/O method is `worker`, and the other possible values are `io_uring` and `sync`.\n1. The default `io_method` is `worker`.\n2. Other possible values for `io_method` are `io_uring` and `sync`.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the default value as 'worker' and lists the other valid options 'io_uring' and 'sync', matching all essential key points.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "The default asynchronous I/O method is `worker`, and the other possible values are `io_uring` and `sync`.\n1. The default `io_method` is `worker`.\n2. Other possible values for `io_method` are `io_uring` and `sync`.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the default value as 'worker' and lists the other valid options 'io_uring' and 'sync', matching all essential key points.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "The default `io_method` is `worker`.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Other possible values for `io_method` are `io_uring` and `sync`.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3250,
+          "completion_tokens": 176,
+          "total_tokens": 3426,
+          "fresh_total_tokens": 3426
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1060,
+          "completion_tokens": 142,
+          "total_tokens": 1202,
+          "fresh_total_tokens": 601
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1481,
+          "completion_tokens": 94,
+          "total_tokens": 1575,
+          "fresh_total_tokens": 1575
+        }
+      },
+      "seconds": 49.0
+    },
+    {
+      "id": "ver-05",
+      "retried": false,
+      "type": "version",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/concepts/storage/ephemeral-storage.md",
+        "kubernetes/concepts/storage/ephemeral-volumes.md",
+        "kubernetes/concepts/workloads/pods/ephemeral-containers.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "kind": "fact",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "Ephemeral containers have been stable since Kubernetes version 1.25.\n1. Feature state: stable v1.25",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that ephemeral containers are stable since Kubernetes v1.25, matching the key point and documentation.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "Ephemeral containers have been stable since Kubernetes version 1.25.\n1. Feature state: stable v1.25",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that ephemeral containers are stable since Kubernetes v1.25, matching the key point and documentation.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Feature state: stable v1.25",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 2834,
+          "completion_tokens": 116,
+          "total_tokens": 2950,
+          "fresh_total_tokens": 2950
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 906,
+          "completion_tokens": 124,
+          "total_tokens": 1030,
+          "fresh_total_tokens": 515
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1026,
+          "completion_tokens": 97,
+          "total_tokens": 1123,
+          "fresh_total_tokens": 1123
+        }
+      },
+      "seconds": 42.3
+    },
+    {
+      "id": "x-03",
+      "retried": false,
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "github/how-tos/deploy/configure-and-manage-deployments/control-deployments.md",
+        "github/reference/security/secure-use.md",
+        "kubernetes/concepts/configuration/secret.md",
+        "stackoverflow/50791303",
+        "stackoverflow/63104643",
+        "stackoverflow/72851548"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 0.5,
+      "drafted_steps": 6,
+      "kind": "explanation",
+      "coverage": "partial",
+      "missing": "Specific guidance on configuring GitHub Actions to avoid leaking credentials in the deployed cluster (e.g., using workload identity, restricting IAM roles, etc.)",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 6,
+        "answer": "To prevent credentials from leaking, store them as encrypted secrets, limit their scope, and avoid exposing them in logs or code.\n1. Store all sensitive values (SSH keys, tokens, passwords) as GitHub Actions secrets and reference them via `${{ secrets.NAME }}` rather than hard‑coding them.\n2. Apply the principle of least privilege: ensure the credentials used in the workflow have only the permissions required for the job (e.g., read‑only repo access, limited cloud IAM role).\n3. Mask secret values in logs using the `::add-mask::VALUE` command to prevent accidental exposure.\n4. Rotate and delete secrets if they ever appear in logs or become compromised.\n5. When deploying to Kubernetes, use Kubernetes Secrets (e.g., `kubernetes.io/dockerconfigjson` or `kubernetes.io/dockercfg`) to store credentials inside the cluster instead of embedding them in manifests.\n6. Avoid storing structured data (JSON/YAML blobs) directly as secret values; use plain strings or the `stringData` field for Kubernetes Secrets to ensure proper redaction.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "GitHub Actions: secret redaction is not guaranteed",
+            "Kubernetes: Secrets are stored unencrypted in etcd by default; enable encryption at rest",
+            "Kubernetes: use RBAC with least privilege, restrict Secret access to specific containers (or use an external secret store)"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to state that Kubernetes Secrets are unencrypted by default and requires enabling encryption at rest, and it omits the need for RBAC/least privilege in Kubernetes, which are essential key points.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 6,
+        "answer": "To prevent credentials from leaking, store them as encrypted secrets, limit their scope, and avoid exposing them in logs or code.\n1. Store all sensitive values (SSH keys, tokens, passwords) as GitHub Actions secrets and reference them via `${{ secrets.NAME }}` rather than hard‑coding them.\n2. Apply the principle of least privilege: ensure the credentials used in the workflow have only the permissions required for the job (e.g., read‑only repo access, limited cloud IAM role).\n3. Mask secret values in logs using the `::add-mask::VALUE` command to prevent accidental exposure.\n4. Rotate and delete secrets if they ever appear in logs or become compromised.\n5. When deploying to Kubernetes, use Kubernetes Secrets (e.g., `kubernetes.io/dockerconfigjson` or `kubernetes.io/dockercfg`) to store credentials inside the cluster instead of embedding them in manifests.\n6. Avoid storing structured data (JSON/YAML blobs) directly as secret values; use plain strings or the `stringData` field for Kubernetes Secrets to ensure proper redaction.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "GitHub Actions: secret redaction is not guaranteed",
+            "Kubernetes: Secrets are stored unencrypted in etcd by default; enable encryption at rest",
+            "Kubernetes: use RBAC with least privilege, restrict Secret access to specific containers (or use an external secret store)"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to state that Kubernetes Secrets are unencrypted by default and requires enabling encryption at rest, and it omits the need for RBAC/least privilege in Kubernetes, which are essential key points.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Store all sensitive values (SSH keys, tokens, passwords) as GitHub Actions secrets and reference them via `${{ secrets.NAME }}` rather than hard‑coding them.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Apply the principle of least privilege: ensure the credentials used in the workflow have only the permissions required for the job (e.g., read‑only repo access, limited cloud IAM role).",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Mask secret values in logs using the `::add-mask::VALUE` command to prevent accidental exposure.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Rotate and delete secrets if they ever appear in logs or become compromised.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "When deploying to Kubernetes, use Kubernetes Secrets (e.g., `kubernetes.io/dockerconfigjson` or `kubernetes.io/dockercfg`) to store credentials inside the cluster instead of embedding them in manifests.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Avoid storing structured data (JSON/YAML blobs) directly as secret values; use plain strings or the `stringData` field for Kubernetes Secrets to ensure proper redaction.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "generation_error",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3065,
+          "completion_tokens": 434,
+          "total_tokens": 3499,
+          "fresh_total_tokens": 3499
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1496,
+          "completion_tokens": 276,
+          "total_tokens": 1772,
+          "fresh_total_tokens": 886
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1699,
+          "completion_tokens": 142,
+          "total_tokens": 1841,
+          "fresh_total_tokens": 1841
+        }
+      },
+      "seconds": 36.6
+    },
+    {
+      "id": "none-01",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/tasks/administer-cluster/configure-upgrade-etcd.md",
+        "kubernetes/tasks/debug/debug-cluster/_index.md",
+        "stackoverflow/42642170",
+        "stackoverflow/47129376",
+        "stackoverflow/49260135",
+        "stackoverflow/60518658",
+        "stackoverflow/76841889"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Solution for kube-apiserver logs showing 'etcdserver: request timed out' and kubectl hanging",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3793,
+          "completion_tokens": 103,
+          "total_tokens": 3896,
+          "fresh_total_tokens": 3896
+        }
+      },
+      "seconds": 38.4
+    },
+    {
+      "id": "none-06",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "kafka/implementation/distribution.md",
+        "kafka/operations/basic-kafka-operations.md",
+        "kafka/operations/geo-replication-(cross-cluster-data-mirroring).md",
+        "kafka/operations/hardware-and-os.md",
+        "kafka/streams/developer-guide/kafka-streams-group-sh.md"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information on setting up Burrow and configuring alerts for consumer lag is not present in the provided excerpts.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3198,
+          "completion_tokens": 98,
+          "total_tokens": 3296,
+          "fresh_total_tokens": 3296
+        }
+      },
+      "seconds": 44.3
+    },
+    {
+      "id": "none-15",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/tasks/debug/debug-application/debug-pods.md",
+        "stackoverflow/44673957",
+        "stackoverflow/47969955",
+        "stackoverflow/59592518",
+        "stackoverflow/59978213",
+        "stackoverflow/61616203",
+        "stackoverflow/63104643"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information on debugging cattle-cluster-agent in Rancher downstream clusters.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3428,
+          "completion_tokens": 92,
+          "total_tokens": 3520,
+          "fresh_total_tokens": 3520
+        }
+      },
+      "seconds": 42.2
+    },
+    {
+      "id": "none-16",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/tasks/debug/debug-cluster/windows.md",
+        "postgres/warm-standby-failover.html",
+        "postgres/warm-standby.html",
+        "stackoverflow/41604499",
+        "stackoverflow/51297136",
+        "stackoverflow/57982945",
+        "stackoverflow/72504998"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information on pgbackrest stanza-create requirements and required pgbackrest.conf settings.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3599,
+          "completion_tokens": 96,
+          "total_tokens": 3695,
+          "fresh_total_tokens": 3695
+        }
+      },
+      "seconds": 41.8
+    },
+    {
+      "id": "none-17",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/runtime-config-client.html",
+        "stackoverflow/13410686",
+        "stackoverflow/13573204",
+        "stackoverflow/25970132",
+        "stackoverflow/6040583"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information on installing PostGIS and locating its extension control file.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3667,
+          "completion_tokens": 94,
+          "total_tokens": 3761,
+          "fresh_total_tokens": 3761
+        }
+      },
+      "seconds": 44.4
+    },
+    {
+      "id": "none-18",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "kafka/streams/developer-guide/config-streams.md",
+        "kafka/streams/upgrade-guide.md",
+        "kubernetes/concepts/security/cloud-native-security.md",
+        "stackoverflow/244243",
+        "stackoverflow/55109508"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information about Cruise Control's rebalance request returning 'NotEnoughValidWindowsException' and its meaning or fix.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3199,
+          "completion_tokens": 114,
+          "total_tokens": 3313,
+          "fresh_total_tokens": 3313
+        }
+      },
+      "seconds": 45.9
+    },
+    {
+      "id": "none-19",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "kafka/operations/basic-kafka-operations.md",
+        "stackoverflow/30880811",
+        "stackoverflow/37062904",
+        "stackoverflow/43103167",
+        "stackoverflow/57965731",
+        "stackoverflow/72851548"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information about Kafdrop showing a 403 Forbidden page and its causes.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3325,
+          "completion_tokens": 93,
+          "total_tokens": 3418,
+          "fresh_total_tokens": 3418
+        }
+      },
+      "seconds": 40.8
+    },
+    {
+      "id": "none-20",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "github/how-tos/manage-workflow-runs/re-run-workflows-and-jobs.md",
+        "github/how-tos/monitor-workflows/use-workflow-run-logs.md",
+        "stackoverflow/58858429",
+        "stackoverflow/59757355",
+        "stackoverflow/60477061"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information on rerunning a failed CircleCI job with SSH enabled is not present in the provided excerpts.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3431,
+          "completion_tokens": 93,
+          "total_tokens": 3524,
+          "fresh_total_tokens": 3524
+        }
+      },
+      "seconds": 38.8
+    },
+    {
+      "id": "err-16",
+      "retried": false,
+      "type": "error_message",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/hot-standby.html",
+        "postgres/routine-vacuuming.html",
+        "stackoverflow/10335561",
+        "stackoverflow/17449420",
+        "stackoverflow/5108876",
+        "stackoverflow/695289",
+        "stackoverflow/7073773"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 3,
+      "kind": "fix",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "Use the FORCE option or terminate/revoke connections before dropping the database.\n1. Run `dropdb -f databasename` (or `DROP DATABASE databasename WITH (FORCE);` in psql) which automatically disconnects other users. Requires superuser or owner rights.\n   WARNING: DROP permanently deletes data. Back up first and check you are connected to the right database.\n2. If using PostgreSQL 12 or older, first prevent new connections: `REVOKE CONNECT ON DATABASE databasename FROM public;` then terminate existing sessions:\n```\nSELECT pid, pg_terminate_backend(pid)\nFROM pg_stat_activity\nWHERE datname = 'databasename' AND pid <> pg_backend_pid();\n```\n3. After revoking and terminating, drop the database with `DROP DATABASE databasename;` (or `dropdb databasename`).\n   WARNING: DROP permanently deletes data. Back up first and check you are connected to the right database.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the FORCE option for PostgreSQL 13+ and provides valid, safe workarounds for older versions, including the necessary permission checks and safety warnings.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "Use the FORCE option or terminate/revoke connections before dropping the database.\n1. Run `dropdb -f databasename` (or `DROP DATABASE databasename WITH (FORCE);` in psql) which automatically disconnects other users. Requires superuser or owner rights.\n   WARNING: DROP permanently deletes data. Back up first and check you are connected to the right database.\n2. If using PostgreSQL 12 or older, first prevent new connections: `REVOKE CONNECT ON DATABASE databasename FROM public;` then terminate existing sessions:\n```\nSELECT pid, pg_terminate_backend(pid)\nFROM pg_stat_activity\nWHERE datname = 'databasename' AND pid <> pg_backend_pid();\n```\n3. After revoking and terminating, drop the database with `DROP DATABASE databasename;` (or `dropdb databasename`).\n   WARNING: DROP permanently deletes data. Back up first and check you are connected to the right database.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the FORCE option for PostgreSQL 13+ and provides valid, safe workarounds for older versions, including the necessary permission checks and safety warnings.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Run `dropdb -f databasename` (or `DROP DATABASE databasename WITH (FORCE);` in psql) which automatically disconnects other users. Requires superuser or owner rights.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "If using PostgreSQL 12 or older, first prevent new connections: `REVOKE CONNECT ON DATABASE databasename FROM public;` then terminate existing sessions:\n```\nSELECT pid, pg_terminate_backend(pid)\nFROM pg_stat_activity\nWHERE datname = 'databasename' AND pid <> pg_backend_pid();\n```",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "After revoking and terminating, drop the database with `DROP DATABASE databasename;` (or `dropdb databasename`).",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3366,
+          "completion_tokens": 290,
+          "total_tokens": 3656,
+          "fresh_total_tokens": 3656
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1396,
+          "completion_tokens": 146,
+          "total_tokens": 1542,
+          "fresh_total_tokens": 771
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1372,
+          "completion_tokens": 133,
+          "total_tokens": 1505,
+          "fresh_total_tokens": 1505
+        }
+      },
+      "seconds": 43.7
+    },
+    {
+      "id": "err-17",
+      "retried": false,
+      "type": "error_message",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kafka/security/authentication-using-sasl.md",
+        "stackoverflow/45756543"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "kind": "fix",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "The properties file passed with --command-config must contain the JAAS configuration itself, not a path, or set the JVM property for the JAAS file.\n1. Replace the line `sasl.jaas.config=(path)/consumer_jaas.conf` with the actual JAAS entry, e.g. `sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"(username)\" password=\"(password)\";` in the properties file used with `--command-config`.\n2. Alternatively, export the JVM option `KAFKA_OPTS=\"-Djava.security.auth.login.config=(path)/consumer_jaas.conf\"` before running `kafka-consumer-groups.sh` so the script picks up the JAAS file automatically.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies that sasl.jaas.config requires the inline JAAS string rather than a file path and provides the correct alternative using KAFKA_OPTS.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "The properties file passed with --command-config must contain the JAAS configuration itself, not a path, or set the JVM property for the JAAS file.\n1. Replace the line `sasl.jaas.config=(path)/consumer_jaas.conf` with the actual JAAS entry, e.g. `sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"(username)\" password=\"(password)\";` in the properties file used with `--command-config`.\n2. Alternatively, export the JVM option `KAFKA_OPTS=\"-Djava.security.auth.login.config=(path)/consumer_jaas.conf\"` before running `kafka-consumer-groups.sh` so the script picks up the JAAS file automatically.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies that sasl.jaas.config requires the inline JAAS string rather than a file path and provides the correct alternative using KAFKA_OPTS.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Replace the line `sasl.jaas.config=(path)/consumer_jaas.conf` with the actual JAAS entry, e.g. `sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username=\"(username)\" password=\"(password)\";` in the properties file used with `--command-config`.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Alternatively, export the JVM option `KAFKA_OPTS=\"-Djava.security.auth.login.config=(path)/consumer_jaas.conf\"` before running `kafka-consumer-groups.sh` so the script picks up the JAAS file automatically.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3311,
+          "completion_tokens": 279,
+          "total_tokens": 3590,
+          "fresh_total_tokens": 3590
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1466,
+          "completion_tokens": 144,
+          "total_tokens": 1610,
+          "fresh_total_tokens": 805
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1109,
+          "completion_tokens": 119,
+          "total_tokens": 1228,
+          "fresh_total_tokens": 1228
+        }
+      },
+      "seconds": 46.1
+    },
+    {
+      "id": "err-18",
+      "retried": false,
+      "type": "error_message",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kafka/operations/basic-kafka-operations.md",
+        "kafka/streams/upgrade-guide.md",
+        "stackoverflow/42564594",
+        "stackoverflow/47391586",
+        "stackoverflow/48866690"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 3,
+      "kind": "fix",
+      "coverage": "partial",
+      "missing": "The excerpts do not describe how to force immediate deletion of a new‑consumer group in versions prior to 0.10.2; they only note that the group is removed automatically when its offsets expire.",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "In newer Kafka versions you can delete a new‑consumer group with the `--delete` option, otherwise the group is removed automatically when its offsets expire.\n1. Upgrade to a Kafka version that supports `--delete` with `--bootstrap-server` (e.g., Confluent Platform 3.2 / Kafka 0.10.2 or later). Then run:\n```\nsudo /usr/bin/kafka-consumer-groups --bootstrap-server localhost:9092 --delete --group my_consumer_group\n```\n2. If you cannot upgrade, let the group be deleted automatically: the new‑consumer group metadata is removed when the last committed offset for that group expires (no active members). Ensure no consumers are running and wait for the offset retention period to elapse.\n3. In Kafka versions that support it, you can also delete groups using the ConsumerGroupCommand tool:\n```\nbin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --delete --group my_group\n```",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Groups of the new consumer cannot be deleted with the --delete option (it only works with --zookeeper, i.e. old consumers); there is no need to delete their metadata because the group is deleted when its last committed offset expires"
+          ],
+          "wrong_or_dangerous_claims": [
+            "In newer Kafka versions you can delete a new‑consumer group with the `--delete` option",
+            "Upgrade to a Kafka version that supports `--delete` with `--bootstrap-server` (e.g., Confluent Platform 3.2 / Kafka 0.10.2 or later). Then run: sudo /usr/bin/kafka-consumer-groups --bootstrap-server localhost:9092 --delete --group my_consumer_group"
+          ],
+          "reason": "The answer incorrectly claims that the --delete option works with new consumers in newer Kafka versions, which contradicts the documentation stating it is only valid with zookeeper and that deletion is automatic upon offset expiration.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "In newer Kafka versions you can delete a new‑consumer group with the `--delete` option, otherwise the group is removed automatically when its offsets expire.\n1. If you cannot upgrade, let the group be deleted automatically: the new‑consumer group metadata is removed when the last committed offset for that group expires (no active members). Ensure no consumers are running and wait for the offset retention period to elapse.\n2. In Kafka versions that support it, you can also delete groups using the ConsumerGroupCommand tool:\n```\nbin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --delete --group my_group\n```",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Groups of the new consumer cannot be deleted with the --delete option (it only works with --zookeeper, i.e. old consumers); there is no need to delete their metadata because the group is deleted when its last committed offset expires"
+          ],
+          "wrong_or_dangerous_claims": [
+            "In newer Kafka versions you can delete a new‑consumer group with the `--delete` option",
+            "bin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --delete --group my_group"
+          ],
+          "reason": "The answer incorrectly claims that the --delete option works for new-consumer groups in newer Kafka versions, which contradicts the documentation stating it is only valid with zookeeper (old consumers) and that metadata expires automatically.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Upgrade to a Kafka version that supports `--delete` with `--bootstrap-server` (e.g., Confluent Platform 3.2 / Kafka 0.10.2 or later). Then run:\n```\nsudo /usr/bin/kafka-consumer-groups --bootstrap-server localhost:9092 --delete --group my_consumer_group\n```",
+            "claim": "unsupported",
+            "why": "S1 states that even after upgrading to 3.2 you still cannot delete new‑style consumer groups with the tool; it does not claim that --delete works with --bootstrap-server."
+          },
+          {
+            "text": "If you cannot upgrade, let the group be deleted automatically: the new‑consumer group metadata is removed when the last committed offset for that group expires (no active members). Ensure no consumers are running and wait for the offset retention period to elapse.",
+            "claim": "supported",
+            "why": "S1 explicitly says the group is deleted when the last committed offset expires, so letting it expire is a valid method."
+          },
+          {
+            "text": "In Kafka versions that support it, you can also delete groups using the ConsumerGroupCommand tool:\n```\nbin/kafka-consumer-groups.sh --bootstrap-server localhost:9092 --delete --group my_group\n```",
+            "claim": "supported",
+            "why": "S3 shows the syntax for deleting a group with --bootstrap-server, which applies to newer Kafka versions."
+          }
+        ]
+      },
+      "category": "unsafe_or_wrong_claim",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3654,
+          "completion_tokens": 407,
+          "total_tokens": 4061,
+          "fresh_total_tokens": 4061
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 0,
+          "prompt_tokens": 1531,
+          "completion_tokens": 390,
+          "total_tokens": 1921,
+          "fresh_total_tokens": 1921
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 2177,
+          "completion_tokens": 313,
+          "total_tokens": 2490,
+          "fresh_total_tokens": 2490
+        }
+      },
+      "seconds": 46.7
+    },
+    {
+      "id": "sym-20",
+      "retried": false,
+      "type": "symptom",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/concepts/scheduling-eviction/api-eviction.md",
+        "kubernetes/concepts/workloads/pods/_index.md",
+        "kubernetes/concepts/workloads/pods/pod-lifecycle.md",
+        "kubernetes/tasks/debug/debug-application/debug-pods.md",
+        "kubernetes/tasks/debug/debug-cluster/windows.md",
+        "stackoverflow/41604499"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "kind": "fix",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "To resolve Windows pods stuck at \"Container Creating\" or repeatedly restarting, verify the pause image compatibility on the node.\n1. Ensure the pause image used on the node is compatible with the Windows OS version; refer to the latest/recommended pause image.\n2. If the node uses containerd, confirm the `plugins.plugins.cri.sandbox_image` field in `config.toml` points to a compatible pause image.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the need to check pause image compatibility with the Windows OS version and specifies the correct containerd configuration field.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "To resolve Windows pods stuck at \"Container Creating\" or repeatedly restarting, verify the pause image compatibility on the node.\n1. Ensure the pause image used on the node is compatible with the Windows OS version; refer to the latest/recommended pause image.\n2. If the node uses containerd, confirm the `plugins.plugins.cri.sandbox_image` field in `config.toml` points to a compatible pause image.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the need to check pause image compatibility with the Windows OS version and specifies the correct containerd configuration field.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Ensure the pause image used on the node is compatible with the Windows OS version; refer to the latest/recommended pause image.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "If the node uses containerd, confirm the `plugins.plugins.cri.sandbox_image` field in `config.toml` points to a compatible pause image.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3356,
+          "completion_tokens": 230,
+          "total_tokens": 3586,
+          "fresh_total_tokens": 3586
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1112,
+          "completion_tokens": 128,
+          "total_tokens": 1240,
+          "fresh_total_tokens": 620
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1153,
+          "completion_tokens": 86,
+          "total_tokens": 1239,
+          "fresh_total_tokens": 1239
+        }
+      },
+      "seconds": 47.8
+    },
+    {
+      "id": "sym-21",
+      "retried": false,
+      "type": "symptom",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/routine-vacuuming.html",
+        "postgres/runtime-config-query.html",
+        "postgres/using-explain.html",
+        "stackoverflow/9407442"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 2,
+      "kind": "explanation",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "The DELETE is slow because PostgreSQL must check foreign‑key constraints and without supporting indexes each row delete requires costly scans.\n1. If you don't have indexes on foreign keys, DELETEs involving the primary keys referenced by those foreign keys will be horribly slow.\n2. Consider using TRUNCATE instead of DELETE for whole‑table clears, as it avoids the per‑row foreign‑key checks and does not require a subsequent VACUUM.\n   WARNING: TRUNCATE deletes every row at once. Back up first.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies missing indexes on foreign key columns as the cause of the slowness, matching the essential key point, and provides harmless additional advice.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "The DELETE is slow because PostgreSQL must check foreign‑key constraints and without supporting indexes each row delete requires costly scans.\n1. If you don't have indexes on foreign keys, DELETEs involving the primary keys referenced by those foreign keys will be horribly slow.\n2. Consider using TRUNCATE instead of DELETE for whole‑table clears, as it avoids the per‑row foreign‑key checks and does not require a subsequent VACUUM.\n   WARNING: TRUNCATE deletes every row at once. Back up first.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies missing indexes on foreign key columns as the cause of the slowness, matching the essential key point, and provides harmless additional advice.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "If you don't have indexes on foreign keys, DELETEs involving the primary keys referenced by those foreign keys will be horribly slow.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Consider using TRUNCATE instead of DELETE for whole‑table clears, as it avoids the per‑row foreign‑key checks and does not require a subsequent VACUUM.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3185,
+          "completion_tokens": 268,
+          "total_tokens": 3453,
+          "fresh_total_tokens": 3453
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1138,
+          "completion_tokens": 136,
+          "total_tokens": 1274,
+          "fresh_total_tokens": 637
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1321,
+          "completion_tokens": 234,
+          "total_tokens": 1555,
+          "fresh_total_tokens": 1555
+        }
+      },
+      "seconds": 47.6
+    },
+    {
+      "id": "sym-22",
+      "retried": false,
+      "type": "symptom",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kafka/streams/developer-guide/running-app.md",
+        "stackoverflow/21020347",
+        "stackoverflow/42666756"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 4,
+      "kind": "explanation",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "Bad messages that cause deserialization or processing exceptions stop the stream; handle them by catching exceptions in your processing logic and by configuring Kafka Streams exception handlers to route or drop the records.\n1. Wrap your mapper/filter code in try‑catch blocks and route the resulting error objects to a separate error topic (DLQ) – this is the recommended approach for handling processing‑time failures.\n2. For deserialization errors you must use a `ByteArraySerde` for the input topic and add a `map()` that performs manual deserialization, allowing you to catch those exceptions yourself.\n3. Starting with KIP‑161 (included in the 1.0.0 release) you can register a `default.deserialization.exception.handler` that is invoked on deserialization failures; the handler can return `DeserializationResponse.CONTINUE` to drop the bad record or `FAIL` to stop the stream.\n4. From Kafka 1.1 (KIP‑210) you can also handle producer‑side errors by configuring `default.production.exception.handler` with a `ProductionExceptionHandler` that can return `CONTINUE` to skip the failing record.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the `default.deserialization.exception.handler` configuration (KIP-161) and its `CONTINUE` behavior as the primary solution for deserialization errors, and accurately describes the alternative of using `ByteArraySerde` for manual handling, as well as the producer-side handler.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 4,
+        "answer": "Bad messages that cause deserialization or processing exceptions stop the stream; handle them by catching exceptions in your processing logic and by configuring Kafka Streams exception handlers to route or drop the records.\n1. Wrap your mapper/filter code in try‑catch blocks and route the resulting error objects to a separate error topic (DLQ) – this is the recommended approach for handling processing‑time failures.\n2. For deserialization errors you must use a `ByteArraySerde` for the input topic and add a `map()` that performs manual deserialization, allowing you to catch those exceptions yourself.\n3. Starting with KIP‑161 (included in the 1.0.0 release) you can register a `default.deserialization.exception.handler` that is invoked on deserialization failures; the handler can return `DeserializationResponse.CONTINUE` to drop the bad record or `FAIL` to stop the stream.\n4. From Kafka 1.1 (KIP‑210) you can also handle producer‑side errors by configuring `default.production.exception.handler` with a `ProductionExceptionHandler` that can return `CONTINUE` to skip the failing record.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the `default.deserialization.exception.handler` configuration (KIP-161) and its `CONTINUE` behavior as the primary solution for deserialization errors, and accurately describes the alternative of using `ByteArraySerde` for manual handling, as well as the producer-side handler.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Wrap your mapper/filter code in try‑catch blocks and route the resulting error objects to a separate error topic (DLQ) – this is the recommended approach for handling processing‑time failures.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "For deserialization errors you must use a `ByteArraySerde` for the input topic and add a `map()` that performs manual deserialization, allowing you to catch those exceptions yourself.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Starting with KIP‑161 (included in the 1.0.0 release) you can register a `default.deserialization.exception.handler` that is invoked on deserialization failures; the handler can return `DeserializationResponse.CONTINUE` to drop the bad record or `FAIL` to stop the stream.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "From Kafka 1.1 (KIP‑210) you can also handle producer‑side errors by configuring `default.production.exception.handler` with a `ProductionExceptionHandler` that can return `CONTINUE` to skip the failing record.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3072,
+          "completion_tokens": 384,
+          "total_tokens": 3456,
+          "fresh_total_tokens": 3456
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1600,
+          "completion_tokens": 200,
+          "total_tokens": 1800,
+          "fresh_total_tokens": 900
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 2035,
+          "completion_tokens": 257,
+          "total_tokens": 2292,
+          "fresh_total_tokens": 2292
+        }
+      },
+      "seconds": 43.4
+    },
+    {
+      "id": "sym-23",
+      "retried": false,
+      "type": "symptom",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kafka/kafka-connect/administration.md",
+        "kafka/kafka-connect/user-guide.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 2,
+      "kind": "explanation",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "A RUNNING connector with an UNASSIGNED task is normal during a rebalance or when tasks have failed and are not being restarted automatically.\n1. During a rebalance, tasks can be temporarily UNASSIGNED while the load is being redistributed; the connector may still show RUNNING.\n2. If a worker leaves the group, Connect waits up to `scheduled.rebalance.max.delay.ms` (default 5 minutes) before reassigning tasks, during which tasks appear UNASSIGNED.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Not necessarily: status updates are published to the status.storage.topic that all workers consume asynchronously, so there is typically a short delay before a state change shows in the status API, and connector and task states can differ for short periods"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to mention the asynchronous status update delay which is the primary reason for the discrepancy, and instead attributes it to rebalancing or failure without the required context.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "A RUNNING connector with an UNASSIGNED task is normal during a rebalance or when tasks have failed and are not being restarted automatically.\n1. During a rebalance, tasks can be temporarily UNASSIGNED while the load is being redistributed; the connector may still show RUNNING.\n2. If a worker leaves the group, Connect waits up to `scheduled.rebalance.max.delay.ms` (default 5 minutes) before reassigning tasks, during which tasks appear UNASSIGNED.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Not necessarily: status updates are published to the status.storage.topic that all workers consume asynchronously, so there is typically a short delay before a state change shows in the status API, and connector and task states can differ for short periods"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to mention the asynchronous status update delay which is the primary reason for the discrepancy, and instead attributes it to rebalancing or failure without the required context.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "During a rebalance, tasks can be temporarily UNASSIGNED while the load is being redistributed; the connector may still show RUNNING.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "If a worker leaves the group, Connect waits up to `scheduled.rebalance.max.delay.ms` (default 5 minutes) before reassigning tasks, during which tasks appear UNASSIGNED.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "generation_error",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 2896,
+          "completion_tokens": 250,
+          "total_tokens": 3146,
+          "fresh_total_tokens": 3146
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1216,
+          "completion_tokens": 238,
+          "total_tokens": 1454,
+          "fresh_total_tokens": 727
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1606,
+          "completion_tokens": 236,
+          "total_tokens": 1842,
+          "fresh_total_tokens": 1842
+        }
+      },
+      "seconds": 42.3
+    },
+    {
+      "id": "sym-24",
+      "retried": false,
+      "type": "symptom",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "github/how-tos/manage-workflow-runs/manage-caches.md",
+        "github/reference/workflows-and-actions/dependency-caching.md",
+        "github/reference/workflows-and-actions/events-that-trigger-workflows.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 5,
+      "kind": "fix",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 5,
+        "answer": "Create a workflow that runs on the `pull_request` closed event and uses `gh cache` to delete caches for the PR branch.\n1. Add a workflow file (e.g., `.github/workflows/cleanup-caches.yml`) with `on: pull_request: types: [closed]`.\n2. In the job, use `gh cache list --ref $BRANCH --limit 100 --json id --jq '.[].id'` to fetch cache IDs for the PR's merge ref (`refs/pull/${{ github.event.pull_request.number }}/merge`).\n3. Loop over the IDs and run `gh cache delete $cacheKey` for each, setting `set +e` so the workflow doesn’t fail if a delete fails.\n4. Provide `GH_TOKEN` and `GH_REPO` via environment variables (`${{ github.token }}` and `${{ github.repository }}`) so the CLI can authenticate.\n5. Optionally trigger on `pull_request_target` for cross‑repo or fork PRs, being aware of the security considerations noted in the excerpt.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Use a workflow triggered by pull_request with types: closed that has permissions actions: write"
+          ],
+          "wrong_or_dangerous_claims": [
+            "use `gh cache list --ref $BRANCH --limit 100 --json id --jq '.[].id'` to fetch cache IDs for the PR's merge ref (`refs/pull/${{ github.event.pull_request.number }}/merge`)"
+          ],
+          "reason": "The answer fails to specify the required `permissions: actions: write` setting, which is essential for the workflow to delete caches, and incorrectly suggests using the merge ref instead of the branch ref for listing caches.",
+          "points_stated": [
+            false,
+            true
+          ],
+          "corrected": true,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 5,
+        "answer": "Create a workflow that runs on the `pull_request` closed event and uses `gh cache` to delete caches for the PR branch.\n1. Add a workflow file (e.g., `.github/workflows/cleanup-caches.yml`) with `on: pull_request: types: [closed]`.\n2. In the job, use `gh cache list --ref $BRANCH --limit 100 --json id --jq '.[].id'` to fetch cache IDs for the PR's merge ref (`refs/pull/${{ github.event.pull_request.number }}/merge`).\n3. Loop over the IDs and run `gh cache delete $cacheKey` for each, setting `set +e` so the workflow doesn’t fail if a delete fails.\n4. Provide `GH_TOKEN` and `GH_REPO` via environment variables (`${{ github.token }}` and `${{ github.repository }}`) so the CLI can authenticate.\n5. Optionally trigger on `pull_request_target` for cross‑repo or fork PRs, being aware of the security considerations noted in the excerpt.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "Use a workflow triggered by pull_request with types: closed that has permissions actions: write"
+          ],
+          "wrong_or_dangerous_claims": [
+            "use `gh cache list --ref $BRANCH --limit 100 --json id --jq '.[].id'` to fetch cache IDs for the PR's merge ref (`refs/pull/${{ github.event.pull_request.number }}/merge`)"
+          ],
+          "reason": "The answer fails to specify the required `permissions: actions: write` setting, which is essential for the workflow to delete caches, and incorrectly suggests using the merge ref instead of the branch ref for listing caches.",
+          "points_stated": [
+            false,
+            true
+          ],
+          "corrected": true,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Add a workflow file (e.g., `.github/workflows/cleanup-caches.yml`) with `on: pull_request: types: [closed]`.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "In the job, use `gh cache list --ref $BRANCH --limit 100 --json id --jq '.[].id'` to fetch cache IDs for the PR's merge ref (`refs/pull/${{ github.event.pull_request.number }}/merge`).",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Loop over the IDs and run `gh cache delete $cacheKey` for each, setting `set +e` so the workflow doesn’t fail if a delete fails.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Provide `GH_TOKEN` and `GH_REPO` via environment variables (`${{ github.token }}` and `${{ github.repository }}`) so the CLI can authenticate.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Optionally trigger on `pull_request_target` for cross‑repo or fork PRs, being aware of the security considerations noted in the excerpt.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "unsafe_or_wrong_claim",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3139,
+          "completion_tokens": 384,
+          "total_tokens": 3523,
+          "fresh_total_tokens": 3523
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1500,
+          "completion_tokens": 302,
+          "total_tokens": 1802,
+          "fresh_total_tokens": 901
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1542,
+          "completion_tokens": 122,
+          "total_tokens": 1664,
+          "fresh_total_tokens": 1664
+        }
+      },
+      "seconds": 40.3
+    },
+    {
+      "id": "ver-17",
+      "retried": false,
+      "type": "version",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/concepts/scheduling-eviction/pod-overhead.md",
+        "kubernetes/concepts/workloads/pods/advanced-pod-config.md",
+        "kubernetes/tasks/administer-cluster/cpu-management-policies.md",
+        "kubernetes/tasks/debug/debug-cluster/_index.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "kind": "fact",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "Pod Overhead has been stable since Kubernetes version v1.24.\n1. Feature state: v1.24 stable",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that Pod Overhead has been stable since Kubernetes v1.24, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "Pod Overhead has been stable since Kubernetes version v1.24.\n1. Feature state: v1.24 stable",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that Pod Overhead has been stable since Kubernetes v1.24, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Feature state: v1.24 stable",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3529,
+          "completion_tokens": 109,
+          "total_tokens": 3638,
+          "fresh_total_tokens": 3638
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 902,
+          "completion_tokens": 124,
+          "total_tokens": 1026,
+          "fresh_total_tokens": 513
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1516,
+          "completion_tokens": 86,
+          "total_tokens": 1602,
+          "fresh_total_tokens": 1602
+        }
+      },
+      "seconds": 39.2
+    },
+    {
+      "id": "ver-18",
+      "retried": false,
+      "type": "version",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/runtime-config-client.html",
+        "postgres/runtime-config-compatible.html",
+        "postgres/runtime-config-query.html"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "kind": "fact",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "JIT compilation is enabled by default and is controlled by the `jit` configuration parameter.\n1. The `jit` (boolean) parameter determines whether JIT compilation may be used; its default is `on`.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the `jit` parameter and states that its default is `on`, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "JIT compilation is enabled by default and is controlled by the `jit` configuration parameter.\n1. The `jit` (boolean) parameter determines whether JIT compilation may be used; its default is `on`.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the `jit` parameter and states that its default is `on`, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "The `jit` (boolean) parameter determines whether JIT compilation may be used; its default is `on`.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3212,
+          "completion_tokens": 159,
+          "total_tokens": 3371,
+          "fresh_total_tokens": 3371
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 944,
+          "completion_tokens": 122,
+          "total_tokens": 1066,
+          "fresh_total_tokens": 533
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1064,
+          "completion_tokens": 96,
+          "total_tokens": 1160,
+          "fresh_total_tokens": 1160
+        }
+      },
+      "seconds": 45.1
+    },
+    {
+      "id": "ver-19",
+      "retried": false,
+      "type": "version",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kafka/streams/developer-guide/streams-rebalance-protocol.md",
+        "kafka/streams/upgrade-guide.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 3,
+      "kind": "fix",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "Enable the streams rebalance protocol on an existing Kafka 4.2 cluster by upgrading the feature flag and ensuring the broker protocol list includes \"streams\".\n1. Run the feature upgrade command: `bin/kafka-features.sh --bootstrap-server localhost:9092 upgrade --feature streams.version=1` to enable the protocol on the cluster.\n2. Verify that the broker configuration `group.coordinator.rebalance.protocols` includes \"streams\"; add it if missing.\n3. Optionally, set the client configuration `group.protocol=streams` in your Kafka Streams application to use the new protocol.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states the essential command to upgrade the streams.version feature, and the additional advice regarding broker and client configurations is accurate and harmless.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "Enable the streams rebalance protocol on an existing Kafka 4.2 cluster by upgrading the feature flag and ensuring the broker protocol list includes \"streams\".\n1. Run the feature upgrade command: `bin/kafka-features.sh --bootstrap-server localhost:9092 upgrade --feature streams.version=1` to enable the protocol on the cluster.\n2. Verify that the broker configuration `group.coordinator.rebalance.protocols` includes \"streams\"; add it if missing.\n3. Optionally, set the client configuration `group.protocol=streams` in your Kafka Streams application to use the new protocol.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states the essential command to upgrade the streams.version feature, and the additional advice regarding broker and client configurations is accurate and harmless.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Run the feature upgrade command: `bin/kafka-features.sh --bootstrap-server localhost:9092 upgrade --feature streams.version=1` to enable the protocol on the cluster.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Verify that the broker configuration `group.coordinator.rebalance.protocols` includes \"streams\"; add it if missing.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Optionally, set the client configuration `group.protocol=streams` in your Kafka Streams application to use the new protocol.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 2734,
+          "completion_tokens": 260,
+          "total_tokens": 2994,
+          "fresh_total_tokens": 2994
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1174,
+          "completion_tokens": 130,
+          "total_tokens": 1304,
+          "fresh_total_tokens": 652
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1438,
+          "completion_tokens": 121,
+          "total_tokens": 1559,
+          "fresh_total_tokens": 1559
+        }
+      },
+      "seconds": 39.1
+    },
+    {
+      "id": "ver-20",
+      "retried": false,
+      "type": "version",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/concepts/services-networking/ingress.md",
+        "kubernetes/concepts/services-networking/service-traffic-policy.md",
+        "kubernetes/concepts/services-networking/service.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 1,
+      "kind": "fact",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "Service internal traffic policy has been stable since Kubernetes version v1.26.\n1. Feature state: v1.26 stable",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that the Service internal traffic policy is stable since Kubernetes v1.26, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 1,
+        "answer": "Service internal traffic policy has been stable since Kubernetes version v1.26.\n1. Feature state: v1.26 stable",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly states that the Service internal traffic policy is stable since Kubernetes v1.26, matching the essential key point.",
+          "points_stated": [
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Feature state: v1.26 stable",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 2776,
+          "completion_tokens": 125,
+          "total_tokens": 2901,
+          "fresh_total_tokens": 2901
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 978,
+          "completion_tokens": 126,
+          "total_tokens": 1104,
+          "fresh_total_tokens": 552
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 925,
+          "completion_tokens": 87,
+          "total_tokens": 1012,
+          "fresh_total_tokens": 1012
+        }
+      },
+      "seconds": 32.9
+    },
+    {
+      "id": "x-13",
+      "retried": false,
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/concepts/configuration/manage-resources-containers.md",
+        "kubernetes/concepts/workloads/pods/pod-qos.md",
+        "kubernetes/tasks/configure-pod-container/assign-memory-resource.md",
+        "stackoverflow/9407442"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 2,
+      "kind": "explanation",
+      "coverage": "partial",
+      "missing": "Specific recommendation for the size of `shared_buffers` in a container with a memory limit.",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "The documentation advises tuning `shared_buffers` based on workload and system limits, and explains that exceeding a memory limit triggers OOM‑kill behavior.\n1. `shared_buffers` should be tuned to fit the workload; the defaults are very conservative and you may need to increase it, ensuring the OS’s maximum shared memory limit can accommodate the setting.\n2. If a container uses more memory than its defined memory limit, the Linux kernel’s OOM subsystem may terminate the container (an OOM kill), especially when memory pressure is detected.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "PostgreSQL: on a dedicated server with 1GB or more of RAM a reasonable starting value for shared_buffers is 25% of the memory (the default is typically 128MB, set at server start); more than about 40% of RAM is unlikely to work better",
+            "Kubernetes: if the container tries to use more memory than its limit it is terminated with reason OOMKilled; check the application for a memory leak or set a higher memory limit (and possibly request)"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to provide the specific 25% recommendation for shared_buffers and does not explicitly state that the container is terminated with the reason OOMKilled, instead vaguely referring to the Linux kernel's OOM subsystem.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 2,
+        "answer": "The documentation advises tuning `shared_buffers` based on workload and system limits, and explains that exceeding a memory limit triggers OOM‑kill behavior.\n1. `shared_buffers` should be tuned to fit the workload; the defaults are very conservative and you may need to increase it, ensuring the OS’s maximum shared memory limit can accommodate the setting.\n2. If a container uses more memory than its defined memory limit, the Linux kernel’s OOM subsystem may terminate the container (an OOM kill), especially when memory pressure is detected.",
+        "judge": {
+          "verdict": "incorrect",
+          "missing_points": [
+            "PostgreSQL: on a dedicated server with 1GB or more of RAM a reasonable starting value for shared_buffers is 25% of the memory (the default is typically 128MB, set at server start); more than about 40% of RAM is unlikely to work better",
+            "Kubernetes: if the container tries to use more memory than its limit it is terminated with reason OOMKilled; check the application for a memory leak or set a higher memory limit (and possibly request)"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to provide the specific 25% recommendation for shared_buffers and does not explicitly state that the container is terminated with the reason OOMKilled, instead vaguely referring to the Linux kernel's OOM subsystem.",
+          "points_stated": [
+            false,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "`shared_buffers` should be tuned to fit the workload; the defaults are very conservative and you may need to increase it, ensuring the OS’s maximum shared memory limit can accommodate the setting.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "If a container uses more memory than its defined memory limit, the Linux kernel’s OOM subsystem may terminate the container (an OOM kill), especially when memory pressure is detected.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3024,
+          "completion_tokens": 306,
+          "total_tokens": 3330,
+          "fresh_total_tokens": 3330
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1362,
+          "completion_tokens": 378,
+          "total_tokens": 1740,
+          "fresh_total_tokens": 870
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 2146,
+          "completion_tokens": 114,
+          "total_tokens": 2260,
+          "fresh_total_tokens": 2260
+        }
+      },
+      "seconds": 32.7
+    },
+    {
+      "id": "x-14",
+      "retried": false,
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kafka/design/protocol.md",
+        "kafka/operations/basic-kafka-operations.md",
+        "kubernetes/concepts/workloads/pods/disruptions.md",
+        "stackoverflow/53571823"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 3,
+      "kind": "explanation",
+      "coverage": "partial",
+      "missing": "Specific steps to create a PodDisruptionBudget for the Kafka broker deployment and how to configure the broker for controlled shutdown.",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "To drain a node with Kafka broker pods without losing partition availability you must use a PodDisruptionBudget to keep enough broker replicas running and enable Kafka's controlled shutdown so leadership is moved before the pod stops.\n1. Create a PodDisruptionBudget for the Kafka broker deployment that sets `minAvailable` to a value that leaves at least one replica for each partition (e.g., `minAvailable: <number of brokers - 1>`). This prevents the drain operation from evicting too many brokers at once, ensuring partitions stay available.\n2. Enable Kafka’s controlled shutdown so that when a broker pod is terminated it migrates its leadership to other replicas before the process ends: set `controlled.shutdown.enable=true` in the broker config.\n3. Make sure every partition has a replication factor greater than 1 and that at least one replica is alive on another broker, because controlled shutdown only succeeds under those conditions.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "Kubernetes: create a PodDisruptionBudget for the brokers; kubectl drain evicts Pods through the Eviction API, which respects the PDB, so only the allowed number of broker pods is down at once",
+            "Kafka: messages stay visible and writable only while the number of in-sync replicas is at least min.insync.replicas, so the PDB should allow no more brokers down than keeps the in-sync replicas at or above that setting"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to state the essential requirement that the PDB must be configured to keep the number of in-sync replicas at or above the min.insync.replicas setting, instead using an incorrect heuristic based on partition count.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "To drain a node with Kafka broker pods without losing partition availability you must use a PodDisruptionBudget to keep enough broker replicas running and enable Kafka's controlled shutdown so leadership is moved before the pod stops.\n1. Create a PodDisruptionBudget for the Kafka broker deployment that sets `minAvailable` to a value that leaves at least one replica for each partition (e.g., `minAvailable: <number of brokers - 1>`). This prevents the drain operation from evicting too many brokers at once, ensuring partitions stay available.\n2. Enable Kafka’s controlled shutdown so that when a broker pod is terminated it migrates its leadership to other replicas before the process ends: set `controlled.shutdown.enable=true` in the broker config.\n3. Make sure every partition has a replication factor greater than 1 and that at least one replica is alive on another broker, because controlled shutdown only succeeds under those conditions.",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "Kubernetes: create a PodDisruptionBudget for the brokers; kubectl drain evicts Pods through the Eviction API, which respects the PDB, so only the allowed number of broker pods is down at once",
+            "Kafka: messages stay visible and writable only while the number of in-sync replicas is at least min.insync.replicas, so the PDB should allow no more brokers down than keeps the in-sync replicas at or above that setting"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer fails to state the essential requirement that the PDB must be configured to keep the number of in-sync replicas at or above the min.insync.replicas setting, instead using an incorrect heuristic based on partition count.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Create a PodDisruptionBudget for the Kafka broker deployment that sets `minAvailable` to a value that leaves at least one replica for each partition (e.g., `minAvailable: <number of brokers - 1>`). This prevents the drain operation from evicting too many brokers at once, ensuring partitions stay available.",
+            "claim": "partially_supported",
+            "why": "S3 discusses PDB but does not specify minAvailable or the exact value needed to keep partitions available"
+          },
+          {
+            "text": "Enable Kafka’s controlled shutdown so that when a broker pod is terminated it migrates its leadership to other replicas before the process ends: set `controlled.shutdown.enable=true` in the broker config.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Make sure every partition has a replication factor greater than 1 and that at least one replica is alive on another broker, because controlled shutdown only succeeds under those conditions.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3233,
+          "completion_tokens": 361,
+          "total_tokens": 3594,
+          "fresh_total_tokens": 3594
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1468,
+          "completion_tokens": 354,
+          "total_tokens": 1822,
+          "fresh_total_tokens": 911
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1645,
+          "completion_tokens": 147,
+          "total_tokens": 1792,
+          "fresh_total_tokens": 1792
+        }
+      },
+      "seconds": 37.2
+    },
+    {
+      "id": "x-15",
+      "retried": false,
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/indexes-index-only-scans.html",
+        "postgres/indexes-partial.html",
+        "stackoverflow/13573204",
+        "stackoverflow/38485771",
+        "stackoverflow/9407442"
+      ],
+      "pages_ok": false,
+      "evidence_in_context": 0.0,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information on how to identify slow queries in PostgreSQL running in a pod.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "refused",
+          "correct": false,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "retrieval_miss",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3349,
+          "completion_tokens": 97,
+          "total_tokens": 3446,
+          "fresh_total_tokens": 3446
+        }
+      },
+      "seconds": 40.9
+    },
+    {
+      "id": "x-16",
+      "retried": false,
+      "type": "cross_product",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/concepts/storage/ephemeral-storage.md",
+        "postgres/runtime-config-resource.html",
+        "stackoverflow/13573204",
+        "stackoverflow/9407442"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 0.5,
+      "drafted_steps": 3,
+      "kind": "fix",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "Set a limit on PostgreSQL temporary file usage and ensure the kubelet tracks local storage so the pod is evicted only when the configured limit is exceeded.\n1. Configure PostgreSQL's `temp_file_limit` (default `-1` meaning no limit) to a suitable size (e.g., `temp_file_limit = 500MB`) to bound the amount of disk space a process can use for temporary sort and hash files; transactions exceeding this limit will be canceled. Use `SET` or edit `postgresql.conf` and restart if needed. (`S3`)\n2. Verify that the kubelet is measuring local ephemeral storage so that the pod’s `emptyDir` and container layer usage are accounted for; if not, enable the appropriate measurement mode as described in the Kubernetes documentation. (`S2`)\n3. Optionally, monitor and adjust the pod’s local storage limit in its spec to a value that accommodates the expected temporary file usage while still protecting the node from over‑consumption. (`S2`)",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "Kubernetes: set limits for the ephemeral-storage resource in the Pod spec"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the PostgreSQL temp_file_limit setting but fails to explicitly state that the ephemeral-storage limit must be set in the Pod spec, instead suggesting to 'monitor and adjust' or verify kubelet measurement, which does not satisfy the requirement to set the limit in the spec.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "Set a limit on PostgreSQL temporary file usage and ensure the kubelet tracks local storage so the pod is evicted only when the configured limit is exceeded.\n1. Configure PostgreSQL's `temp_file_limit` (default `-1` meaning no limit) to a suitable size (e.g., `temp_file_limit = 500MB`) to bound the amount of disk space a process can use for temporary sort and hash files; transactions exceeding this limit will be canceled. Use `SET` or edit `postgresql.conf` and restart if needed. (`S3`)\n2. Verify that the kubelet is measuring local ephemeral storage so that the pod’s `emptyDir` and container layer usage are accounted for; if not, enable the appropriate measurement mode as described in the Kubernetes documentation. (`S2`)\n3. Optionally, monitor and adjust the pod’s local storage limit in its spec to a value that accommodates the expected temporary file usage while still protecting the node from over‑consumption. (`S2`)",
+        "judge": {
+          "verdict": "partially_correct",
+          "missing_points": [
+            "Kubernetes: set limits for the ephemeral-storage resource in the Pod spec"
+          ],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the PostgreSQL temp_file_limit setting but fails to explicitly state that the ephemeral-storage limit must be set in the Pod spec, instead suggesting to 'monitor and adjust' or verify kubelet measurement, which does not satisfy the requirement to set the limit in the spec.",
+          "points_stated": [
+            true,
+            false
+          ],
+          "corrected": false,
+          "correct": false,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Configure PostgreSQL's `temp_file_limit` (default `-1` meaning no limit) to a suitable size (e.g., `temp_file_limit = 500MB`) to bound the amount of disk space a process can use for temporary sort and hash files; transactions exceeding this limit will be canceled. Use `SET` or edit `postgresql.conf` and restart if needed. (`S3`)",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Verify that the kubelet is measuring local ephemeral storage so that the pod’s `emptyDir` and container layer usage are accounted for; if not, enable the appropriate measurement mode as described in the Kubernetes documentation. (`S2`)",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Optionally, monitor and adjust the pod’s local storage limit in its spec to a value that accommodates the expected temporary file usage while still protecting the node from over‑consumption. (`S2`)",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "generation_error",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3291,
+          "completion_tokens": 365,
+          "total_tokens": 3656,
+          "fresh_total_tokens": 3656
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1492,
+          "completion_tokens": 228,
+          "total_tokens": 1720,
+          "fresh_total_tokens": 860
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1727,
+          "completion_tokens": 146,
+          "total_tokens": 1873,
+          "fresh_total_tokens": 1873
+        }
+      },
+      "seconds": 44.1
+    },
+    {
+      "id": "err-23",
+      "retried": false,
+      "type": "error_message",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/concepts/scheduling-eviction/api-eviction.md",
+        "kubernetes/concepts/scheduling-eviction/node-pressure-eviction.md",
+        "kubernetes/concepts/workloads/pods/disruptions.md"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 3,
+      "kind": "explanation",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "A 429 response means the eviction is currently blocked by a PodDisruptionBudget or API rate limiting, and you should retry later or adjust the budget.\n1. The Eviction API returns `429 Too Many Requests` when the eviction is not allowed because the configured PodDisruptionBudget blocks it or due to API rate limiting.\n2. You can attempt the eviction again later, after the budget permits or the rate limit window passes.\n3. If the pod is stuck and repeatedly returns 429, consider aborting or pausing the automated operation, investigating the underlying issue, or directly deleting the pod instead of using the Eviction API.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies that the 429 error is caused by PodDisruptionBudgets or API rate limiting and advises retrying later, covering all essential and optional key points without making wrong claims.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 3,
+        "answer": "A 429 response means the eviction is currently blocked by a PodDisruptionBudget or API rate limiting, and you should retry later or adjust the budget.\n1. The Eviction API returns `429 Too Many Requests` when the eviction is not allowed because the configured PodDisruptionBudget blocks it or due to API rate limiting.\n2. You can attempt the eviction again later, after the budget permits or the rate limit window passes.\n3. If the pod is stuck and repeatedly returns 429, consider aborting or pausing the automated operation, investigating the underlying issue, or directly deleting the pod instead of using the Eviction API.",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies that the 429 error is caused by PodDisruptionBudgets or API rate limiting and advises retrying later, covering all essential and optional key points without making wrong claims.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "The Eviction API returns `429 Too Many Requests` when the eviction is not allowed because the configured PodDisruptionBudget blocks it or due to API rate limiting.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "You can attempt the eviction again later, after the budget permits or the rate limit window passes.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "If the pod is stuck and repeatedly returns 429, consider aborting or pausing the automated operation, investigating the underlying issue, or directly deleting the pod instead of using the Eviction API.",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3036,
+          "completion_tokens": 276,
+          "total_tokens": 3312,
+          "fresh_total_tokens": 3312
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1230,
+          "completion_tokens": 160,
+          "total_tokens": 1390,
+          "fresh_total_tokens": 695
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 1703,
+          "completion_tokens": 139,
+          "total_tokens": 1842,
+          "fresh_total_tokens": 1842
+        }
+      },
+      "seconds": 40.2
+    },
+    {
+      "id": "err-24",
+      "retried": false,
+      "type": "error_message",
+      "answerable": true,
+      "provider": "groq",
+      "context_pages": [
+        "stackoverflow/57830375",
+        "stackoverflow/58282791",
+        "stackoverflow/60477061",
+        "stackoverflow/63104643",
+        "stackoverflow/69014742",
+        "stackoverflow/72851548"
+      ],
+      "pages_ok": true,
+      "evidence_in_context": 1.0,
+      "drafted_steps": 6,
+      "kind": "fix",
+      "coverage": "full",
+      "missing": "",
+      "off": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 6,
+        "answer": "Configure SSH keys without passphrase and add known_hosts in the workflow to avoid 'Permission denied (publickey,...)' errors.\n1. Generate a new SSH key pair without a passphrase: `ssh-keygen -t rsa -b 4096 -C \"[email]\" -q -N \"\"`.\n2. Add the public key to the remote server's `authorized_keys` (e.g., `ssh-copy-id -i ~/.ssh/id_rsa.pub user@host`).\n3. Run `ssh-keyscan remote-server.com` on the server and store the output in a GitHub secret (e.g., `SSH_KNOWN_HOSTS`).\n4. Store the private key in a GitHub secret (e.g., `SSH_PRIVATE_KEY`).\n5. In the workflow, create the key file and known_hosts:\n```yaml\n- name: Create SSH key\n  run: |\n    mkdir -p ~/.ssh/\n    echo \"$SSH_PRIVATE_KEY\" > ../private.key\n    sudo chmod 600 ../private.key\n    echo \"$SSH_KNOWN_HOSTS\" > ~/.ssh/known_hosts\n  shell: bash\n  env:\n    SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}\n    SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}\n```\n6. If using a passphrase-protected key, start an ssh-agent and add the key in the workflow:\n```yaml\n- name: Setup SSH Keys and known_hosts\n  env:\n    SSH_AUTH_SOCK: /tmp/ssh_agent.sock\n  run: |\n    mkdir -p ~/.ssh\n    ssh-keyscan github.com >> ~/.ssh/known_hosts\n    ssh-agent -a $SSH_AUTH_SOCK > /dev/null\n    ssh-add - <<< \"${{ secrets.SSH_PRIVATE_KEY }}\"\n```",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the need for a passphrase-less key and provides the correct commands to generate it, store secrets, and configure the workflow with proper permissions and known_hosts setup.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        }
+      },
+      "on": {
+        "refused": false,
+        "blocked": {},
+        "steps_shown": 6,
+        "answer": "Configure SSH keys without passphrase and add known_hosts in the workflow to avoid 'Permission denied (publickey,...)' errors.\n1. Generate a new SSH key pair without a passphrase: `ssh-keygen -t rsa -b 4096 -C \"[email]\" -q -N \"\"`.\n2. Add the public key to the remote server's `authorized_keys` (e.g., `ssh-copy-id -i ~/.ssh/id_rsa.pub user@host`).\n3. Run `ssh-keyscan remote-server.com` on the server and store the output in a GitHub secret (e.g., `SSH_KNOWN_HOSTS`).\n4. Store the private key in a GitHub secret (e.g., `SSH_PRIVATE_KEY`).\n5. In the workflow, create the key file and known_hosts:\n```yaml\n- name: Create SSH key\n  run: |\n    mkdir -p ~/.ssh/\n    echo \"$SSH_PRIVATE_KEY\" > ../private.key\n    sudo chmod 600 ../private.key\n    echo \"$SSH_KNOWN_HOSTS\" > ~/.ssh/known_hosts\n  shell: bash\n  env:\n    SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}\n    SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}\n```\n6. If using a passphrase-protected key, start an ssh-agent and add the key in the workflow:\n```yaml\n- name: Setup SSH Keys and known_hosts\n  env:\n    SSH_AUTH_SOCK: /tmp/ssh_agent.sock\n  run: |\n    mkdir -p ~/.ssh\n    ssh-keyscan github.com >> ~/.ssh/known_hosts\n    ssh-agent -a $SSH_AUTH_SOCK > /dev/null\n    ssh-add - <<< \"${{ secrets.SSH_PRIVATE_KEY }}\"\n```",
+        "judge": {
+          "verdict": "correct",
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "The answer correctly identifies the need for a passphrase-less key and provides the correct commands to generate it, store secrets, and configure the workflow with proper permissions and known_hosts setup.",
+          "points_stated": [
+            true,
+            true
+          ],
+          "corrected": false,
+          "correct": true,
+          "judged_by": "qwen/qwen3.8-27b"
+        },
+        "verified_by": "llm",
+        "partial": false,
+        "claims": [
+          {
+            "text": "Generate a new SSH key pair without a passphrase: `ssh-keygen -t rsa -b 4096 -C \"[email]\" -q -N \"\"`.",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Add the public key to the remote server's `authorized_keys` (e.g., `ssh-copy-id -i ~/.ssh/id_rsa.pub user@host`).",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Run `ssh-keyscan remote-server.com` on the server and store the output in a GitHub secret (e.g., `SSH_KNOWN_HOSTS`).",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "Store the private key in a GitHub secret (e.g., `SSH_PRIVATE_KEY`).",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "In the workflow, create the key file and known_hosts:\n```yaml\n- name: Create SSH key\n  run: |\n    mkdir -p ~/.ssh/\n    echo \"$SSH_PRIVATE_KEY\" > ../private.key\n    sudo chmod 600 ../private.key\n    echo \"$SSH_KNOWN_HOSTS\" > ~/.ssh/known_hosts\n  shell: bash\n  env:\n    SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}\n    SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}\n```",
+            "claim": "supported",
+            "why": ""
+          },
+          {
+            "text": "If using a passphrase-protected key, start an ssh-agent and add the key in the workflow:\n```yaml\n- name: Setup SSH Keys and known_hosts\n  env:\n    SSH_AUTH_SOCK: /tmp/ssh_agent.sock\n  run: |\n    mkdir -p ~/.ssh\n    ssh-keyscan github.com >> ~/.ssh/known_hosts\n    ssh-agent -a $SSH_AUTH_SOCK > /dev/null\n    ssh-add - <<< \"${{ secrets.SSH_PRIVATE_KEY }}\"\n```",
+            "claim": "supported",
+            "why": ""
+          }
+        ]
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3521,
+          "completion_tokens": 570,
+          "total_tokens": 4091,
+          "fresh_total_tokens": 4091
+        },
+        "groq/qwen/qwen3.8-27b": {
+          "calls": 2,
+          "cached_calls": 1,
+          "prompt_tokens": 1856,
+          "completion_tokens": 148,
+          "total_tokens": 2004,
+          "fresh_total_tokens": 1002
+        },
+        "groq/openai/gpt-oss-20b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 2435,
+          "completion_tokens": 141,
+          "total_tokens": 2576,
+          "fresh_total_tokens": 2576
+        }
+      },
+      "seconds": 42.3
+    },
+    {
+      "id": "none-21",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "postgres/routine-vacuuming.html",
+        "postgres/runtime-config-vacuum.html"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information about a setting named max_vacuum_workers and its recommended value for speeding up autovacuum on large tables.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3288,
+          "completion_tokens": 123,
+          "total_tokens": 3411,
+          "fresh_total_tokens": 3411
+        }
+      },
+      "seconds": 45.8
+    },
+    {
+      "id": "none-22",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "kubernetes/concepts/configuration/configmap.md",
+        "kubernetes/concepts/workloads/pods/pod-lifecycle.md",
+        "stackoverflow/41604499",
+        "stackoverflow/44673957",
+        "stackoverflow/53535540"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information on spec.podRestartBackoffSeconds and how to set it on a Deployment is not present in the provided excerpts.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3479,
+          "completion_tokens": 106,
+          "total_tokens": 3585,
+          "fresh_total_tokens": 3585
+        }
+      },
+      "seconds": 42.9
+    },
+    {
+      "id": "none-23",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "kafka/configuration/broker-configs.md",
+        "kafka/design/design.md",
+        "kafka/implementation/message-format.md",
+        "kafka/streams/developer-guide/manage-topics.md",
+        "kafka/streams/developer-guide/processor-api.md"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information about the broker property log.retention.compaction.ratio and its default value is not present in the provided excerpts.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3254,
+          "completion_tokens": 102,
+          "total_tokens": 3356,
+          "fresh_total_tokens": 3356
+        }
+      },
+      "seconds": 42.6
+    },
+    {
+      "id": "none-24",
+      "retried": false,
+      "type": "unanswerable",
+      "answerable": false,
+      "provider": "groq",
+      "context_pages": [
+        "github/how-tos/manage-workflow-runs/re-run-workflows-and-jobs.md",
+        "github/how-tos/monitor-workflows/use-workflow-run-logs.md",
+        "github/reference/workflows-and-actions/contexts.md",
+        "github/reference/workflows-and-actions/dependency-caching.md"
+      ],
+      "pages_ok": null,
+      "evidence_in_context": null,
+      "drafted_steps": 0,
+      "kind": "not_found",
+      "coverage": "none",
+      "missing": "Information about the `retry-on-failure: 3` job-level key and its documentation location is not present in the provided excerpts.",
+      "off": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        }
+      },
+      "on": {
+        "refused": true,
+        "blocked": {},
+        "steps_shown": 0,
+        "answer": null,
+        "judge": {
+          "verdict": "correct",
+          "correct": true,
+          "missing_points": [],
+          "wrong_or_dangerous_claims": [],
+          "reason": "refused",
+          "judged_by": "rule"
+        },
+        "verified_by": "",
+        "partial": false,
+        "claims": []
+      },
+      "category": "correct",
+      "tokens": {
+        "groq/openai/gpt-oss-120b": {
+          "calls": 1,
+          "cached_calls": 0,
+          "prompt_tokens": 3236,
+          "completion_tokens": 104,
+          "total_tokens": 3340,
+          "fresh_total_tokens": 3340
+        }
+      },
+      "seconds": 38.8
+    }
+  ]
+}

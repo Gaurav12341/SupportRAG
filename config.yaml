@@ -66,6 +66,15 @@ access:
   licensed_levels: [internal, restricted]
   admin_levels: [public, internal, restricted]
 
+retry:           # stage 16: one more, wider try when the writer reports partial or no coverage (Phase 4b in docs/IMPROVEMENT_PLAN.md)
+  enabled: false                   # measured, no gain on the dev subset (80.0% vs 82.5%, docs/DECISIONS.md Phase 4)
+  when: [partial, none]            # the writer's `coverage` values that trigger it
+  plan_llm: groq                   # who writes the query plan (src/query.py) ...
+  plan_model: openai/gpt-oss-20b   # ... on this Groq model = its own token bucket (answers use 120b)
+  use: [rewrite, route, hyde]      # parts of the plan used (search_plan); the writer's `missing` text is always added as a query
+  k_context: 12                    # chunks kept after merging with the first hits (first pass: 10)
+  max_context_chars: 14000         # context budget of the second answer (first pass: 12000)
+
 verify:          # stage 14: how a drafted answer is checked against the excerpts it cites (src/verify.py, Phase 3 in docs/IMPROVEMENT_PLAN.md)
   method: llm                   # llm = one claim check per answer; nli = the local scorer below (also the automatic fallback when the llm call fails)
   llm: {model: "openai/gpt-oss-20b", max_tokens: 1200, reasoning_effort: low}   # its own Groq bucket (answers use 120b, the eval judge qwen)

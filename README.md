@@ -437,6 +437,84 @@ How to read it:
 - 40 questions: +-14 points. Tokens: 54k on the 20b bucket for 32 checks (about 1.7k each).
 <!-- phase3:end -->
 
+<!-- phase4:start -->
+### Phase 4 (started): retrieval for the remaining misses
+
+Phase 4 has three parts (`docs/DECISIONS.md`); none beat the Phase 3 pipeline.
+Retrieval at the Phase 2 context (10 chunks / 12,000 characters / sections up to 2,000; hybrid; 58 answerable tune questions), from `eval/results/ctx_k10_c12000_s2000_tune.md`, `p4a_m3_ctx_tune.md`, `p4c_prefix_ctx_tune.md`:
+
+| Index | Page recall@10 | MRR | Passage recall@10 | Evidence in context | ... cross-product | Median search |
+|---|--:|--:|--:|--:|--:|--:|
+| bge-small (current) | 0.940 | 0.890 | 0.810 | 0.810 | 0.455 | 79 ms |
+| 4a: bge-m3 | 0.931 | 0.905 | 0.793 | 0.767 | 0.500 | 210 ms |
+| 4c: bge-small + title/heading prefix | 0.931 | 0.842 | 0.845 | 0.810 | 0.364 | 80 ms |
+
+- **4a, bge-m3: not adopted.** Evidence-in-context falls overall (0.810 to 0.767; the 11 cross-product questions rise, 0.455 to 0.500, which is 0.5 of one question's evidence) and the question embedding is slower. Its earlier gain was measured at a 5-chunk context.
+- **4c, contextual prefix: not adopted.** Evidence-in-context is unchanged; passage recall@10 rises but MRR and page recall@10 fall. Nothing here predicts a higher accuracy.
+- **4b, retry loop: built, measured, switched off.** When the writer says its excerpts cover only part of the question: one more search with a query plan and the writer's own `missing` text, then one more answer.
+  Dev subset (`eval/results/accuracy_p4b_dev_tune.md`): **80.0%** (32/40, CI 65.2-89.5%) against **82.5%** without it. It ran for 12 questions; the 7 unanswerable ones were still all refused; of 5 answerable ones 1 improved, 2 got worse, 1 turned a refusal into a wrong answer. No gain, so `retry.enabled: false`. 40 questions: 1 question = 2.5 points.
+- **Phase 4 result: no change to the defaults.** Accuracy on the dev subset stays 82.5%.
+<!-- phase4:end -->
+
+<!-- phase5:start -->
+### Final result (Phase 5): the holdout, run once
+
+The holdout (38 questions never used for any choice) was run once with the frozen pipeline: Groq `gpt-oss-120b` writer, bge-small + BM25 hybrid search, 10 chunks / 12,000 characters, `gpt-oss-20b` claim check, retry off.
+`python -m eval.accuracy --final --name final`, copied from `eval/results/accuracy_final_holdout.md`. The 8 original holdout questions got their key points, and 4 near-miss unanswerable questions were added, before this run (`docs/DECISIONS.md`, Phase 5). Questions and key points were written and checked by the assistant, not a human.
+
+**Accuracy: 30/38 = 78.9% (95% CI 63.7-88.9%)** on holdout (38 questions: 26 answerable, 12 unanswerable).
+
+| | Verifier on (pipeline as configured) | Verifier off (draft) |
+|---|--:|--:|
+| Accuracy (correct + correctly refused) / all | 78.9% | 78.9% |
+| Answerable answered correctly | 18 of 26 | 18 of 26 |
+| Answerable partially correct (not counted as correct) | 3 of 26 | 3 of 26 |
+| Answerable incorrect | 4 of 26 | 4 of 26 |
+| Answerable refused (false refusals) | 1 of 26 | 1 of 26 |
+| Unanswerable refused (correct) | 12 of 12 | 12 of 12 |
+
+| Question type | n | Correct (verifier on) | Correct (verifier off) |
+|---|--:|--:|--:|
+| error_message | 8 | 7 | 7 |
+| symptom | 7 | 5 | 5 |
+| version | 6 | 6 | 6 |
+| cross_product | 5 | 0 | 0 |
+| unanswerable | 12 | 12 | 12 |
+
+The writer's own `coverage` flag against the draft (verifier off; unanswerable questions count as correct when refused):
+
+| Writer says | Questions | Draft correct |
+|---|--:|--:|
+| full | 21 | 18 |
+| partial | 4 | 0 |
+| none | 13 | 12 |
+
+**Failure breakdown** (8 questions not correct, verifier on):
+
+| Category | Questions |
+|---|--:|
+| retrieval_miss | 3 |
+| generation_error | 3 |
+| verifier_false_refusal | 0 |
+| unsafe_or_wrong_claim | 2 |
+
+Of the 3 generation errors, 0 were the model refusing by itself. Evidence fully inside the context for 19 of 26 answerable questions. Shown answers with a wrong or dangerous claim: 2.
+
+| Tokens behind these results | calls | of which cached | prompt | completion | total | spent in this run |
+|---|--:|--:|--:|--:|--:|--:|
+| groq/openai/gpt-oss-120b | 38 | 0 | 124395 | 8515 | 132910 | 132910 |
+| groq/openai/gpt-oss-20b | 25 | 0 | 39200 | 3775 | 42975 | 42975 |
+| groq/qwen/qwen3.8-27b | 50 | 24 | 32317 | 4678 | 36995 | 19458 |
+
+Split: holdout. Role: admin. Collection support_docs (BAAI/bge-small-en-v1.5), k_context 10, max_context_chars 12000, max_section_chars 2000. Answer LLM groq (reasoning_effort low). Answer providers: {'groq': 38}. Verifier: llm (openai/gpt-oss-20b), used for: {'llm': 25, '': 13}. Judge qwen/qwen3.8-27b (prompt v2). Retry: off. Answer salt: (none).
+
+How to read it:
+- **78.9% (95% CI 63.7-88.9%)** is the number to quote; the dev-subset 82.5% was measured on the questions the pipeline was tuned on, and it is inside this interval.
+- **Refusing is solid**: all 12 unanswerable questions were refused, including the 4 near-miss ones (a realistic but non-existent setting in a covered product).
+- **Cross-product is the weak spot**: 0 of 5 correct (the dev subset had 2 of 6). The writer's own `coverage` flag was `partial` for 4 questions and none of those 4 drafts was correct.
+- 8 misses: 3 retrieval, 3 generation, 2 wrong claims the claim check did not stop. 38 questions: one question is 2.6 points.
+<!-- phase5:end -->
+
 ### Answer quality: verifier off vs on
 
 `python -m eval.answer --name answer_v8_small --collection exp_fixed500_small --embedding BAAI/bge-small-en-v1.5` (copied from

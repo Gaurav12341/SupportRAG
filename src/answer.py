@@ -4,7 +4,8 @@
 
 `generate()` is the LLM call; `finalize()` is everything after it (verify + safety), kept separate so the eval can
 run the same generation with the verifier off and on. The verifier is one LLM claim check (`verify.method: llm`, src/verify.py),
-with the local NLI scorer as the fallback when that call fails. The model sees short labels (S1, S2, ...); answers show the real
+with the local NLI scorer as the fallback when that call fails. Stage 16 (`retry`): if the writer says the excerpts
+only partly cover the question, one more search with a query plan and the writer's `missing` text, then one more answer. The model sees short labels (S1, S2, ...); answers show the real
 chunk ids. The model replies in a JSON schema: a `kind` (fix / explanation / fact / not_found), how well the excerpts cover
 the question (`coverage`, `missing`), a short `summary` and `points`, each with its sources. Retrieved text is wrapped in
 <doc> tags and the prompt says it is data, never instructions. The writer is `answer.llm` in config.yaml (Groq gpt-oss-120b,
@@ -89,6 +90,7 @@ class Answer:
     summary: str = ""               # shown only when at least one point is supported (the summary itself is not verified yet)
     summary_warnings: list = field(default_factory=list)
     verified_by: str = ""           # llm | nli | "" (verifier off); nli after an llm failure means a fallback
+    retried: bool = False           # stage 16 ran: a second, wider try after the writer reported partial or no coverage
     partial: str = ""               # note shown when the claim check says the docs only cover part of the question (verify.partial_note)
 
     def render(self):
@@ -160,6 +162,37 @@ def generate(question, items, cfg, llm=None, cache=None, salt="", stop_on_quota=
                               reasoning_effort=a["reasoning_effort"], **extra)
     draft = parse_reply(text, items)
     return draft, draft.kind == "not_found" or not draft.steps, provider
+
+
+# ---------- retry (stage 16) ----------
+
+def needs_retry(draft, cfg):
+    """The writer says the excerpts do not cover the whole question (`coverage` in retry.when) and retry is on."""
+    return bool(cfg["retry"]["enabled"]) and draft.coverage in cfg["retry"]["when"]
+
+
+def retry(question, items, hits, draft, refused, provider, principal, product, cfg, llm, **gen_kw):
+    """Stage 16: one more try when the writer reported partial or no coverage. A query plan (rewrite / route / HyDE, a small model on
+    its own Groq bucket) plus the writer's own `missing` text as an extra query find more candidates; they are merged with the first
+    hits (RRF), a somewhat wider context is built and the writer answers once more. The second draft replaces the first only if it
+    has points (a refusal on retry keeps what the first pass had). `gen_kw` goes to generate() (cache, salt, stop_on_quota).
+    Returns (items, hits, draft, refused, provider, retried)."""
+    from src.query import understand
+    from src.search import rrf, search_plan
+    r = cfg["retry"]
+    plan = understand(question, cfg, llm, prefer=r["plan_llm"], model=r["plan_model"], stop_on_quota=gen_kw.get("stop_on_quota", False))
+    if draft.missing:
+        plan.queries = plan.queries + [(None, draft.missing)]
+    more = search_plan(question, plan, k=cfg["retrieval"]["k_dense"], product=product, principal=principal, cfg=cfg, use=tuple(r["use"]))
+    merged = rrf([hits, more], cfg["retrieval"]["rrf_k"])[:r["k_context"]]
+    items2 = build_context(merged, principal, {**cfg, "context": {**cfg["context"], "max_context_chars": r["max_context_chars"]}})
+    if not items2:
+        return items, hits, draft, refused, provider, True
+    draft2, refused2, provider2 = generate(question, items2, cfg, llm, **gen_kw)
+    log.info("RETRY coverage=%s -> %s, %d -> %d context items", draft.coverage, draft2.coverage, len(items), len(items2))
+    if refused2:
+        return items, hits, draft, refused, provider, True
+    return items2, merged, draft2, refused2, provider2, True
 
 
 # ---------- verify + safety ----------
@@ -260,7 +293,12 @@ def answer(question, principal=None, product=None, verify=True, cfg=None, llm=No
     if not items:  # nothing readable was found: do not ask the model to guess
         return Answer(question, refused=True, steps=[], sources=[], reason=cfg["answer"]["refuse_text"])
     draft, refused, provider = generate(question, items, cfg, llm)
-    return finalize(question, items, draft, refused, provider, principal, cfg, verify, llm)
+    retried = needs_retry(draft, cfg)
+    if retried:
+        items, hits, draft, refused, provider, _ = retry(question, items, hits, draft, refused, provider, principal, product, cfg, llm)
+    ans = finalize(question, items, draft, refused, provider, principal, cfg, verify, llm)
+    ans.retried = retried
+    return ans
 
 
 if __name__ == "__main__":

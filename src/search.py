@@ -33,12 +33,12 @@ def tokenize(text):
 
 
 class BM25Index:
-    """BM25 over every chunk in the collection (title + text). Built once per process from Qdrant's payloads,
+    """BM25 over every chunk in the collection (title + text, or the "title > headings" context line + text if the index has one). Built once per process from Qdrant's payloads,
     so it always matches what is indexed. Access and product filtering happen before ranking."""
 
     def __init__(self, payloads):
         self.payloads = payloads
-        self.bm25 = BM25Okapi([tokenize(p.get("title", "") + " " + p["text"]) for p in payloads])
+        self.bm25 = BM25Okapi([tokenize((p.get("context") or p.get("title", "")) + " " + p["text"]) for p in payloads])
 
     def search(self, question, k, principal, cfg, product=None):
         scores = self.bm25.get_scores(tokenize(question))

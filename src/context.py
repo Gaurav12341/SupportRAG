@@ -40,6 +40,19 @@ def headings(text):
     return out
 
 
+def heading_path(page_text, pos):
+    """Titles of the headings above character `pos`, outermost first (a deeper heading replaces one of the same or lower level):
+    ["Install", "Configure"] for a chunk under "## Configure" inside "# Install"."""
+    path, in_fence = [], False
+    for line in page_text[:pos].split("\n"):
+        if FENCE.match(line):
+            in_fence = not in_fence
+        elif not in_fence and (m := HEADING.match(line)):
+            level = len(m.group(1))
+            path = [(lv, t) for lv, t in path if lv < level] + [(level, line[level:].strip())]
+    return [t for _, t in path]
+
+
 def parent_section(page_text, chunk_text, max_chars):
     """The section of `page_text` that contains the chunk, or the chunk itself if the section is too long
     or the chunk cannot be located. Returns (start, end, head): the span in the page, and a heading line to put in

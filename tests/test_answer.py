@@ -6,7 +6,7 @@ import pytest
 
 import src.answer as A
 from src.access import Principal
-from src.context import build_context, headings, parent_section
+from src.context import build_context, heading_path, headings, parent_section
 from src.llm import load_config
 from src.safety import dangerous_warnings, find_sensitive
 
@@ -373,3 +373,74 @@ def test_claim_check_off_means_no_call_and_unsafe_text_is_still_blocked():
 def test_parse_claims_rejects_bad_json(text):
     from src.verify import parse_claims
     assert parse_claims(text, 1) is None
+
+
+# ---------- stage 16: retry ----------
+
+def draft_of(coverage, missing="", steps=("alpha",)):
+    return A.Draft("fix", coverage, missing, "s", [S(t) for t in steps])
+
+
+def test_needs_retry_only_for_partial_or_none_and_when_enabled():
+    on = {**CFG, "retry": {**CFG["retry"], "enabled": True}}
+    assert [A.needs_retry(draft_of(c), on) for c in ("full", "partial", "none")] == [False, True, True]
+    off = {**CFG, "retry": {**CFG["retry"], "enabled": False}}
+    assert not A.needs_retry(draft_of("partial"), off)
+
+
+@pytest.fixture
+def fake_retry(monkeypatch):
+    """A plan, a second search and a second answer, all fake; records what the retry asked for."""
+    import src.query, src.search
+    seen = {}
+    plan = type("P", (), {"queries": [("kafka", "kafka part")]})()
+    monkeypatch.setattr(src.query, "understand", lambda q, cfg, llm, **kw: seen.update(plan_kw=kw) or plan)
+    monkeypatch.setattr(src.search, "search_plan", lambda q, p, **kw: seen.update(queries=list(p.queries), search_kw=kw) or [hit("b#0", "beta", "pg/b.md")])
+    monkeypatch.setattr(A, "build_context", lambda hits, who, cfg, *a: [{**ITEMS[0], "chunk_id": h["chunk_id"], "text": h["text"]} for h in hits])
+    return seen
+
+
+def test_retry_adds_missing_as_a_query_and_uses_the_second_draft(fake_retry, monkeypatch):
+    second = A.Draft("fix", "full", "", "s2", [S("beta")])
+    monkeypatch.setattr(A, "generate", lambda *a, **kw: (fake_retry.update(gen_kw=kw) or second, False, "groq"))
+    first = draft_of("partial", missing="the kafka part")
+    items, hits, draft, refused, provider, retried = A.retry("q?", ITEMS, [hit("a#0", "alpha")], first, False, "groq", Principal.admin(), None, CFG,
+                                                             object(), cache="answer", stop_on_quota=True)
+    assert draft is second and retried and not refused and {h["chunk_id"] for h in hits} == {"a#0", "b#0"}
+    assert fake_retry["queries"] == [("kafka", "kafka part"), (None, "the kafka part")]
+    assert fake_retry["plan_kw"]["model"] == CFG["retry"]["plan_model"] and fake_retry["plan_kw"]["stop_on_quota"] is True
+    assert fake_retry["search_kw"]["use"] == tuple(CFG["retry"]["use"]) and fake_retry["gen_kw"] == {"cache": "answer", "stop_on_quota": True}
+
+
+def test_retry_that_refuses_keeps_the_first_draft(fake_retry, monkeypatch):
+    monkeypatch.setattr(A, "generate", lambda *a, **kw: (A.Draft("not_found", "none", "", "", []), True, "groq"))
+    first = draft_of("partial")
+    items, hits, draft, refused, provider, retried = A.retry("q?", ITEMS, [hit("a#0", "alpha")], first, False, "groq", Principal.admin(), None, CFG, object())
+    assert draft is first and items is ITEMS and not refused and retried
+
+
+def test_answer_marks_a_retried_answer(fake_retry, monkeypatch):
+    monkeypatch.setattr(A, "build_context", lambda hits, who, cfg, *a: [{**ITEMS[0], "chunk_id": h["chunk_id"], "text": h["text"]} for h in hits])
+    drafts = iter([(draft_of("partial", "x"), False, "groq"), (A.Draft("fix", "full", "", "s2", [S("alpha")]), False, "groq")])
+    monkeypatch.setattr(A, "generate", lambda *a, **kw: next(drafts))
+    on = {**NLI, "retry": {**NLI["retry"], "enabled": True}}
+    ans = A.answer("q?", Principal.admin(), verify=False, cfg=on, llm=object(), hits=[hit("a#0", "alpha")])
+    assert ans.retried and not ans.refused and ans.coverage == "full"
+
+
+# ---------- contextual prefix (index experiment 4c) ----------
+
+def test_heading_path_nests_and_ignores_code_fences():
+    page = "# T\n\n## A\n\ntext\n\n### A1\n\n```\n# not a heading\n```\n\n## B\n\nbody"
+    assert heading_path(page, page.index("text")) == ["T", "A"]
+    assert heading_path(page, page.index("```")) == ["T", "A", "A1"]
+    assert heading_path(page, page.index("body")) == ["T", "B"]  # B replaces A and A1
+    assert heading_path(page, 0) == []
+
+
+def test_context_line_repeats_no_title():
+    from src.index import context_line
+    page = "# Pods\n\n## Working with Pods\n\nThe chunk text."
+    c = {"title": "Pods", "source_path": "p.md", "text": "The chunk text."}
+    assert context_line(c, {"p.md": page}) == "Pods > Working with Pods"
+    assert context_line(c, {}) == "Pods"  # page not found: just the title
