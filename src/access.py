@@ -9,19 +9,27 @@ Roles:
 One rule, two forms: `qdrant_filter()` (used inside the Qdrant query) and `allows()` (used for BM25, before ranking).
 Both are built from the same fields, and a test checks they agree on every chunk. Missing or unknown data is denied.
 
-Licenses live in a small SQLite file (`paths.access_db`), with an audit log of every grant/revoke.
-Nothing here proves who a caller is: login is stage 7 and will produce the `user_id` used below.
+Users, password hashes, licenses and an audit log of every change live in MongoDB (docker-compose service `mongo`, config.yaml `mongo`).
+Nothing here proves who a caller is: login (src/auth.py) produces the `user_id` used below.
 """
-import sqlite3
+import os
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import quote_plus
 
+from dotenv import load_dotenv
+from pymongo import ASCENDING, MongoClient
 from qdrant_client import models
+
+load_dotenv()
 
 ROLES = ("public", "member", "admin")
 PRODUCTS = ("kubernetes", "postgres", "kafka", "github")
 ROOT = Path(__file__).resolve().parent.parent
+USER_ID = re.compile(r"^[a-z0-9][a-z0-9_.-]{1,31}$")  # lower-case, 2-32 characters
+_open = {}  # one client per process (MongoClient is thread-safe and pools connections)
 
 
 @dataclass(frozen=True)
@@ -83,29 +91,37 @@ class Principal:
         return models.Filter(must=must)
 
 
-class AccessStore:
-    """Users, roles and product licenses in SQLite. Only an admin can change licenses; every change is logged."""
+def open_store(cfg):
+    """The AccessStore on the MongoDB from config.yaml `mongo` (password from .env MONGO_PASSWORD). The client is shared and connects on first use (the unique license index is made by scripts.setup_users)."""
+    m = cfg["mongo"]
+    if "store" not in _open:
+        password = os.getenv("MONGO_PASSWORD")
+        if not password:
+            raise RuntimeError("MONGO_PASSWORD is missing in .env; run `python -m scripts.setup_users`")
+        client = MongoClient(f"mongodb://{quote_plus(m['user'])}:{quote_plus(password)}@{m['host']}:{m['port']}/?authSource=admin",
+                             serverSelectionTimeoutMS=m.get("timeout_ms", 3000))
+        _open["store"] = AccessStore(client[m["db"]])
+    return _open["store"]
 
-    def __init__(self, path=None, cfg=None):
-        path = Path(path) if path else ROOT / ((cfg or {}).get("paths", {}).get("access_db", "data/access.db"))
-        if str(path) != ":memory:":
-            path.parent.mkdir(parents=True, exist_ok=True)
-        self.db = sqlite3.connect(str(path))
-        self.db.executescript("""
-            CREATE TABLE IF NOT EXISTS users (user_id TEXT PRIMARY KEY, role TEXT NOT NULL CHECK (role IN ('member','admin')));
-            CREATE TABLE IF NOT EXISTS licenses (user_id TEXT NOT NULL REFERENCES users(user_id), product TEXT NOT NULL,
-                granted_by TEXT NOT NULL, granted_at REAL NOT NULL, PRIMARY KEY (user_id, product));
-            CREATE TABLE IF NOT EXISTS audit (at REAL NOT NULL, actor TEXT NOT NULL, action TEXT NOT NULL,
-                user_id TEXT NOT NULL, product TEXT);
-        """)
+
+class AccessStore:
+    """Users, roles, password hashes and product licenses in MongoDB. Only an admin can change licenses or add users; every change is logged.
+
+    Collections: users {_id: user_id, role, password_hash, created_at, created_by}, licenses {user_id, product, granted_by, granted_at},
+    audit {at, actor, action, user_id, product}. `db` is a pymongo Database (tests pass a mongomock one).
+    """
+
+    def __init__(self, db):
+        self.db = db
+        self.users, self.licenses, self.audit = db["users"], db["licenses"], db["audit"]
 
     # ----- reading -----
     def role_of(self, user_id):
-        row = self.db.execute("SELECT role FROM users WHERE user_id=?", (user_id,)).fetchone()
-        return row[0] if row else None
+        row = self.users.find_one({"_id": user_id}, {"role": 1})
+        return row["role"] if row else None
 
     def licenses_of(self, user_id):
-        return sorted(p for (p,) in self.db.execute("SELECT product FROM licenses WHERE user_id=?", (user_id,)))
+        return sorted(r["product"] for r in self.licenses.find({"user_id": user_id}))
 
     def principal(self, user_id=None):
         """Who is this caller? No user or an unknown user = public (never an error that leaks more access)."""
@@ -116,30 +132,56 @@ class AccessStore:
             return Principal.member(*self.licenses_of(user_id))
         return Principal.public()
 
-    def audit_log(self):
-        return self.db.execute("SELECT at, actor, action, user_id, product FROM audit ORDER BY rowid").fetchall()
+    def password_hash(self, user_id):
+        row = self.users.find_one({"_id": user_id}, {"password_hash": 1})
+        return row.get("password_hash") if row else None
 
-    # ----- changing (admin only) -----
+    def list_users(self):
+        """Every user with role and licenses, for the admin screen (never the password hash)."""
+        by_user = {}
+        for r in self.licenses.find():
+            by_user.setdefault(r["user_id"], []).append(r["product"])
+        return [{"user": u["_id"], "role": u["role"], "licenses": sorted(by_user.get(u["_id"], [])), "created_at": u.get("created_at"), "created_by": u.get("created_by")}
+                for u in self.users.find({}, {"role": 1, "created_at": 1, "created_by": 1}).sort("_id", ASCENDING)]
+
+    def audit_log(self):
+        return [(r["at"], r["actor"], r["action"], r["user_id"], r["product"]) for r in self.audit.find().sort("_id", ASCENDING)]
+
+    def recent_audit(self, n=20):
+        return [{k: r[k] for k in ("at", "actor", "action", "user_id", "product")} for r in self.audit.find().sort("_id", -1).limit(n)]
+
+    # ----- changing (admin only, except the setup helpers) -----
     def _require_admin(self, actor):
         if self.role_of(actor) != "admin":
             raise PermissionError(f"{actor!r} is not an admin")
 
     def _log(self, actor, action, user_id, product=None):
-        self.db.execute("INSERT INTO audit VALUES (?,?,?,?,?)", (time.time(), actor, action, user_id, product))
+        self.audit.insert_one({"at": time.time(), "actor": actor, "action": action, "user_id": user_id, "product": product})
 
     def bootstrap_admin(self, user_id):
         """The very first admin, created from a trusted place (a setup script), never through a request."""
-        self.db.execute("INSERT OR REPLACE INTO users VALUES (?, 'admin')", (user_id,))
+        self.users.update_one({"_id": user_id}, {"$set": {"role": "admin"}, "$setOnInsert": {"created_at": time.time(), "created_by": "setup"}}, upsert=True)
         self._log("setup", "bootstrap_admin", user_id)
-        self.db.commit()
 
-    def add_user(self, actor, user_id, role="member"):
+    def add_user(self, actor, user_id, role="member", password_hash=None):
+        """Create a user, or change an existing user's role (and password if one is given). The hash is made by src.auth, never the plain password."""
         self._require_admin(actor)
         if role not in ("member", "admin"):
             raise ValueError("role must be 'member' or 'admin'")
-        self.db.execute("INSERT OR REPLACE INTO users VALUES (?, ?)", (user_id, role))
+        if not USER_ID.match(user_id or ""):
+            raise ValueError("user name must be 2-32 characters: lower-case letters, digits, '.', '_' or '-', starting with a letter or digit")
+        update = {"$set": {"role": role}, "$setOnInsert": {"created_at": time.time(), "created_by": actor}}
+        if password_hash:
+            update["$set"]["password_hash"] = password_hash
+        self.users.update_one({"_id": user_id}, update, upsert=True)
+        if role == "admin":  # admins see everything; licenses would only confuse
+            self.licenses.delete_many({"user_id": user_id})
         self._log(actor, f"add_user:{role}", user_id)
-        self.db.commit()
+
+    def set_password_hash(self, user_id, password_hash):
+        """Store a hash made by src.auth.hash_password. Used by the setup script and by the admin when creating a user."""
+        if self.users.update_one({"_id": user_id}, {"$set": {"password_hash": password_hash}}).matched_count == 0:
+            raise ValueError(f"unknown user {user_id!r}")
 
     def grant(self, actor, user_id, product):
         self._require_admin(actor)
@@ -147,12 +189,10 @@ class AccessStore:
             raise ValueError(f"unknown product {product!r}; known products: {list(PRODUCTS)}")
         if self.role_of(user_id) != "member":
             raise ValueError(f"{user_id!r} is not a member (licenses are for members; admins see everything)")
-        self.db.execute("INSERT OR IGNORE INTO licenses VALUES (?,?,?,?)", (user_id, product, actor, time.time()))
+        self.licenses.update_one({"user_id": user_id, "product": product}, {"$setOnInsert": {"granted_by": actor, "granted_at": time.time()}}, upsert=True)
         self._log(actor, "grant", user_id, product)
-        self.db.commit()
 
     def revoke(self, actor, user_id, product):
         self._require_admin(actor)
-        self.db.execute("DELETE FROM licenses WHERE user_id=? AND product=?", (user_id, product))
+        self.licenses.delete_many({"user_id": user_id, "product": product})
         self._log(actor, "revoke", user_id, product)
-        self.db.commit()

@@ -14,13 +14,17 @@ dependencies = [
     "rank-bm25",
     "fastapi",
     "uvicorn",
-    "gradio",
     "beautifulsoup4>=4.15.0",
     "pyjwt>=2.15.1",
+    "pymongo>=4.19.0",
+    "python-multipart>=0.0.32",
 ]
 
 [dependency-groups]
-dev = ["pytest"]
+dev = [
+    "mongomock>=4.3.0",
+    "pytest",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

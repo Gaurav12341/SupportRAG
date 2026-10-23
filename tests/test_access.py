@@ -1,4 +1,5 @@
-"""Roles, product licenses and the SQLite license store. All users here are fake."""
+"""Roles, product licenses and the MongoDB-backed access store (mongomock here). All users here are fake."""
+import mongomock
 import pytest
 
 from src.access import AccessStore, Principal
@@ -44,7 +45,7 @@ def test_bad_roles_and_products_fail_closed():
 
 @pytest.fixture
 def store():
-    s = AccessStore(":memory:")
+    s = AccessStore(mongomock.MongoClient().db)
     s.bootstrap_admin("admin-1")
     s.add_user("admin-1", "alice")  # fake members
     s.add_user("admin-1", "bob")
@@ -99,3 +100,29 @@ def test_grant_twice_is_harmless(store):
     store.grant("admin-1", "alice", "github")
     store.grant("admin-1", "alice", "github")
     assert store.licenses_of("alice") == ["github"]
+
+
+def test_list_users_shows_roles_and_licenses_but_never_hashes(store):
+    store.grant("admin-1", "alice", "github")
+    store.add_user("admin-1", "carol", "member", password_hash="scrypt$x$y")
+    users = {u["user"]: u for u in store.list_users()}
+    assert users["alice"]["licenses"] == ["github"] and users["admin-1"]["role"] == "admin" and users["bob"]["licenses"] == []
+    assert all("password_hash" not in u for u in users.values())
+    assert store.password_hash("carol") == "scrypt$x$y" and store.password_hash("bob") is None
+
+
+def test_user_names_are_checked_and_an_admin_has_no_licenses(store):
+    for bad in ("A", "x", "Has Space", "../etc", "a" * 33, ""):
+        with pytest.raises(ValueError, match="user name"):
+            store.add_user("admin-1", bad)
+    store.grant("admin-1", "alice", "kafka")
+    store.add_user("admin-1", "alice", "admin")  # promoted: licenses no longer apply
+    assert store.licenses_of("alice") == [] and store.principal("alice") == Principal.admin()
+
+
+def test_re_adding_a_user_keeps_the_password(store):
+    store.set_password_hash("alice", "scrypt$a$b")
+    store.add_user("admin-1", "alice", "member")
+    assert store.password_hash("alice") == "scrypt$a$b"
+    with pytest.raises(ValueError, match="unknown user"):
+        store.set_password_hash("ghost", "scrypt$a$b")

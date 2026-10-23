@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 from types import SimpleNamespace
 
+import mongomock
 import pytest
 from fastapi.testclient import TestClient
 
@@ -60,24 +61,31 @@ def test_real_documentation_is_not_flagged():
 # ---------- login + token + API ----------
 
 @pytest.fixture
-def env(tmp_path, monkeypatch):
-    monkeypatch.setenv("JWT_SECRET", "x" * 48)
-    cfg = {**CFG, "paths": {**CFG["paths"], "access_db": str(tmp_path / "access.db")}}
-    monkeypatch.setattr(api, "CFG", cfg)
-    s = AccessStore(cfg=cfg)
+def env(monkeypatch):
+    s = AccessStore(mongomock.MongoClient().db)
+    monkeypatch.setitem(api.app.dependency_overrides, api.store, lambda: s)
     s.bootstrap_admin("admin")
     s.add_user("admin", "alice", "member")
     s.grant("admin", "alice", "postgres")
     for u, pw in (("admin", "admin-pw"), ("alice", "alice-pw")):
         auth.set_password(s, u, pw)
     auth._fails.clear()
-    return cfg, s, TestClient(api.app)
+    return CFG, s, TestClient(api.app)
 
 
 def test_passwords_are_hashed_and_verified():
     h = auth.hash_password("secret-pw")
     assert "secret-pw" not in h and h.startswith("scrypt$") and h != auth.hash_password("secret-pw")  # salted
     assert auth.verify_password("secret-pw", h) and not auth.verify_password("other", h) and not auth.verify_password("x", "garbage")
+
+
+def test_the_pepper_matters_and_is_required(monkeypatch):
+    h = auth.hash_password("secret-pw")
+    monkeypatch.setenv("PASSWORD_PEPPER", "y" * 48)  # a stolen database without the server's pepper cannot verify a guess
+    assert not auth.verify_password("secret-pw", h)
+    monkeypatch.setenv("PASSWORD_PEPPER", "short")
+    with pytest.raises(RuntimeError, match="PASSWORD_PEPPER"):
+        auth.hash_password("secret-pw")
 
 
 def login(client, user, pw):
@@ -109,10 +117,8 @@ def test_bad_expired_and_orphaned_tokens_are_rejected_not_downgraded(env):
     other = auth.make_token("alice", cfg).replace(".", "x", 1)
     for token in (expired, other, good[:-3] + "abc", "garbage"):
         assert c.get("/me", headers={"Authorization": f"Bearer {token}"}).status_code == 401
-    s.db.execute("DELETE FROM licenses WHERE user_id='alice'")
-    s.db.execute("DELETE FROM credentials WHERE user_id='alice'")
-    s.db.execute("DELETE FROM users WHERE user_id='alice'")
-    s.db.commit()
+    s.licenses.delete_many({"user_id": "alice"})
+    s.users.delete_one({"_id": "alice"})
     assert c.get("/me", headers={"Authorization": f"Bearer {good}"}).status_code == 401  # valid signature, user gone
 
 
@@ -234,25 +240,77 @@ def test_product_is_detected_but_not_used_to_filter_unless_asked(pipe):
         pipeline.ask("q", product="oracle", cfg=CFG, llm=object())
 
 
-# ---------- UI rendering ----------
+# ---------- documents, metrics, admin ----------
 
-def test_ui_render_answer_links_citations_and_strips_images_and_html():
-    import src.ui as ui
-    res = {"status": "answered", "message": "", "question_used": "q", "rewritten": False, "products": ["postgres"], "product_filter": "", "dropped_chunks": [],
-           "summary": "Cause: ![x](http://evil/p.png?d=1) see [here](http://evil) <script>x</script>", "summary_warnings": [], "partial_note": "", "provider": "groq",
-           "verified_by": "llm", "coverage": "full",
-           "points": [{"text": "Run `VACUUM`.", "cited": ["a#0", "zzz"], "warnings": ["DROP deletes data"]}],
-           "sources": [{"chunk_id": "a#0", "title": "Vacuum", "url": "https://docs/vacuum", "product": "postgres"}],
-           "passages": [{"label": "S1", "chunk_id": "a#0", "title": "Vacuum", "url": "https://docs/vacuum", "product": "postgres", "access_level": "public", "text": "x ``` y"}]}
-    answer, passages, notes = ui.render_answer(res)
-    assert "evil" not in answer and "<script>" not in answer and "[[1]](https://docs/vacuum)" in answer and "[Vacuum](https://docs/vacuum)" in answer
-    assert "⚠ DROP deletes data" in answer and "x ''' y" in passages and "Product detected: postgres" in notes
+def bearer_for(c, user, pw):
+    return {"Authorization": f"Bearer {login(c, user, pw).json()['access_token']}"}
 
 
-def test_ui_refused_and_blocked_states():
-    import src.ui as ui
-    base = {"question_used": "q", "rewritten": True, "products": [], "product_filter": "", "dropped_chunks": [("c", "r")], "message": "no way"}
-    answer, passages, notes = ui.render_answer({**base, "status": "refused", "sources": [], "passages": [{"label": "S1", "title": "T", "url": "u", "product": "kafka", "access_level": "public", "text": "t"}]})
-    assert answer.startswith("### No documented fix found") and "S1" in passages and "Searched for" in notes and "left out" in notes
-    answer, passages, _ = ui.render_answer({**base, "status": "blocked", "sources": []})
-    assert answer.startswith("### Question not run") and "no way" in answer and passages == ""
+def test_documents_follow_the_callers_licenses():
+    c = TestClient(api.app)
+    if not (Path(CFG["paths"]["processed"]) / "chunks.jsonl").exists():
+        pytest.skip("no chunks file")
+    public = c.get("/documents").json()
+    assert {d["access_level"] for d in public["documents"]} == {"public"} and sum(public["locked"].values()) > 0
+    assert all("text" not in d for d in public["documents"])  # the library lists pages, it never ships their text
+
+
+def test_a_license_unlocks_that_products_internal_pages_and_admin_sees_all(env):
+    _, _, c = env
+    if not (Path(CFG["paths"]["processed"]) / "chunks.jsonl").exists():
+        pytest.skip("no chunks file")
+    alice = c.get("/documents", headers=bearer_for(c, "alice", "alice-pw")).json()
+    assert {d["access_level"] for d in alice["documents"] if d["product"] == "postgres"} == {"public", "internal", "restricted"}
+    assert {d["access_level"] for d in alice["documents"] if d["product"] == "kafka"} == {"public"}
+    admin = c.get("/documents", headers=bearer_for(c, "admin", "admin-pw")).json()
+    assert admin["locked"] == {} and len(admin["documents"]) > len(alice["documents"])
+
+
+def test_metrics_come_from_the_result_files():
+    r = TestClient(api.app).get("/metrics").json()
+    h = json.loads((Path(CFG["paths"]["eval_results"]) / "accuracy_final_holdout.json").read_text(encoding="utf8"))["summary"]
+    assert r["holdout"]["accuracy"] == h["on"]["accuracy"] and r["holdout"]["n"] == h["n"]
+    assert sum(r["holdout"]["outcomes"].values()) == h["n"]  # the five outcomes account for every question
+    assert r["safety"]["attacks"] == 20 and r["safety_first_run"]["attacks_blocked"] <= r["safety"]["attacks_blocked"]
+
+
+def test_admin_endpoints_are_for_admins_only(env):
+    _, _, c = env
+    member = bearer_for(c, "alice", "alice-pw")
+    for method, url in (("get", "/admin/users"), ("get", "/admin/audit"), ("put", "/admin/users/alice/licenses/kafka"),
+                        ("delete", "/admin/users/alice/licenses/postgres")):
+        assert getattr(c, method)(url).status_code == 403  # not logged in = public = not an admin
+        assert getattr(c, method)(url, headers=member).status_code == 403  # a member cannot self-grant
+    assert c.post("/admin/users", json={"user": "mallory", "password": "long-enough-pw"}, headers=member).status_code == 403
+    assert c.get("/admin/users", headers={"Authorization": "Bearer junk"}).status_code == 401
+
+
+def test_admin_creates_a_user_who_can_log_in_and_grants_a_license(env):
+    _, s, c = env
+    h = bearer_for(c, "admin", "admin-pw")
+    r = c.post("/admin/users", json={"user": "Carol", "password": "carol-password"}, headers=h)
+    assert r.status_code == 201 and r.json() == {"user": "carol", "role": "member", "licenses": []}
+    stored = s.password_hash("carol")
+    assert "carol-password" not in stored and stored.startswith("scrypt$")  # only the hash is kept
+    assert login(c, "Carol", "carol-password").status_code == 200  # user names are case-insensitive
+    assert c.post("/admin/users", json={"user": "carol", "password": "another-password"}, headers=h).status_code == 409
+    assert c.post("/admin/users", json={"user": "dave", "password": "short"}, headers=h).status_code == 422
+    assert c.post("/admin/users", json={"user": "bad name!", "password": "long-enough-pw"}, headers=h).status_code == 422
+    assert c.put("/admin/users/carol/licenses/kafka", headers=h).json()["licenses"] == ["kafka"]
+    assert c.get("/me", headers=bearer_for(c, "carol", "carol-password")).json()["licenses"] == ["kafka"]
+    assert c.delete("/admin/users/carol/licenses/kafka", headers=h).json()["licenses"] == []
+    assert c.put("/admin/users/carol/licenses/oracle", headers=h).status_code == 422
+    assert c.put("/admin/users/ghost/licenses/kafka", headers=h).status_code == 422
+    users = {u["user"]: u for u in c.get("/admin/users", headers=h).json()["users"]}
+    assert set(users) == {"admin", "alice", "carol"} and all("password" not in str(u) for u in users.values())
+    actions = [(e["actor"], e["action"], e["user_id"], e["product"]) for e in c.get("/admin/audit", headers=h).json()["entries"]]
+    assert ("admin", "grant", "carol", "kafka") in actions and ("admin", "revoke", "carol", "kafka") in actions
+
+
+def test_user_database_down_is_a_clean_503(env, monkeypatch):
+    from pymongo.errors import ServerSelectionTimeoutError
+    _, s, c = env
+    token = bearer_for(c, "alice", "alice-pw")
+    monkeypatch.setattr(s, "role_of", lambda u: (_ for _ in ()).throw(ServerSelectionTimeoutError("mongodb://supportrag:secret@host")))
+    r = c.get("/me", headers=token)
+    assert r.status_code == 503 and "secret" not in r.text

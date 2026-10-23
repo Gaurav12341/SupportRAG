@@ -5,3 +5,18 @@ services:
       - "6333:6333"
     volumes:
       - ./data/qdrant:/qdrant/storage
+
+  # Users, password hashes, licenses and the audit log. Listens on this machine only. The password is MONGO_PASSWORD from .env
+  # (python -m scripts.setup_users creates it; run that once BEFORE the first `docker compose up`).
+  mongo:
+    image: mongo:7
+    ports:
+      - "127.0.0.1:27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: supportrag
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?run python -m scripts.setup_users first, it creates MONGO_PASSWORD in .env}
+    volumes:
+      - mongo_data:/data/db   # a named volume: MongoDB does not run reliably on a Windows bind mount
+
+volumes:
+  mongo_data:

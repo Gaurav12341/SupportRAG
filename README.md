@@ -108,7 +108,22 @@ Live answer writer with one poisoned chunk added to a real context:
 python -m src.pipeline "psql says FATAL: password authentication failed for user postgres" --role member --licenses postgres
 ```
 
-## How to run (10 commands)
+## The web app
+
+A Next.js (React) app in `web/` in front of the FastAPI backend. Screens: **Sign in**, **Ask** (cited answer, with an evidence strip of every passage the writer saw and which ones it cited), **Documents** (the pages this account can read, with locked counts per product), **Evaluation** (the numbers in this README, read live from `eval/results/`) and, for admins, **Users and licenses** (create users, switch product licenses on and off, audit log).
+Users, password hashes, licenses and the audit log live in **MongoDB** (Docker). Passwords are never stored in plain text and never "encrypted": each is peppered (HMAC with `PASSWORD_PEPPER` from `.env`) and hashed with salted scrypt. The browser never sees the JWT: Next.js keeps it in an `httpOnly` cookie and attaches it when it calls the API. Login is a JWT bearer token; it is **not** a full OAuth2 server.
+Design notes: `docs/DECISIONS.md` ("Web app").
+
+## Start everything with one command
+
+```
+launch.cmd                 (from the project folder; or  .venv\Scripts\python -m scripts.start)
+```
+
+It checks each part, starts what is missing and reuses what is running: `.env` secrets, Docker Desktop, Qdrant and MongoDB, the demo users (first run only), the local models on disk, the API, the web app, LM Studio plus the failsafe model (last, so its model load does not slow the others), then a browser-to-data smoke test, and opens the browser. It stops with a clear `FAIL` line if a required part cannot start (for example "index missing: run python -m src.index"); LM Studio and the Groq key only warn. `launch.cmd --status` reports without starting anything; other flags: `--prod`, `--no-open`, `--skip-lm`, `--stop-docker`. Ctrl+C stops the API and web app; Docker and LM Studio stay up. Logs: `logs/start/`.
+**Passwords:** they are never stored in readable form, so they cannot be looked up. They are printed once when the demo users are created. Forgot one: `python -m scripts.setup_users --reset --user admin` prints a new one (`--reset` alone resets all three). A user an admin created in the app has no reset yet: ask the admin to create them again under a new name.
+
+## How to run step by step
 
 ```
 1  python -m venv .venv && .venv\Scripts\python -m pip install uv
@@ -116,16 +131,18 @@ python -m src.pipeline "psql says FATAL: password authentication failed for user
 3  .venv\Scripts\python -m scripts.download_models
 4  .venv\Scripts\python -m scripts.download_docs
 5  .venv\Scripts\python -m src.ingest
-6  docker compose up -d
-7  .venv\Scripts\python -m src.index
-8  copy .env.example .env      (then set GROQ_API_KEY in .env)
-9  .venv\Scripts\python -m scripts.setup_users      (prints the 3 demo passwords once)
-10 .venv\Scripts\python -m src.ui
+6  copy .env.example .env      (then set GROQ_API_KEY in .env)
+7  .venv\Scripts\python -m scripts.setup_users      (first run: writes JWT_SECRET, PASSWORD_PEPPER, MONGO_PASSWORD to .env, then says MongoDB is not running)
+8  docker compose up -d        (Qdrant + MongoDB)
+9  .venv\Scripts\python -m scripts.setup_users      (creates the 3 demo users in MongoDB, prints their passwords once)
+10 .venv\Scripts\python -m src.index
+11 .venv\Scripts\python -m uvicorn src.api:app --port 8000      (the API)
+12 cd web && npm install && npm run dev                        (the web app)
 ```
 
-Then open `http://127.0.0.1:7860/ui` (page) or `http://127.0.0.1:7860/docs` (API). Log in as `alice` (member: Kubernetes + PostgreSQL licenses), `bob` (member, no licenses) or `admin`, or ask without logging in (public docs only).
-Optional: start LM Studio with `qwen2.5-3b-instruct` as the failsafe writer. Tests: `.venv\Scripts\python -m pytest` (about 16 minutes with Qdrant running).
-API: `POST /login` (form) -> token; `POST /ask` with `Authorization: Bearer <token>` and `{"question": ..., "history": [...], "product": ...}`.
+Then open `http://127.0.0.1:3000`. Sign in as `alice` (member: Kubernetes + PostgreSQL licenses), `bob` (member, no licenses) or `admin`, or continue without signing in (public docs only). API docs: `http://127.0.0.1:8000/docs`. For production use `npm run build && npm run start` (the cookie is then `Secure`, so it needs HTTPS).
+Optional: start LM Studio with `qwen2.5-3b-instruct` as the failsafe writer. Tests: `.venv\Scripts\python -m pytest` (about 16 minutes with Qdrant running) and `cd web && npm test`.
+API: `POST /login` (form) -> token; `POST /ask` with `Authorization: Bearer <token>` and `{"question": ..., "history": [...], "product": ...}`; `GET /documents`, `GET /metrics`; admin only: `GET|POST /admin/users`, `PUT|DELETE /admin/users/{user}/licenses/{product}`, `GET /admin/audit`.
 Free-tier note: the Groq `gpt-oss-120b` bucket allows about 55 answers a day; when it is used up the API answers 503 and the UI says to try later.
 
 ## Limitations
@@ -136,8 +153,8 @@ Free-tier note: the Groq `gpt-oss-120b` bucket allows about 55 answers a day; wh
 - **Free-tier dependence.** The default writer is a Groq free-tier model (about 55 answers a day, 5-30 s per answer). The local failsafe (Qwen2.5-3B) is much weaker: 30.0% and 37.1% in two identical runs on the tuning split.
 - **The checks are not proofs.** The claim check is an LLM and shares blind spots with the writer (2 shown holdout answers were judged wrong). The input guard is a rule list: on my 20 attacks / 20 normal questions it first blocked 14 and wrongly blocked 3, and the 20 / 0 reported above is after tuning on the same prompts, so it overstates how it handles a stranger's attack.
 - **The accuracy numbers do not include the entry layer** (login, input guard, follow-up rewrite, product detection). The eval runs the retrieval-answer-verify stages directly. The follow-up rewrite has no accuracy measurement (no multi-turn test set), and routing the search to a detected product is off because it was not measured.
-- **Demo-grade security.** Three simulated users, HS256 JWT with one secret in `.env`, in-memory login lockout, no HTTPS, no token revocation before expiry. Access levels are simulated.
-- **The UI was checked by tests and an HTTP smoke test, not by a person clicking through it.**
+- **Demo-grade security.** Simulated users, HS256 JWT with one secret in `.env`, in-memory login lockout (a restart clears it), no HTTPS on localhost, no token revocation before expiry, MongoDB without encryption at rest, no password change or reset screen (an admin sets the password when creating a user), no delete-user action. Access levels are simulated.
+- **The web app was checked in a real browser by me and the assistant** (sign in as admin, switch a license on and off and see it audited, ask one real question, open a citation and its passage) plus the design inspector at 1440, 768 and 390 px; it has no automated browser tests. Titles imported from Stack Overflow can contain HTML entities from ingest; the UI decodes them for display, the data is unchanged.
 
 ## Data and licenses
 

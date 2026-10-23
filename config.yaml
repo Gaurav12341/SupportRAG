@@ -117,7 +117,13 @@ paths:
   processed: data/processed
   eval_dir: eval
   eval_results: eval/results
-  access_db: data/access.db   # users, roles, product licenses, audit log (SQLite)
+
+mongo:           # users, roles, password hashes, product licenses, audit log (docker-compose service `mongo`); the password is MONGO_PASSWORD in .env
+  host: 127.0.0.1
+  port: 27017
+  user: supportrag
+  db: supportrag
+  timeout_ms: 3000
 
 input:           # stage 7: input safety (src/guard.py). Rules, not a model; eval/safety_prompts.json + `python -m eval.safety` report what they catch and miss
   max_chars: 1000          # longest question accepted

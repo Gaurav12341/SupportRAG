@@ -1,4 +1,4 @@
-.PHONY: up ingest index eval ui test
+.PHONY: up ingest index eval api web test
 
 up:
 	docker compose up -d
@@ -14,8 +14,11 @@ index:
 eval:
 	uv run python -m eval.run
 
-ui:
-	uv run python -m src.ui
+api:
+	uv run uvicorn src.api:app --port 8000
+
+web:
+	cd web && npm run dev
 
 test:
 	uv run pytest
