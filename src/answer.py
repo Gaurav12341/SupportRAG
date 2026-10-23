@@ -90,7 +90,8 @@ class Answer:
     summary: str = ""               # shown only when at least one point is supported (the summary itself is not verified yet)
     summary_warnings: list = field(default_factory=list)
     verified_by: str = ""           # llm | nli | "" (verifier off); nli after an llm failure means a fallback
-    retried: bool = False           # stage 16 ran: a second, wider try after the writer reported partial or no coverage
+    context: list = field(default_factory=list)  # the excerpts the writer saw (set by answer(); what the UI shows as "retrieved passages")
+    retried: bool = False          # stage 16 ran: a second, wider try after the writer reported partial or no coverage
     partial: str = ""               # note shown when the claim check says the docs only cover part of the question (verify.partial_note)
 
     def render(self):
@@ -297,7 +298,7 @@ def answer(question, principal=None, product=None, verify=True, cfg=None, llm=No
     if retried:
         items, hits, draft, refused, provider, _ = retry(question, items, hits, draft, refused, provider, principal, product, cfg, llm)
     ans = finalize(question, items, draft, refused, provider, principal, cfg, verify, llm)
-    ans.retried = retried
+    ans.retried, ans.context = retried, items
     return ans
 
 

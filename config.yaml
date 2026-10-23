@@ -118,3 +118,23 @@ paths:
   eval_dir: eval
   eval_results: eval/results
   access_db: data/access.db   # users, roles, product licenses, audit log (SQLite)
+
+input:           # stage 7: input safety (src/guard.py). Rules, not a model; eval/safety_prompts.json + `python -m eval.safety` report what they catch and miss
+  max_chars: 1000          # longest question accepted
+  scan_chunks: true        # leave retrieved chunks that look like injected instructions out of the context
+  max_history_turns: 3     # earlier question/answer pairs kept for follow-ups
+  max_history_chars: 2000  # each earlier turn is cut to this many characters
+
+rewrite:         # stage 7: follow-up -> standalone question, and which product the question is about (src/rewrite.py)
+  llm: groq
+  model: openai/gpt-oss-20b   # own Groq bucket (answers use 120b)
+  max_tokens: 600
+  detect_product: true        # run the query plan (src/query.py) to name the product(s); the name is shown to the user
+  route_product: false        # also restrict the search to that product. OFF: not measured on accuracy; a wrong single guess would hide the right docs (docs/DECISIONS.md)
+
+auth:            # stage 7: login (src/auth.py, src/api.py). JWT_SECRET lives in .env (scripts/setup_users.py creates it), never here
+  token_minutes: 60
+  demo_users:             # created by `python -m scripts.setup_users`; passwords are generated and printed once
+    - {user: alice, role: member, licenses: [kubernetes, postgres]}
+    - {user: bob, role: member, licenses: []}
+    - {user: admin, role: admin, licenses: []}

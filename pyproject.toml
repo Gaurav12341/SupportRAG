@@ -16,6 +16,7 @@ dependencies = [
     "uvicorn",
     "gradio",
     "beautifulsoup4>=4.15.0",
+    "pyjwt>=2.15.1",
 ]
 
 [dependency-groups]
